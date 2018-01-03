@@ -1,0 +1,14 @@
+{
+  "name": "eslint-config-basys",
+  "version": "0.1.0",
+  "description": "ESLint configuration used by Basys projects",
+  "bugs": {
+    "url": "https://github.com/basys/basys/issues"
+  },
+  "license": "MIT",
+  "author": "Sergey Kopylov <sergey@basys.io>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/basys/basys/tree/master/packages/eslint-config-basys"
+  }
+}
