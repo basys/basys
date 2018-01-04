@@ -1,3 +1,4 @@
+import 'babel-polyfill';
 import Meta from 'vue-meta';
 import Router from 'vue-router';
 

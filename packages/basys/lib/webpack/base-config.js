@@ -18,7 +18,7 @@ function babelLoader(appType) {
   return {
     loader: 'babel-loader',
     options: {
-      // BUG: set cacheDirectory if config.env==='dev' to improve performance?
+      cacheDirectory: true,
       babelrc: false,
       presets: [
         [
@@ -26,32 +26,21 @@ function babelLoader(appType) {
           {
             modules: false,
             targets,
-            // BUG: useBuiltIns: true, ?
-            // BUG: debug: true, for testing
+            useBuiltIns: true,
           },
         ],
       ],
       plugins: [
-        // Only stage 4 syntax features are supported (in line  with Espree)
+        // Only stage 4 syntax features are supported (in line with Espree)
         'syntax-trailing-function-commas',
         'transform-async-to-generator',
         'transform-exponentiation-operator',
-        // BUG: http://babeljs.io/docs/plugins/transform-runtime/
-        [
-          'transform-runtime',
-          {
-            helpers: true,
-            polyfill: true,
-            regenerator: true,
-            moduleName: 'babel-runtime',
-          },
-        ],
       ],
       // BUG: do we need it?
       // env: {
       //   testing: {
       //     plugins: ['istanbul'], // BUG: use with karma
-      //     plugins: ['transform-es2015-modules-commonjs', 'dynamic-import-node'], // BUG: use with jest
+      //     plugins: ['dynamic-import-node'], // BUG: use with jest
       //   },
       // },
     },
@@ -92,20 +81,15 @@ module.exports = function(appType) {
         __filename: false,
       },
       externals: [
+        // Don't bundle packages from node_modules into backend.js
         function(context, request, callback) {
+          // BUG: Look at https://github.com/liady/webpack-node-externals and https://github.com/liady/webpack-node-externals/issues/39 .
+          //      It's not compatible with lerna and yarn new node_modules hierarchy.
+          //      Special processing for 'webpack/hot/dev-server.js' would be required.
           if (!request.startsWith('.') && !request.startsWith('/')) {
             return callback(null, `commonjs ${request}`);
           }
           callback();
-
-          // BUG: look at https://github.com/liady/webpack-node-externals and https://github.com/liady/webpack-node-externals/issues/39
-          // BUG: not compatible with lerna and yarn new node_modules hierarchy
-          // const nodeModules = fs.readdirSync('node_modules').filter((x) => ['.bin'].indexOf(x) === -1);
-          // const pathStart = request.split('/')[0];
-          // if (nodeModules.indexOf(pathStart) >= 0 && request !== 'webpack/hot/signal.js') {
-          //   return callback(null, 'commonjs ' + request);
-          // };
-          // callback();
         },
       ],
       plugins: [
@@ -198,7 +182,11 @@ module.exports = function(appType) {
         },
         {
           test: /\.js$/,
-          include: [path.join(config._projectDir, 'src'), path.join(config._projectDir, 'tests')],
+          include: [
+            path.join(config._projectDir, 'src'),
+            path.join(config._projectDir, 'tests'),
+            path.join(config._projectDir, '.basys'), // Required to apply loaders to webpack entries
+          ],
           use: [babelLoader(appType)],
         },
         // BUG: these loaders are very similar. expose (name, regexp, limit) list and generate the loader?
