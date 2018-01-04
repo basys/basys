@@ -151,6 +151,21 @@ function build() {
           spinner.stop();
           if (err) return reject(err);
 
+          if (config.backend) {
+            // Generate package.json
+            const packageJson = JSON.parse(fs.readFileSync(path.join(config._projectDir, 'package.json'), 'utf8'));
+            packageJson.scripts = {start: 'node backend/backend.js'};
+            delete packageJson.devDependencies;
+
+            packageJson.dependencies = packageJson.dependencies || {};
+            const basysPackageJson = require('basys/package.json');
+            for (const name of ['body-parser', 'express', 'morgan']) {
+              packageJson.dependencies[name] = basysPackageJson.dependencies[name];
+            }
+
+            fs.writeFileSync(path.join(config._distDir, 'package.json'), JSON.stringify(packageJson, null, '  '), 'utf8');
+          }
+
           for (const stats of multiStats.stats) {
             // BUG: print the name of stats (app type)?
             process.stdout.write(

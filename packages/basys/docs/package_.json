@@ -11,8 +11,10 @@
     "test:e2e": "basys e2e"
   },
   "dependencies": {
-    "basys": "^0.1.0",
     "todomvc-app-css": "^2.1.0"
+  },
+  "devDependencies": {
+    "basys": "^0.1.0"
   },
   "engines": {
     "node": ">= 8"
