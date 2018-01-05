@@ -97,6 +97,7 @@ function generateEntries(init = true) {
       chokidar
         .watch(vuePattern, {ignoreInitial: true})
         .on('add', () => generateEntries(false))
+        .on('change', () => generateEntries(false))
         .on('unlink', () => generateEntries(false));
     }
 
