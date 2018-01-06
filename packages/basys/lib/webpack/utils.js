@@ -146,7 +146,7 @@ function generateEntries(init = true) {
     }
 
     const entryPath = path.join(config._tempDir, `${appType}-entry.js`);
-    fs.writeFileSync(entryPath, js, 'utf8');
+    fs.writeFileSync(entryPath, js);
 
     if (init) {
       // BUG: a temporary fix for the webpack-dev-server issue https://github.com/webpack/webpack-dev-server/issues/1208

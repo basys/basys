@@ -1,4 +1,3 @@
-const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 const webpack = require('webpack');
@@ -242,24 +241,23 @@ module.exports = function(appType) {
       new HtmlWebpackPlugin({
         filename: path.join(config._distDir, appType, 'index.html'),
         template: path.join(__dirname, 'index.html'),
-        inject: true,
+        inject: 'body',
         minify:
           config.env === 'prod'
             ? {
                 removeComments: true,
                 collapseWhitespace: true,
+                conservativeCollapse: true,
                 removeAttributeQuotes: true,
-                // BUG: see more options at https://github.com/kangax/html-minifier#options-quick-reference
+                removeScriptTypeAttributes: true,
+                removeStyleLinkTypeAttributes: true,
               }
             : false,
-        chunksSortMode: 'dependency', // BUG: is it always correct?
-        alwaysWriteToDisk: true,
       }),
       new HtmlWebpackIncludeExternalAssetsPlugin({
         jsAssets: config[appType].jsUrlAssets,
         cssAssets: config[appType].cssUrlAssets,
       }),
-      new HtmlWebpackHarddiskPlugin(),
     ],
     // BUG: think about it
     // node: {

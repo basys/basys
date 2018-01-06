@@ -44,7 +44,6 @@ async function devRun() {
         appPort: config.port,
         targetProjectDir: config._projectDir,
       }),
-      'utf8',
     );
     process.env.BASYS_CONFIG_PATH = configPath;
     require('basys-app-builder/backend/backend.js');

@@ -1,3 +1,7 @@
+const fs = require('fs-extra');
+const path = require('path');
+
+
 // Used to insert external JS and CSS URLs into HTML before project assets
 class HtmlWebpackIncludeExternalAssetsPlugin {
   constructor(options) {
@@ -26,6 +30,14 @@ class HtmlWebpackIncludeExternalAssetsPlugin {
       //   }
       //   callback(null, htmlPluginData);
       // });
+
+      compilation.plugin('html-webpack-plugin-after-emit', (htmlPluginData, callback) => {
+        fs.outputFileSync(
+          path.resolve(compilation.compiler.outputPath, htmlPluginData.outputName),
+          compilation.assets[htmlPluginData.outputName].source()
+        );
+        callback(null);
+      });
     });
   }
 }
