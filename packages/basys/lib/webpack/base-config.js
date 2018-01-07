@@ -2,7 +2,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 const webpack = require('webpack');
 const {config} = require('../config');
-const HtmlWebpackIncludeExternalAssetsPlugin = require('./html-include-external-assets');
+const BasysWebpackPlugin = require('./basys-plugin');
 const {assetsPath, cssLoaders} = require('./utils');
 
 function babelLoader(appType) {
@@ -100,10 +100,11 @@ module.exports = function(appType) {
   }
 
   const assets = [entryPath];
-  for (const relPath of config[appType].pathAssets) {
-    const resolvePaths = [path.join(config._projectDir, 'src')].concat(require.resolve.paths(relPath));
-    const fullPath = require.resolve(relPath, {paths: resolvePaths});
-    assets.push(fullPath);
+  for (const relPath of config[appType].styles || []) {
+    if (!relPath.startsWith('http://') && !relPath.startsWith('https://')) {
+      const resolvePaths = [path.join(config._projectDir, 'src')].concat(require.resolve.paths(relPath));
+      assets.push(require.resolve(relPath, {paths: resolvePaths}));
+    }
   }
 
   if (config.env === 'dev') {
@@ -254,9 +255,8 @@ module.exports = function(appType) {
               }
             : false,
       }),
-      new HtmlWebpackIncludeExternalAssetsPlugin({
-        jsAssets: config[appType].jsUrlAssets,
-        cssAssets: config[appType].cssUrlAssets,
+      new BasysWebpackPlugin({
+        appType,
       }),
     ],
     // BUG: think about it

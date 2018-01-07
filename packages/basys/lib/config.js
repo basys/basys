@@ -124,39 +124,9 @@ function loadConfig(projectDir, env, deplName = null) {
   let conf = defaultEnvConfig[env];
 
   for (const appType of Object.keys(defaultAppConfig)) {
+    // If app is activated merge its options with default options and add to `conf`
     if (projectConfig[appType]) {
       conf[appType] = merge(defaultAppConfig[appType], projectConfig[appType]);
-
-      if (appType === 'backend') continue; // Processing assets is not relevant for backend app
-
-      conf[appType].pathAssets = [];
-      conf[appType].jsUrlAssets = [];
-      conf[appType].cssUrlAssets = [];
-
-      let urlAllowed = true;
-      for (const entry of conf[appType].assets || []) {
-        if (entry.startsWith('http://') || entry.startsWith('https://')) {
-          if (!urlAllowed) {
-            // BUG: improve error message
-            exit(chalk.red('External URL assets must be provided at the beginning of the list'));
-          }
-
-          const entryPath = entry.split('?')[0]; // Remove anything after '?'
-          if (entryPath.endsWith('js')) {
-            conf[appType].jsUrlAssets.push(entry);
-          } else if (entryPath.endsWith('css')) {
-            conf[appType].cssUrlAssets.push(entry);
-          } else {
-            console.log('TO BE IMPLEMENTED');
-            // BUG: Send http request. First check 'content-type' header - whether it starts with 'text/css;' or 'application/javascript;'.
-            //      If it didn't help - look at the contents and try to detect the file type.
-            // BUG: if url is reused between apps - only send 1 http request
-          }
-        } else {
-          urlAllowed = false;
-          conf[appType].pathAssets.push(entry);
-        }
-      }
     }
   }
 
