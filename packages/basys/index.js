@@ -4,7 +4,6 @@ const chalk = require('chalk');
 const yargs = require('yargs');
 const {executeCommand} = require('./lib/index');
 
-
 const {argv} = yargs
   .usage('$0 <command> [args]')
   .command('dev', 'Start a development server')

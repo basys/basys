@@ -2,12 +2,12 @@
 // This file uses JSON5 format (an unofficial extension of JSON), see http://json5.org.
 // You can add custom attributes and access them in the backend code using global `BASYS_CONFIG` variable.
 {
-  backend: {
+  "backend": {
     // Optional entry for Express application (relative to src/ directory).
     // See https://github.com/basys/basys/blob/master/packages/basys/lib/templates/backend.js .
-    entry: 'backend.js',
+    "entry": "backend.js",
   },
-  web: {
+  "web": {
     // Optional entry for Vue application (relative to src/ directory).
     // See https://github.com/basys/basys/blob/master/packages/basys/lib/templates/frontend.js .
     // entry: 'web.js',
@@ -17,22 +17,22 @@
     // 1) URLs to include external resources (e.g. 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css');
     // 2) Project files using a path relative to src/ directory (e.g. 'theme.css');
     // 3) Files from NPM modules using a path relative to project's node_modules directory (e.g. 'bootstrap/dist/css/bootstrap.min.css').
-    assets: [
-      'todomvc-app-css/index.css',
+    "assets": [
+      "todomvc-app-css/index.css",
     ],
 
     // See https://github.com/ai/browserslist#queries
-    browsers: ['> 1%', 'last 2 versions'],
+    "browsers": ["> 1%", "last 2 versions"],
   },
-  dev: {},
-  test: {
+  "dev": {},
+  "test": {
     // Available options: 'chromium', 'chrome', 'chrome:headless', 'chrome-canary', 'ie',
     // 'edge', 'firefox', 'firefox:headless', 'opera', 'safari'
-    testBrowsers: ['chrome'],
+    "testBrowsers": ["chrome"],
   },
-  deployments: {
-    prod: {},
+  "deployments": {
+    "prod": {},
   },
-  editor: null, // The code editor you use. Can be null/'atom'/'code'/'sublime'.
-  appBuilder: true,
+  "editor": null, // The code editor you use. Can be null/'atom'/'code'/'sublime'.
+  "appBuilder": true,
 }

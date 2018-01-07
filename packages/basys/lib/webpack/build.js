@@ -163,7 +163,7 @@ function build() {
               packageJson.dependencies[name] = basysPackageJson.dependencies[name];
             }
 
-            fs.writeFileSync(path.join(config._distDir, 'package.json'), JSON.stringify(packageJson, null, '  '));
+            fs.writeFileSync(path.join(config._distDir, 'package.json'), JSON.stringify(packageJson, null, 2));
           }
 
           for (const stats of multiStats.stats) {

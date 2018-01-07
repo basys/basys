@@ -4,7 +4,6 @@ const path = require('path');
 const {config, loadConfig} = require('./config');
 const {devRun, prodRun} = require('./utils');
 
-
 // command='dev'/'start'/'build'/'e2e'
 async function executeCommand(command, deplName) {
   const projectDir = process.cwd(); // BUG: is it always correct? Only if called from the project root directory?
