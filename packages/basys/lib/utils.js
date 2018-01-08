@@ -8,9 +8,8 @@ async function devRun() {
   const {config, loadConfig} = require('./config');
   let backendPort;
 
-  // To run web app we still need a backend
-  if (config.backend || config.web) {
-    backendPort = await portfinder.getPortPromise({host: config.host, port: (config.backend && config.backend.port) || 3000});
+  if (config.backend) {
+    backendPort = await portfinder.getPortPromise({host: config.host, port: config.backend.port || 3000});
     config.backendPort = backendPort;
   }
 
@@ -49,11 +48,15 @@ async function devRun() {
     require('basys-app-builder/backend/backend.js');
   }
 
-  if (config.backend || config.web) {
-    const backendEntryPath = path.join(config.backend ? config._distDir : config._tempDir, 'backend', 'backend.js');
+  if (config.backend) {
+    const backendEntryPath = path.join(config._tempDir, 'backend', 'backend.js');
+    const watchPaths = [backendEntryPath];
+    if (config.web) watchPaths.push(path.join(config._tempDir, 'web', 'index.html'));
+    // BUG: watch other files (like basys.json)?
+
     nodemon({
       script: backendEntryPath,
-      watch: [backendEntryPath], // BUG: do we need to watch other files?
+      watch: watchPaths,
       // BUG: configure stdout so that log is printed
     });
 
@@ -69,11 +72,9 @@ async function devRun() {
 async function prodRun() {
   const {config} = require('./config');
 
-  // To run web app we still need a backend
-  if (config.backend || config.web) {
+  if (config.backend) {
     config.backendPort = config.port;
-    // BUG: do we need ternary operator here?
-    require(path.join(config.backend ? config._distDir : config._tempDir, 'backend', 'backend.js'));
+    require(path.join(config._distDir, 'backend', 'backend.js'));
   }
 }
 

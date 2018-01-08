@@ -2,11 +2,11 @@
 // `app` - Express app instance
 // `BASYS_CONFIG` - Basys project configuration object (evaluated using basys.json)
 
-// Inject a global `config` variable with the value returned by the function into each page
-setPageGlobalVar('config', req => {
-  return {
-    value: 'from backend',
-  };
+// Provide a custom function to render index.html and include request-specific data (avoid using request url).
+setPageHandler((render, req, res) => {
+  render({
+    config: {value: 'from backend'},
+  });
 });
 
 app.get('/api', (req, res) => {

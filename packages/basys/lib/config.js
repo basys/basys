@@ -110,6 +110,7 @@ function loadConfig(projectDir, env, deplName = null) {
     },
     web: {
       entry: null,
+      favicon: false,
       browsers: ['> 1%', 'last 2 versions'],
     },
     mobile: {
@@ -122,6 +123,10 @@ function loadConfig(projectDir, env, deplName = null) {
   };
 
   let conf = defaultEnvConfig[env];
+
+  if (projectConfig.web && !projectConfig.backend) {
+    exit(chalk.red('Backend app is required for all web apps'));
+  }
 
   for (const appType of Object.keys(defaultAppConfig)) {
     // If app is activated merge its options with default options and add to `conf`
@@ -170,8 +175,7 @@ function loadConfig(projectDir, env, deplName = null) {
 }
 
 function appTypes() {
-  // We always need to compile backend if web app is present (to run the server)
-  return ['backend', 'web', 'mobile', 'desktop'].filter(appType => config[appType] || (appType === 'backend' && config.web));
+  return ['backend', 'web', 'mobile', 'desktop'].filter(appType => config[appType]);
 }
 
 module.exports = {appTypes, config, loadConfig};

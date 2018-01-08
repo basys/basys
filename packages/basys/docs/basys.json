@@ -22,6 +22,9 @@
       "todomvc-app-css/index.css",
     ],
 
+    // Path to favicon file relative to the project root
+    "favicon": false,
+
     // See https://github.com/ai/browserslist#queries
     "browsers": ["> 1%", "last 2 versions"],
   },

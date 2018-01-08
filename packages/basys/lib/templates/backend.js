@@ -3,10 +3,11 @@ import express from 'express';
 import fs from 'fs';
 import http from 'http';
 import morgan from 'morgan';
+import nunjucks from 'nunjucks';
 import path from 'path';
 
 // BUG: not all config options need to be included here
-let config = {{ conf|dump }};
+let config = {{ conf|dump(2) }};
 {% if conf.env !== 'dev' %}
   // To customize deployment configuration put 'config.json' next to the bundled backend.js
   // or set BASYS_CONFIG_PATH environment variable to the path to the config file
@@ -34,11 +35,6 @@ if (testRun) {
 }
 
 {% if conf.web %}
-  let pageVar = null;
-  global.setPageGlobalVar = (name, getValue) => {
-    pageVar = {name, getValue};
-  };
-
   {% if conf.env === 'dev' %}
     const buildWebDir = path.join(config._distDir, 'web');
   {% else %}
@@ -52,19 +48,29 @@ if (testRun) {
     });
   }
 
-  let indexHtml = fs.readFileSync(path.join(buildWebDir, 'index.html'), 'utf8');
+  let pageHandler = (render, req, res) => render({});
 
-  const pageHandler = (req, res) => {
-    let html = indexHtml;
-    if (pageVar) {
-      // <script> tag is closed on the first occurance of "</script>", even if it's inside the code
-      const value = JSON.stringify(pageVar.getValue(req)).replace(/<\/script>/g, '<"+"/script>');
-      html = html.replace('</div>', `</div><script>window.${pageVar.name} = ${value};</script>`);
-    }
-    res.send(html);
+  global.setPageHandler = func => {
+    pageHandler = func;
+  };
+
+  const nunjucksEnv = new nunjucks.Environment(new nunjucks.FileSystemLoader(), {autoescape: false});
+  nunjucksEnv.addFilter('escapeJS', js => {
+    // See https://stackoverflow.com/a/8749240
+    return js.replace(/</g, '\\u003c').replace(/>/g, '\\u003e');
+  });
+
+  const pageTemplate = nunjucks.compile(
+    fs.readFileSync(path.join(buildWebDir, 'index.html'), 'utf8'),
+    nunjucksEnv,
+    path.join(buildWebDir, 'index.html')
+  );
+
+  const pageRoute = (req, res) => {
+    pageHandler(ctx => res.send(pageTemplate.render(ctx)), req, res);
   };
   for (const pagePath of pagePaths) {
-    app.get(pagePath, pageHandler);
+    app.get(pagePath, pageRoute);
   }
 {% endif %}
 

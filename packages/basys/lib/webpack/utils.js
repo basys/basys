@@ -133,7 +133,7 @@ function generateEntries(init = true) {
 
       js = nunjucks.render('backend.js', {
         pagePaths: JSON.stringify(Object.values(config._routes).map(route => route.path), null, 2),
-        entry: config.backend && config.backend.entry && path.join(config._projectDir, 'src', config.backend.entry),
+        entry: config.backend.entry && path.join(config._projectDir, 'src', config.backend.entry),
         conf,
       });
     } else {

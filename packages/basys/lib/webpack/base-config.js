@@ -8,7 +8,7 @@ const {assetsPath, cssLoaders} = require('./utils');
 function babelLoader(appType) {
   let targets;
   if (appType === 'backend') {
-    targets = {node: config.backend ? config.backend.nodeVersion : 'current'};
+    targets = {node: config.backend.nodeVersion};
   } else if (appType === 'web') {
     targets = {browsers: config.web.browsers};
   }
@@ -56,8 +56,7 @@ module.exports = function(appType) {
       target: 'node',
       output: {
         filename: 'backend.js',
-        // For projects without backend it's still bundled to start web app on developer's machine
-        path: path.join(config.backend ? config._distDir : config._tempDir, 'backend'),
+        path: path.join(config._distDir, 'backend'),
       },
       resolve: {
         extensions: ['.js', '.json', '.vue'],
@@ -241,10 +240,10 @@ module.exports = function(appType) {
       }),
       new HtmlWebpackPlugin({
         filename: path.join(config._distDir, appType, 'index.html'),
-        template: path.join(__dirname, 'index.html'),
+        template: path.join(config._projectDir, 'src', 'index.html'),
         inject: 'body',
         minify:
-          config.env === 'prod'
+          config.env !== 'dev'
             ? {
                 removeComments: true,
                 collapseWhitespace: true,

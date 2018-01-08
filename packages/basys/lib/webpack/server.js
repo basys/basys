@@ -58,7 +58,7 @@ function startDevServer() {
       port: config.port,
       overlay: config.errorOverlay ? {warnings: false, errors: true} : false,
       publicPath: config.assetsPublicPath,
-      proxy: config.backend || config.web ? {'/': `http://${config.host}:${config.backendPort}`} : config.proxy,
+      proxy: config.backend ? {'/': `http://${config.host}:${config.backendPort}`} : {}, // BUG: allow to add more proxies?
       // BUG: webpack errors aren't printed when quiet==true
       quiet: true, // necessary for FriendlyErrorsPlugin
       watchOptions: {

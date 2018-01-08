@@ -159,7 +159,7 @@ function build() {
 
             packageJson.dependencies = packageJson.dependencies || {};
             const basysPackageJson = require('basys/package.json');
-            for (const name of ['body-parser', 'express', 'morgan']) {
+            for (const name of ['body-parser', 'express', 'morgan', 'nunjucks']) {
               packageJson.dependencies[name] = basysPackageJson.dependencies[name];
             }
 
