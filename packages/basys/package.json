@@ -78,7 +78,6 @@
     "webpack-bundle-analyzer": "2.9.2",
     "webpack-dev-server": "2.10.0",
     "webpack-merge": "4.1.1",
-    "write-file-webpack-plugin": "4.2.0",
     "yargs": "10.0.3"
   },
   "engines": {

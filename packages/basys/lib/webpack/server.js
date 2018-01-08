@@ -2,8 +2,8 @@ const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin');
 const webpack = require('webpack');
 const Server = require('webpack-dev-server/lib/Server');
 const merge = require('webpack-merge');
-const WriteFilePlugin = require('write-file-webpack-plugin');
 const {appTypes, config} = require('../config');
+const BackendWebpackPlugin = require('./backend-plugin');
 const baseWebpackConfig = require('./base-config');
 const {generateEntries, styleLoaders} = require('./utils');
 
@@ -11,8 +11,7 @@ function devWebpackConfig(appType) {
   if (appType === 'backend') {
     return merge(baseWebpackConfig('backend'), {
       plugins: [
-        // BUG: think about using a second instance of webpack instead of WriteFilePlugin
-        WriteFilePlugin(),
+        new BackendWebpackPlugin(),
       ],
     });
   }
