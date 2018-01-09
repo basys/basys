@@ -35,7 +35,7 @@
     "testBrowsers": ["chrome"],
   },
   "deployments": {
-    "prod": {},
+    "main": {},
   },
   "editor": null, // The code editor you use. Can be null/'atom'/'code'/'sublime'.
   "appBuilder": true,

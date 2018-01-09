@@ -2,7 +2,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 const webpack = require('webpack');
 const {config} = require('../config');
-const BasysWebpackPlugin = require('./basys-plugin');
+const FrontendWebpackPlugin = require('./frontend-plugin');
 const {assetsPath, cssLoaders} = require('./utils');
 
 function babelLoader(appType) {
@@ -254,7 +254,7 @@ module.exports = function(appType) {
               }
             : false,
       }),
-      new BasysWebpackPlugin({
+      new FrontendWebpackPlugin({
         appType,
       }),
     ],

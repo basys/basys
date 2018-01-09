@@ -10,9 +10,7 @@ const {generateEntries, styleLoaders} = require('./utils');
 function devWebpackConfig(appType) {
   if (appType === 'backend') {
     return merge(baseWebpackConfig('backend'), {
-      plugins: [
-        new BackendWebpackPlugin(),
-      ],
+      plugins: [new BackendWebpackPlugin()],
     });
   }
   // BUG: what about other app types?

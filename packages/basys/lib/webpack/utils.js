@@ -1,4 +1,3 @@
-const chalk = require('chalk');
 const chokidar = require('chokidar');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const fs = require('fs-extra');
@@ -110,7 +109,7 @@ function generateEntries(init = true) {
         try {
           routeInfo = JSON5.parse(routeBlock.content);
         } catch (e) {
-          exit(chalk.red(`${vuePath}: ${e.message}`));
+          exit(`${vuePath}: ${e.message}`);
         }
 
         routeInfo.file = vuePath;

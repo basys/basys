@@ -141,60 +141,59 @@ function build() {
   const spinner = ora('building for production...');
   spinner.start();
 
-  return fs.emptyDir(config._distDir).then(
-    () =>
-      new Promise((resolve, reject) => {
-        generateEntries();
+  fs.emptyDirSync(config._distDir);
 
-        const configs = appTypes().map(prodWebpackConfig);
-        webpack(configs, (err, multiStats) => {
-          spinner.stop();
-          if (err) return reject(err);
+  return new Promise((resolve, reject) => {
+    generateEntries();
 
-          if (config.backend) {
-            // Generate package.json
-            const packageJson = JSON.parse(fs.readFileSync(path.join(config._projectDir, 'package.json'), 'utf8'));
-            packageJson.scripts = {start: 'node backend/backend.js'};
-            delete packageJson.devDependencies;
+    const configs = appTypes().map(prodWebpackConfig);
+    webpack(configs, (err, multiStats) => {
+      spinner.stop();
+      if (err) return reject(err);
 
-            packageJson.dependencies = packageJson.dependencies || {};
-            const basysPackageJson = require('basys/package.json');
-            for (const name of ['body-parser', 'express', 'morgan', 'nunjucks']) {
-              packageJson.dependencies[name] = basysPackageJson.dependencies[name];
-            }
+      if (config.backend) {
+        // Generate package.json
+        const packageJson = JSON.parse(fs.readFileSync(path.join(config._projectDir, 'package.json'), 'utf8'));
+        packageJson.scripts = {start: 'node backend/backend.js'};
+        delete packageJson.devDependencies;
 
-            fs.writeFileSync(path.join(config._distDir, 'package.json'), JSON.stringify(packageJson, null, 2));
-          }
+        packageJson.dependencies = packageJson.dependencies || {};
+        const basysPackageJson = require('basys/package.json');
+        for (const name of ['body-parser', 'express', 'morgan', 'nunjucks']) {
+          packageJson.dependencies[name] = basysPackageJson.dependencies[name];
+        }
 
-          for (const stats of multiStats.stats) {
-            // BUG: print the name of stats (app type)?
-            process.stdout.write(
-              `${stats.toString({
-                colors: true,
-                modules: false,
-                children: false,
-                chunks: false,
-                chunkModules: false,
-              })}\n\n`,
-            );
+        fs.writeFileSync(path.join(config._distDir, 'package.json'), JSON.stringify(packageJson, null, 2));
+      }
 
-            if (stats.hasErrors()) {
-              exit(chalk.red('  Build failed with errors.\n'));
-            }
-          }
+      for (const stats of multiStats.stats) {
+        // BUG: print the name of stats (app type)?
+        process.stdout.write(
+          `${stats.toString({
+            colors: true,
+            modules: false,
+            children: false,
+            chunks: false,
+            chunkModules: false,
+          })}\n\n`,
+        );
 
-          console.log(chalk.cyan('Build complete.\n'));
+        if (stats.hasErrors()) {
+          exit('  Build failed with errors.\n');
+        }
+      }
 
-          // BUG: depends on the list of apps built
-          // BUG: fix the command, show deployment name if needed?
-          if (config.env === 'prod') {
-            console.log(chalk.yellow(`Use \`npm run start\` to test the production build on your machine.\n`));
-          }
+      console.log(chalk.cyan('Build complete.\n'));
 
-          resolve();
-        });
-      }),
-  );
+      // BUG: depends on the list of apps built
+      // BUG: fix the command, show deployment name if needed?
+      if (config.env === 'prod') {
+        console.log(chalk.yellow(`Use \`npm run start\` to test the production build on your machine.\n`));
+      }
+
+      resolve();
+    });
+  });
 }
 
 module.exports = {build};

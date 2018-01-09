@@ -7,10 +7,10 @@ const {executeCommand} = require('./lib/index');
 const {argv} = yargs
   .usage('$0 <command> [args]')
   .command('dev', 'Start a development server')
-  .command('build <deployment-name>', 'Build the project for production deployment', yargs => {
+  .command('build [<deployment-name>]', 'Build the project for production deployment', yargs => {
     yargs.positional('deployment-name', {type: 'string'});
   })
-  .command('start <deployment-name>', 'Serve a production bundle', yargs => {
+  .command('start [<deployment-name>]', 'Serve a production bundle', yargs => {
     yargs.positional('deployment-name', {type: 'string'});
   })
   .command('e2e', 'Run end-to-end tests')

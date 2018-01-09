@@ -1,3 +1,4 @@
+const chalk = require('chalk');
 const chokidar = require('chokidar');
 const fs = require('fs');
 const nodemon = require('nodemon');
@@ -79,7 +80,7 @@ async function prodRun() {
 }
 
 function exit(error) {
-  console.log(error);
+  console.log(chalk.bold.red(error));
   process.exit(1);
 }
 

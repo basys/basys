@@ -3,7 +3,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const {config} = require('../config');
 
-class BasysWebpackPlugin {
+class FrontendWebpackPlugin {
   constructor(options) {
     this.appType = options.appType;
   }
@@ -64,4 +64,4 @@ class BasysWebpackPlugin {
   }
 }
 
-module.exports = BasysWebpackPlugin;
+module.exports = FrontendWebpackPlugin;
