@@ -7,23 +7,21 @@ const portfinder = require('portfinder');
 
 async function devRun() {
   const {config, loadConfig} = require('./config');
-  let backendPort;
+  const {startDevServer} = require('./webpack/server');
 
-  if (config.backend) {
-    backendPort = await portfinder.getPortPromise({host: config.host, port: config.backend.port || 3000});
-    config.backendPort = backendPort;
+  config.port = await portfinder.getPortPromise({host: config.host, port: config.port});
+  if (config.type === 'web') {
+    config.backendPort = await portfinder.getPortPromise({host: config.host, port: config.backendPort});
   }
 
-  const {startDevServer} = require('./webpack/server');
-  const port = await portfinder.getPortPromise({host: config.host, port: config.port});
-  config.port = port;
   let server = await startDevServer();
 
   // On basys.json changes restart the webpack dev server
   chokidar.watch(path.join(config._projectDir, 'basys.json'), {ignoreInitial: true}).on('change', () => {
     // BUG: not all changes in basys.json require to restart the dev server and recompile the project
     server.close(async () => {
-      loadConfig(config._projectDir, 'dev');
+      const {backendPort, port} = config;
+      loadConfig(config._projectDir, config.appName, 'dev');
       config.port = port;
       config.backendPort = backendPort;
       server = await startDevServer();
@@ -34,25 +32,27 @@ async function devRun() {
 
   if (config.appBuilder) {
     // BUG: what if config.appBuilder option changes?
-    config.appBuilderPort = await portfinder.getPortPromise({host: config.host, port: 8090});
+    config.appBuilder.port = await portfinder.getPortPromise({host: config.host, port: config.appBuilder.port});
     const configPath = path.join(config._tempDir, 'app-builder.json');
     fs.writeFileSync(
       configPath,
       JSON.stringify({
         host: config.host,
-        port: config.appBuilderPort,
+        port: config.appBuilder.port,
+        backendPort: config.appBuilder.port,
         appPort: config.port,
         targetProjectDir: config._projectDir,
       }),
     );
     process.env.BASYS_CONFIG_PATH = configPath;
-    require('basys-app-builder/backend/backend.js');
+    require('basys-app-builder/backend.js');
   }
 
-  if (config.backend) {
-    const backendEntryPath = path.join(config._tempDir, 'backend', 'backend.js');
+  if (config.type === 'web') {
+    const backendEntryPath = path.join(config._tempDir, 'backend.js');
     const watchPaths = [backendEntryPath];
-    if (config.web) watchPaths.push(path.join(config._tempDir, 'web', 'index.html'));
+    // BUG: only if there are pages
+    watchPaths.push(path.join(config._tempDir, 'index.html'));
     // BUG: watch other files (like basys.json)?
 
     nodemon({
@@ -73,9 +73,9 @@ async function devRun() {
 async function prodRun() {
   const {config} = require('./config');
 
-  if (config.backend) {
+  if (config.type === 'web') {
     config.backendPort = config.port;
-    require(path.join(config._distDir, 'backend', 'backend.js'));
+    require(path.join(config._distDir, 'backend.js'));
   }
 }
 

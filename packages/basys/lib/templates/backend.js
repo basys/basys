@@ -6,7 +6,6 @@ import morgan from 'morgan';
 import nunjucks from 'nunjucks';
 import path from 'path';
 
-// BUG: not all config options need to be included here
 let config = {{ conf|dump(2) }};
 {% if conf.env !== 'dev' %}
   // To customize deployment configuration put 'config.json' next to the bundled backend.js
@@ -34,45 +33,38 @@ if (testRun) {
   //      See http://www.jyotman.xyz/post/logging-in-node.js-done-right .
 }
 
-{% if conf.web %}
-  {% if conf.env === 'dev' %}
-    const buildWebDir = path.join(config._distDir, 'web');
-  {% else %}
-    const buildWebDir =  path.join(__dirname, '..', 'web');
-  {% endif %}
-
-  if (testRun) {
-    // BUG: don't use express to serve these files in production
-    app.use('/static', express.static(path.join(buildWebDir, 'static')), (req, res) => {
-      res.status(404).end();
-    });
-  }
-
-  let pageHandler = (render, req, res) => render({});
-
-  global.setPageHandler = func => {
-    pageHandler = func;
-  };
-
-  const nunjucksEnv = new nunjucks.Environment(new nunjucks.FileSystemLoader(), {autoescape: false});
-  nunjucksEnv.addFilter('escapeJS', js => {
-    // See https://stackoverflow.com/a/8749240
-    return js.replace(/</g, '\\u003c').replace(/>/g, '\\u003e');
+if (testRun) {
+  // BUG: don't use express to serve these files in production, in dev mode assets are managed by webpack-dev-server
+  app.use('/static', express.static(path.join(__dirname, 'static')), (req, res) => {
+    res.status(404).end();
   });
+}
 
-  const pageTemplate = nunjucks.compile(
-    fs.readFileSync(path.join(buildWebDir, 'index.html'), 'utf8'),
-    nunjucksEnv,
-    path.join(buildWebDir, 'index.html')
-  );
+// BUG: only include this code if pagePaths.length>0
+let pageHandler = (render, req, res) => render({});
 
-  const pageRoute = (req, res) => {
-    pageHandler(ctx => res.send(pageTemplate.render(ctx)), req, res);
-  };
-  for (const pagePath of pagePaths) {
-    app.get(pagePath, pageRoute);
-  }
-{% endif %}
+global.setPageHandler = func => {
+  pageHandler = func;
+};
+
+const nunjucksEnv = new nunjucks.Environment(new nunjucks.FileSystemLoader(), {autoescape: false});
+nunjucksEnv.addFilter('escapeJS', js => {
+  // See https://stackoverflow.com/a/8749240
+  return js.replace(/</g, '\\u003c').replace(/>/g, '\\u003e');
+});
+
+const pageTemplate = nunjucks.compile(
+  fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8'),
+  nunjucksEnv,
+  path.join(__dirname, 'index.html')
+);
+
+const pageRoute = (req, res) => {
+  pageHandler(ctx => res.send(pageTemplate.render(ctx)), req, res);
+};
+for (const pagePath of pagePaths) {
+  app.get(pagePath, pageRoute);
+}
 
 // BUG: use helmet
 // BUG: validate the host on requests for security reasons (like in django)

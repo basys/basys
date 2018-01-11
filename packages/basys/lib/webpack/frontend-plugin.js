@@ -4,25 +4,19 @@ const path = require('path');
 const {config} = require('../config');
 
 class FrontendWebpackPlugin {
-  constructor(options) {
-    this.appType = options.appType;
-  }
-
   apply(compiler) {
     compiler.plugin('compilation', compilation => {
       // Insert external CSS URLs into HTML before project chunks
       compilation.plugin('html-webpack-plugin-before-html-generation', (htmlPluginData, callback) => {
-        const externalStyleUrls = (config[this.appType].styles || []).filter(
-          entry => entry.startsWith('http://') || entry.startsWith('https://'),
-        );
+        const externalStyleUrls = config.styles.filter(entry => entry.startsWith('http://') || entry.startsWith('https://'));
         htmlPluginData.assets.css = externalStyleUrls.concat(htmlPluginData.assets.css);
         callback(null, htmlPluginData);
       });
 
       compilation.plugin('html-webpack-plugin-alter-asset-tags', (htmlPluginData, callback) => {
         // Add favicon
-        if (this.appType === 'web' && config.web.favicon) {
-          const fullFaviconPath = path.resolve(config._projectDir, config.web.favicon);
+        if (config.type === 'web' && config.favicon) {
+          const fullFaviconPath = path.resolve(config._projectDir, config.favicon);
 
           if (!fs.existsSync(fullFaviconPath)) {
             // BUG: improve how this error is printed

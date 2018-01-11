@@ -5,22 +5,24 @@ const yargs = require('yargs');
 const {executeCommand} = require('./lib/index');
 
 const {argv} = yargs
-  .usage('$0 <command> [args]')
-  .command('dev', 'Start a development server')
-  .command('build [<deployment-name>]', 'Build the project for production deployment', yargs => {
-    yargs.positional('deployment-name', {type: 'string'});
+  .usage('$0 <command> [<app-name>]')
+  .command('dev [<app-name>]', 'Start a development server', yargs => {
+    yargs.positional('app-name', {type: 'string'});
   })
-  .command('start [<deployment-name>]', 'Serve a production bundle', yargs => {
-    yargs.positional('deployment-name', {type: 'string'});
+  .command('build [<app-name>]', 'Build the app for production', yargs => {
+    yargs.positional('app-name', {type: 'string'});
   })
-  .command('e2e', 'Run end-to-end tests')
+  .command('start [<app-name>]', 'Serve a production bundle', yargs => {
+    yargs.positional('app-name', {type: 'string'});
+  })
+  .command('e2e [<app-name>]', 'Run end-to-end tests', yargs => {
+    yargs.positional('app-name', {type: 'string'});
+  })
   .help();
 
 const command = argv._[0];
 try {
-  if (argv._.length < 1) {
-    throw new Error('You need to provide a command and the name of deployment config file');
-  }
+  if (argv._.length < 1) throw new Error('You need to provide a command');
 
   if (!['dev', 'build', 'start', 'e2e'].includes(command)) {
     throw new Error('Invalid command provided');
@@ -31,7 +33,7 @@ try {
   process.exit(1);
 }
 
-executeCommand(command, argv['deployment-name']).catch(err => {
+executeCommand(command, argv['app-name']).catch(err => {
   console.log(chalk.bold.red(err));
   process.exit(1);
 });

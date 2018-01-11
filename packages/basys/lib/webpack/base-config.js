@@ -5,12 +5,11 @@ const {config} = require('../config');
 const FrontendWebpackPlugin = require('./frontend-plugin');
 const {assetsPath, cssLoaders} = require('./utils');
 
-function babelLoader(appType) {
+function getBabelLoader(entryType) {
   let targets;
-  if (appType === 'backend') {
-    targets = {node: config.backend.nodeVersion};
-  } else if (appType === 'web') {
-    targets = {browsers: config.web.browsers};
+  if (config.type === 'web') {
+    if (entryType === 'backend') targets = {node: config.nodeVersion};
+    if (entryType === 'frontend') targets = {browsers: config.browsers};
   }
   // BUG: use 'electron', 'ios', 'android' targets
 
@@ -46,17 +45,17 @@ function babelLoader(appType) {
   };
 }
 
-// appType = 'backend'/'web'/'mobile'/'desktop'
-module.exports = function(appType) {
-  const entryPath = path.join(config._tempDir, `${appType}-entry.js`);
-  if (appType === 'backend') {
+module.exports = function(entryType) {
+  const babelLoader = getBabelLoader(entryType);
+
+  if (config.type === 'web' && entryType === 'backend') {
     return {
-      context: config._projectDir, // BUG: maybe use ./src? does it actually help?
-      entry: entryPath,
+      context: config._projectDir,
+      entry: path.join(config._tempDir, 'backend-entry.js'),
       target: 'node',
       output: {
         filename: 'backend.js',
-        path: path.join(config._distDir, 'backend'),
+        path: config._distDir,
       },
       resolve: {
         extensions: ['.js', '.json', '.vue'],
@@ -64,12 +63,11 @@ module.exports = function(appType) {
       module: {
         // BUG: think about processing backend-specific static files
         rules: [
-          // BUG: do we need eslint-loader?
           {
             test: /\.js$/,
             exclude: /node_modules/,
             // include: ['src/backend'],
-            use: [babelLoader('backend')],
+            use: [babelLoader],
           },
         ],
       },
@@ -98,8 +96,8 @@ module.exports = function(appType) {
     };
   }
 
-  const assets = [entryPath];
-  for (const relPath of config[appType].styles || []) {
+  const assets = [path.join(config._tempDir, 'frontend-entry.js')];
+  for (const relPath of config.styles) {
     if (!relPath.startsWith('http://') && !relPath.startsWith('https://')) {
       const resolvePaths = [path.join(config._projectDir, 'src')].concat(require.resolve.paths(relPath));
       assets.push(require.resolve(relPath, {paths: resolvePaths}));
@@ -107,7 +105,6 @@ module.exports = function(appType) {
   }
 
   if (config.env === 'dev') {
-    // BUG: only for 'web' app?
     assets.unshift(
       `webpack-dev-server/client/?http://${config.host}:${config.port}`,
       'webpack/hot/dev-server.js', // BUG: or use 'webpack/hot/only-dev-server.js'?
@@ -134,35 +131,15 @@ module.exports = function(appType) {
     },
     module: {
       rules: [
-        // BUG: Fix it and use for dev env only. Should be disabled by default, but allow to customize in config.
-        // BUG: custom npm packages (eslint plugins and presets) will be installed in project's directory - need to be resolved
-        // ...(config.useEslint
-        //   ? [
-        //       {
-        //         test: /\.(js|vue)$/,
-        //         enforce: 'pre',
-        //         include: ['src', 'tests'],
-        //         use: [
-        //           {
-        //             loader: 'eslint-loader',
-        //             options: {
-        //               formatter: require('eslint-friendly-formatter'),
-        //               emitWarning: !config.showEslintErrorsInOverlay,
-        //             },
-        //           },
-        //         ],
-        //       },
-        //     ]
-        //   : []),
         {
           test: /\.vue$/,
-          include: [path.join(config._projectDir, 'src')], // BUG: can relative path be used?
+          include: [path.join(config._projectDir, 'src')],
           use: [
             {
               loader: 'vue-loader',
               options: {
                 loaders: Object.assign(
-                  {js: babelLoader(appType)},
+                  {js: babelLoader},
                   cssLoaders({
                     sourceMap: config.cssSourceMap,
                     extract: config.env === 'prod',
@@ -186,7 +163,7 @@ module.exports = function(appType) {
             path.join(config._projectDir, 'tests'),
             path.join(config._projectDir, '.basys'), // Required to apply loaders to webpack entries
           ],
-          use: [babelLoader(appType)],
+          use: [babelLoader],
         },
         // BUG: these loaders are very similar. expose (name, regexp, limit) list and generate the loader?
         {
@@ -230,8 +207,7 @@ module.exports = function(appType) {
     plugins: [
       new webpack.DefinePlugin({
         'process.env': {
-          // BUG: think about 'testing'. maybe use `process.env.NODE_ENV` (should be equivalent)?
-          NODE_ENV: config.env === 'dev' ? '"development"' : config.env === 'test' ? '"testing"' : '"production"',
+          NODE_ENV: JSON.stringify(process.env.NODE_ENV),
         },
       }),
       new webpack.ProvidePlugin({
@@ -239,7 +215,7 @@ module.exports = function(appType) {
         Vue: ['vue/dist/vue.esm.js', 'default'],
       }),
       new HtmlWebpackPlugin({
-        filename: path.join(config._distDir, appType, 'index.html'),
+        filename: path.join(config._distDir, 'index.html'),
         template: path.join(config._projectDir, 'src', 'index.html'),
         inject: 'body',
         minify:
@@ -254,9 +230,7 @@ module.exports = function(appType) {
               }
             : false,
       }),
-      new FrontendWebpackPlugin({
-        appType,
-      }),
+      new FrontendWebpackPlugin(),
     ],
     // BUG: think about it
     // node: {

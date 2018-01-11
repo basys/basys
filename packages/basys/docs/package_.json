@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "basys dev",
-    "build": "basys build main",
-    "start": "basys start main",
+    "build": "basys build",
+    "start": "basys start",
     "lint": "eslint --ext .js,.vue src tests/e2e",
     "lint:fix": "npm run lint -- --fix",
     "test:e2e": "basys e2e"

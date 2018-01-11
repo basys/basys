@@ -7,7 +7,7 @@ const nunjucks = require('nunjucks');
 const path = require('path');
 const parseVue = require('vue-loader/lib/parser');
 const {exit} = require('../utils');
-const {appTypes, config} = require('../config');
+const {config} = require('../config');
 
 nunjucks.configure(path.join(__dirname, '..', 'templates'), {autoescape: false});
 
@@ -85,67 +85,71 @@ function styleLoaders(options) {
 // BUG: Perform validation of component options, at least the ones that affect whether and how they are used.
 //      Warn if component names are not unique.
 function generateEntries(init = true) {
+  const vuePattern = path.join(config._projectDir, 'src', '**', '*.vue');
+  config._vuePaths = glob.sync(vuePattern);
+
+  if (config.env === 'dev' && init) {
+    // Re-generate webpack entries when .vue files are added or deleted inside src/ folder
+    chokidar
+      .watch(vuePattern, {ignoreInitial: true})
+      .on('add', () => generateEntries(false))
+      .on('change', () => generateEntries(false))
+      .on('unlink', () => generateEntries(false));
+  }
+
   config._routes = {}; // {vuePath: routeInfo}
-  config._vuePaths = [];
-  if (config.web || config.mobile || config.desktop) {
-    const vuePattern = path.join(config._projectDir, 'src', '**', '*.vue');
-    config._vuePaths = glob.sync(vuePattern);
+  for (const vuePath of config._vuePaths) {
+    const parts = parseVue(fs.readFileSync(vuePath, 'utf8'), vuePath);
+    const routeBlock = parts.customBlocks.find(block => block.type === 'route');
+    if (routeBlock) {
+      // BUG: can it contain js code?
+      let routeInfo;
+      try {
+        routeInfo = JSON5.parse(routeBlock.content);
+      } catch (e) {
+        exit(`${vuePath}: ${e.message}`);
+      }
+      // BUG: validate the data inside routeInfo (e.g. path starts with '/')
 
-    if (config.env === 'dev' && init) {
-      // Re-generate webpack entries when .vue files are added or deleted inside src/ folder
-      chokidar
-        .watch(vuePattern, {ignoreInitial: true})
-        .on('add', () => generateEntries(false))
-        .on('change', () => generateEntries(false))
-        .on('unlink', () => generateEntries(false));
-    }
+      routeInfo.file = vuePath;
 
-    for (const vuePath of config._vuePaths) {
-      const parts = parseVue(fs.readFileSync(vuePath, 'utf8'), vuePath);
-      const routeBlock = parts.customBlocks.find(block => block.type === 'route');
-      if (routeBlock) {
-        // BUG: can it contain js code?
-        let routeInfo;
-        try {
-          routeInfo = JSON5.parse(routeBlock.content);
-        } catch (e) {
-          exit(`${vuePath}: ${e.message}`);
-        }
-
-        routeInfo.file = vuePath;
+      const usedInApp = !Array.isArray(routeInfo.apps) || routeInfo.apps.includes(config.appName);
+      if (usedInApp) {
         config._routes[vuePath] = routeInfo; // BUG: needs special processing to adopt for Vue and express (e.g. url params)
-        // BUG: validate the data inside routeInfo (e.g. path starts with '/')
+      } else {
+        // BUG: remove vuePath from config._vuePaths
       }
     }
   }
 
-  for (const appType of appTypes()) {
-    let js;
-    if (appType === 'backend') {
-      // When bundling for production exclude all internal config options (starting with '_')
-      let conf = Object.assign({}, config);
-      if (config.env !== 'dev') {
-        for (let key of Object.keys(config)) {
-          if (key.startsWith('_')) delete conf[key];
-        }
-      }
-
-      js = nunjucks.render('backend.js', {
-        pagePaths: JSON.stringify(Object.values(config._routes).map(route => route.path), null, 2),
-        entry: config.backend.entry && path.join(config._projectDir, 'src', config.backend.entry),
-        conf,
-      });
-    } else {
-      // BUG: frontend.js code may depend on app type
-      js = nunjucks.render('frontend.js', {
-        vuePaths: config._vuePaths,
-        routes: config._routes,
-        entry: config[appType].entry && path.join(config._projectDir, 'src', config[appType].entry),
-      });
+  const entries = {};
+  if (config.type === 'web') {
+    // Expose only whitelisted and custom config options to backend code
+    const conf = {};
+    for (const key of ['host', 'port', 'backendPort', 'appName', 'env']) {
+      conf[key] = config[key];
+    }
+    for (const key in config.custom) {
+      conf[key] = config.custom[key];
     }
 
-    const entryPath = path.join(config._tempDir, `${appType}-entry.js`);
-    fs.writeFileSync(entryPath, js);
+    entries.backend = nunjucks.render('backend.js', {
+      pagePaths: JSON.stringify(Object.values(config._routes).map(route => route.path), null, 2),
+      entry: config.backendEntry && path.join(config._projectDir, 'src', config.backendEntry),
+      conf,
+    });
+  }
+
+  // BUG: for web app don't generate front-end bundle if there are no pages (what about mobile/desktop?)
+  entries.frontend = nunjucks.render('frontend.js', {
+    vuePaths: config._vuePaths,
+    routes: config._routes,
+    entry: config.entry && path.join(config._projectDir, 'src', config.entry),
+  });
+
+  for (const entryType in entries) {
+    const entryPath = path.join(config._tempDir, `${entryType}-entry.js`);
+    fs.writeFileSync(entryPath, entries[entryType]);
 
     if (init) {
       // BUG: a temporary fix for the webpack-dev-server issue https://github.com/webpack/webpack-dev-server/issues/1208

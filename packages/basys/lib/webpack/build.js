@@ -8,12 +8,12 @@ const path = require('path');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const merge = require('webpack-merge');
 const webpack = require('webpack');
-const {appTypes, config} = require('../config');
+const {config} = require('../config');
+const {exit} = require('../utils');
 const baseWebpackConfig = require('./base-config');
 const {assetsPath, generateEntries, styleLoaders} = require('./utils');
-const {exit} = require('../utils');
 
-function prodWebpackConfig(appType) {
+function prodWebpackConfigs() {
   const uglifyJsPlugin = new UglifyJsPlugin({
     uglifyOptions: {
       compress: {
@@ -24,10 +24,8 @@ function prodWebpackConfig(appType) {
     parallel: true,
   });
 
-  let webpackConfig = baseWebpackConfig(appType);
-
-  if (appType !== 'backend') {
-    webpackConfig = merge(webpackConfig, {
+  const webpackConfigs = [
+    merge(baseWebpackConfig('frontend'), {
       module: {
         rules: styleLoaders({
           sourceMap: config.cssSourceMap,
@@ -37,7 +35,7 @@ function prodWebpackConfig(appType) {
       },
       devtool: config.cssSourceMap ? 'source-map' : false,
       output: {
-        path: path.join(config._distDir, appType),
+        path: config._distDir,
         filename: assetsPath('js/[name].[chunkhash].js'),
         chunkFilename: assetsPath('js/[id].[chunkhash].js'),
       },
@@ -106,35 +104,25 @@ function prodWebpackConfig(appType) {
         //   },
         // ]),
       ],
-    });
-  } else {
-    webpackConfig = merge(webpackConfig, {
-      plugins: [uglifyJsPlugin],
-    });
-  }
-
-  // BUG: only for web apps?
-  // if (config.productionGzip) {
-  //   const CompressionWebpackPlugin = require('compression-webpack-plugin');
-  //   webpackConfig.plugins.push(
-  //     new CompressionWebpackPlugin({
-  //       asset: '[path].gz[query]',
-  //       algorithm: 'gzip',
-  //       test: new RegExp('\\.(' +config.productionGzipExtensions.join('|') + ')$'),
-  //       threshold: 10240,
-  //       minRatio: 0.8,
-  //     })
-  //   );
-  // }
+    }),
+  ];
 
   // BUG: document it
   // BUG: does it work with multiple apps? (see https://github.com/webpack-contrib/webpack-bundle-analyzer/issues/12)
   if (config.bundleAnalyzerReport) {
     const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer');
-    webpackConfig.plugins.push(new BundleAnalyzerPlugin()); // BUG: pass configuration?
+    webpackConfigs[0].plugins.push(new BundleAnalyzerPlugin()); // BUG: pass configuration?
   }
 
-  return webpackConfig;
+  if (config.type === 'web') {
+    webpackConfigs.push(
+      merge(baseWebpackConfig('backend'), {
+        plugins: [uglifyJsPlugin],
+      }),
+    );
+  }
+
+  return webpackConfigs;
 }
 
 function build() {
@@ -146,15 +134,14 @@ function build() {
   return new Promise((resolve, reject) => {
     generateEntries();
 
-    const configs = appTypes().map(prodWebpackConfig);
-    webpack(configs, (err, multiStats) => {
+    webpack(prodWebpackConfigs(), (err, multiStats) => {
       spinner.stop();
       if (err) return reject(err);
 
-      if (config.backend) {
+      if (config.type === 'web') {
         // Generate package.json
         const packageJson = JSON.parse(fs.readFileSync(path.join(config._projectDir, 'package.json'), 'utf8'));
-        packageJson.scripts = {start: 'node backend/backend.js'};
+        packageJson.scripts = {start: 'node backend.js'};
         delete packageJson.devDependencies;
 
         packageJson.dependencies = packageJson.dependencies || {};

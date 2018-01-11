@@ -4,8 +4,10 @@ fixture('Index page').page('http://localhost:8080'); // BUG: retrieve url from c
 
 test('Default tests', async t => {
   await t
-    .expect(Selector('header.header').exists).ok()
+    .expect(Selector('header.header').exists)
+    .ok()
     .click('.new-todo')
     .pressKey('B u y space m i l k enter')
-    .expect(Selector('.todo label').innerText).contains('Buy milk');
+    .expect(Selector('.todo label').innerText)
+    .contains('Buy milk');
 });

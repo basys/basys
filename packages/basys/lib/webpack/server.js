@@ -2,46 +2,51 @@ const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin');
 const webpack = require('webpack');
 const Server = require('webpack-dev-server/lib/Server');
 const merge = require('webpack-merge');
-const {appTypes, config} = require('../config');
+const {config} = require('../config');
 const BackendWebpackPlugin = require('./backend-plugin');
 const baseWebpackConfig = require('./base-config');
 const {generateEntries, styleLoaders} = require('./utils');
 
-function devWebpackConfig(appType) {
-  if (appType === 'backend') {
-    return merge(baseWebpackConfig('backend'), {
-      plugins: [new BackendWebpackPlugin()],
-    });
-  }
-  // BUG: what about other app types?
-  return merge(baseWebpackConfig(appType), {
-    module: {
-      rules: styleLoaders({sourceMap: config.cssSourceMap, usePostCSS: true}),
-    },
-    devtool: config.jsSourceMap ? 'eval-source-map' : false,
-    output: {
-      filename: '[name].js',
-    },
-    plugins: [
-      new webpack.HotModuleReplacementPlugin(),
-      new webpack.NamedModulesPlugin(), // HMR shows correct file names in console on update
-      // BUG: fix it and set quiet=true - so far no errors are printed
-      new webpack.NoEmitOnErrorsPlugin(),
-      new FriendlyErrorsPlugin({
-        compilationSuccessInfo: {
-          messages: [`Your application is running here: http://${config.host}:${config.port}`],
-        },
+function devWebpackConfigs() {
+  const webpackConfigs = [
+    merge(baseWebpackConfig('frontend'), {
+      module: {
+        rules: styleLoaders({sourceMap: config.cssSourceMap, usePostCSS: true}),
+      },
+      devtool: config.jsSourceMap ? 'eval-source-map' : false,
+      output: {
+        filename: '[name].js',
+      },
+      plugins: [
+        new webpack.HotModuleReplacementPlugin(),
+        new webpack.NamedModulesPlugin(), // HMR shows correct file names in console on update
+        // BUG: fix it and set quiet=true - so far no errors are printed
+        new webpack.NoEmitOnErrorsPlugin(),
+        new FriendlyErrorsPlugin({
+          compilationSuccessInfo: {
+            messages: [`Your application is running here: http://${config.host}:${config.port}`],
+          },
+        }),
+      ],
+    }),
+  ];
+
+  if (config.type === 'web') {
+    webpackConfigs.push(
+      merge(baseWebpackConfig('backend'), {
+        plugins: [new BackendWebpackPlugin()],
       }),
-    ],
-  });
+    );
+  }
+
+  return webpackConfigs;
 }
 
 function startDevServer() {
   return new Promise((resolve, reject) => {
     generateEntries();
 
-    const configs = appTypes().map(devWebpackConfig);
-    const compiler = webpack(configs);
+    const compiler = webpack(devWebpackConfigs());
     compiler.apply(new webpack.ProgressPlugin());
 
     compiler.plugin('done', () => resolve(server));
@@ -53,9 +58,9 @@ function startDevServer() {
       compress: true,
       host: config.host,
       port: config.port,
-      overlay: config.errorOverlay ? {warnings: false, errors: true} : false,
+      overlay: true,
       publicPath: config.assetsPublicPath,
-      proxy: config.backend ? {'/': `http://${config.host}:${config.backendPort}`} : {}, // BUG: allow to add more proxies?
+      proxy: config.type === 'web' ? {'/': `http://${config.host}:${config.backendPort}`} : {}, // BUG: allow to add more proxies?
       // BUG: webpack errors aren't printed when quiet==true
       quiet: true, // necessary for FriendlyErrorsPlugin
       watchOptions: {

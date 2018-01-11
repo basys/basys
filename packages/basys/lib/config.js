@@ -1,4 +1,3 @@
-const assert = require('assert');
 const deepmerge = require('deepmerge');
 const fs = require('fs-extra');
 const JSON5 = require('json5');
@@ -11,8 +10,10 @@ function merge(dest, src) {
   return deepmerge(dest, src, {arrayMerge: (destination, source) => source});
 }
 
-function loadConfig(projectDir, env, deplName = null) {
-  assert(['dev', 'test', 'prod'].includes(env));
+// `appName` may be null if config defines only 1 app
+function loadConfig(projectDir, appName, env) {
+  if (!['dev', 'test', 'prod'].includes(env)) exit(`Incorrect env value: ${env}`);
+  process.env.NODE_ENV = {dev: 'development', test: 'testing', prod: 'production'}[env];
 
   const configPath = path.join(projectDir, 'basys.json');
   let projectConfig;
@@ -37,42 +38,60 @@ function loadConfig(projectDir, env, deplName = null) {
     exit(`${configPath} value must be an object`);
   }
 
-  process.env.NODE_ENV = {dev: 'development', test: 'testing', prod: 'production'}[env];
+  if (!projectConfig.apps) exit("'apps' option must be provided in basys.json");
+  const appNames = Object.keys(projectConfig.apps);
+  if (appNames.length === 0) exit('At least one app must be defined in basys.json');
+  // BUG: validate that all appNames use allowed symbols only
 
-  // BUG: not all of these configs should be exposed
-  const defaultEnvConfig = {
-    dev: {
-      host: 'localhost',
-      port: 8080, // If this port is in use, a free one will be determined automatically
+  if (!appName) {
+    if (appNames.length > 1) exit('App name must be specified');
+    appName = appNames[0];
+  }
 
-      // CSS Sourcemaps off by default because relative paths are "buggy"
-      // with this option, according to the CSS-Loader README
-      // (https://github.com/webpack/css-loader#sourcemaps).
-      // In our experience, they generally work as expected,
-      // just be aware of this issue when enabling this option.
-      cssSourceMap: false,
+  if (!appNames.includes(appName)) exit(`Incorrect app name. Available names are: ${appNames.join(', ')}.`);
 
-      jsSourceMap: false,
+  let conf = projectConfig.apps[appName];
+  if (!['web', 'mobile', 'desktop'].includes(conf.type)) exit(`Incorrect app type: ${conf.type}`);
 
-      errorOverlay: true,
-      poll: false, // https://webpack.js.org/configuration/dev-server/#devserver-watchoptions-
-      proxy: {}, // https://webpack.js.org/configuration/dev-server/#devserver-proxy
+  // Default app configuration
+  const defaultConfig = {
+    entry: null, // Path to UI entry file (relative to src/ directory)
+    favicon: false,
+    styles: [],
 
-      // Use Eslint Loader?
-      // If true, your code will be linted during bundling and
-      // linting errors and warnings will be shown in the console.
-      // useEslint: true,
-      // If true, eslint errors and warnings will also be shown in the error overlay in the browser.
-      // showEslintErrorsInOverlay: false,
+    // CSS Sourcemaps off by default because relative paths are "buggy"
+    // with this option, according to the CSS-Loader README
+    // (https://github.com/webpack/css-loader#sourcemaps).
+    // In our experience, they generally work as expected,
+    // just be aware of this issue when enabling this option.
+    cssSourceMap: env !== 'dev',
 
-      // poll: null,
-    },
-    // BUG: reduce duplication with other envs, not all attributes need to be exposed
-    test: {
-      host: 'localhost',
-      port: 8080,
-      cssSourceMap: true,
-      jsSourceMap: true,
+    jsSourceMap: env !== 'dev',
+
+    // BUG: shorten the list of supported editors?
+    editor: null, // 'sublime', 'atom', 'code', 'webstorm', 'phpstorm', 'idea14ce', 'vim', 'emacs', 'visualstudio'
+
+    host: 'localhost',
+    // In dev env another free port will be determined if this one is occupied.
+    // In other envs the server will fail to start.
+    port: 8080,
+
+    poll: false, // dev env only, see https://webpack.js.org/configuration/dev-server/#devserver-watchoptions-
+    bundleAnalyzerReport: false, // BUG: think about it, makes sense only if env==='prod'
+    custom: {}, // Holds custom config options (shouldn't overlap with any built-in options)
+  };
+
+  if (projectConfig.appBuilder) {
+    defaultConfig.appBuilder = merge({port: 8090}, projectConfig.appBuilder);
+  }
+
+  if (conf.type === 'web') {
+    Object.assign(defaultConfig, {
+      backendEntry: null, // Path to backend entry file (relative to src/ directory)
+      backendPort: 3000,
+      nodeVersion: env === 'dev' ? 'current' : '8.9',
+
+      browsers: ['> 1%', 'last 2 versions'],
 
       // BUG: automatically detect the browsers available on developer's machine? (only relevant if web app is present)
       // BUG: allow to override it via CLI arguments?
@@ -80,99 +99,34 @@ function loadConfig(projectDir, env, deplName = null) {
       // Available values: 'chromium', 'chrome', 'chrome:headless', 'chrome-canary', 'ie', 'edge',
       // 'firefox', 'firefox:headless', 'opera', 'safari'
       testBrowsers: [],
-    },
-    // BUG: some/all of these options are per production deployment?
-    prod: {
-      host: 'localhost',
-      port: 8080, // Server will fail to start if this port is in use
+    });
+  }
+  // BUG: for mobile apps provide ios/android configuration, supported versions
 
-      cssSourceMap: true,
-      jsSourceMap: true,
-
-      // Gzip off by default as many popular static hosts such as
-      // Surge or Netlify already gzip all static assets for you.
-      // Before setting to `true`, make sure to:
-      // npm install --save-dev compression-webpack-plugin
-      // productionGzip: false,
-      // productionGzipExtensions: ['js', 'css'],
-      bundleAnalyzerReport: process.env.npm_config_report, // BUG: allow to activate it via npm script argument
-    },
-  };
-
-  // BUG: backend is required for ssr (validate config consistency)
-  const defaultAppConfig = {
-    backend: {
-      entry: null, // Path to backend customization js relative to src/ directory
-      nodeVersion: env === 'dev' ? 'current' : '8.9',
-    },
-    web: {
-      entry: null,
-      favicon: false,
-      browsers: ['> 1%', 'last 2 versions'],
-    },
-    mobile: {
-      entry: null,
-      // BUG: ios/android configuration, supported versions
-    },
-    desktop: {
-      entry: null,
-    },
-  };
-
-  let conf = defaultEnvConfig[env];
-
-  if (projectConfig.web && !projectConfig.backend) {
-    exit('Backend app is required for all web apps');
+  if (conf[env]) {
+    conf = merge(conf, conf[env]);
+    delete conf.dev;
+    delete conf.test;
+    delete conf.prod;
   }
 
-  for (const appType of Object.keys(defaultAppConfig)) {
-    // If app is activated merge its options with default options and add to `conf`
-    if (projectConfig[appType]) {
-      conf[appType] = merge(defaultAppConfig[appType], projectConfig[appType]);
-    }
+  conf = merge(defaultConfig, conf);
+
+  // Validate that custom options don't overlap with any built-in options
+  for (const key in conf.custom) {
+    if (key in conf) exit(`Custom config option '${key}' is not allowed`);
   }
 
-  if (env === 'prod') {
-    if (!projectConfig.deployments) exit("'deployments' option must be provided in basys.json");
-    const deplNames = Object.keys(projectConfig.deployments);
-    if (deplNames.length === 0) exit('At least one deployment must be defined in basys.json');
-    // BUG: validate that all deplNames use allowed symbols only
-
-    if (!deplName) {
-      if (deplNames.length > 1) exit('Deployment name must be provided');
-      deplName = deplNames[0];
-    }
-
-    if (!deplNames.includes(deplName)) exit(`Incorrect deployment name. Available names are: ${deplNames.join(', ')}.`);
-  }
-
-  const tempDir = path.join(projectDir, '.basys', env !== 'prod' ? env : `prod-${deplName}`);
+  const tempDir = path.join(projectDir, '.basys', appName, env);
   fs.ensureDirSync(tempDir);
 
-  // Deep-merge project-level configuration with deployment configuration. Arrays are not concatenated.
-  conf = merge(conf, env === 'prod' ? projectConfig.deployments[deplName] : projectConfig[env]);
-
-  // Copy custom top-level attributes
-  const builtinAttrs = Object.keys(defaultAppConfig).concat('dev', 'test', 'deployments');
-  for (const key in projectConfig) {
-    if (!builtinAttrs.includes(key)) {
-      conf[key] = projectConfig[key];
-    }
-  }
-
-  // BUG: prefix internal (undocumented) options with '_' to avoid overlap with user's custom options
   conf = merge(conf, {
-    // BUG: shorten the list of supported editors?
-    editor: null, // 'sublime', 'atom', 'code', 'webstorm', 'phpstorm', 'idea14ce', 'vim', 'emacs', 'visualstudio'
-    appBuilder: conf.appBuilder !== undefined ? conf.appBuilder : true,
+    appName,
     env,
     assetsPublicPath: '/', // BUG: maybe set it to '/static/'? don't expose to user?
-    deplName,
     _tempDir: tempDir,
     _projectDir: projectDir,
-    // BUG: what if there are several production deployments? need separate folders for them?
-    _distDir: env === 'prod' ? path.join(projectDir, 'dist', deplName) : tempDir,
-    // 'package.json': require(path.join(projectDir, 'package.json')), // BUG: do we need it?
+    _distDir: env === 'prod' ? path.join(projectDir, 'dist', appName) : tempDir,
   });
 
   // BUG: Validate both config files (depending on env), if invalid raise a meaningful error (with a link to local or public docs?)
@@ -184,8 +138,4 @@ function loadConfig(projectDir, env, deplName = null) {
   Object.assign(config, conf);
 }
 
-function appTypes() {
-  return ['backend', 'web', 'mobile', 'desktop'].filter(appType => config[appType]);
-}
-
-module.exports = {appTypes, config, loadConfig};
+module.exports = {config, loadConfig};
