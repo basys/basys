@@ -5,8 +5,7 @@ const {config, loadConfig} = require('./config');
 const {devRun, exit, prodRun} = require('./utils');
 
 // command='dev'/'start'/'build'/'e2e'
-async function executeCommand(command, appName) {
-  const projectDir = process.cwd(); // BUG: is it always correct? Only if called from the project root directory?
+async function executeCommand(projectDir, command, appName) {
   const firstRun = !fs.pathExistsSync(path.join(projectDir, '.basys'));
 
   if (command === 'dev') {

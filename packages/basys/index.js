@@ -33,7 +33,8 @@ try {
   process.exit(1);
 }
 
-executeCommand(command, argv['app-name']).catch(err => {
+const projectDir = process.cwd(); // BUG: is it always correct? Only if called from the project root directory?
+executeCommand(projectDir, command, argv['app-name']).catch(err => {
   console.log(chalk.bold.red(err));
   process.exit(1);
 });
