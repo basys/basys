@@ -11,7 +11,10 @@ async function devRun() {
 
   config.port = await portfinder.getPortPromise({host: config.host, port: config.port});
   if (config.type === 'web') {
-    config.backendPort = await portfinder.getPortPromise({host: config.host, port: config.backendPort});
+    config.backendPort = await portfinder.getPortPromise({
+      host: config.host,
+      port: config.backendPort,
+    });
   }
 
   let server = await startDevServer();
@@ -32,7 +35,10 @@ async function devRun() {
 
   if (config.appBuilder) {
     // BUG: what if config.appBuilder option changes?
-    config.appBuilder.port = await portfinder.getPortPromise({host: config.host, port: config.appBuilder.port});
+    config.appBuilder.port = await portfinder.getPortPromise({
+      host: config.host,
+      port: config.appBuilder.port,
+    });
     const configPath = path.join(config._tempDir, 'app-builder.json');
     fs.writeFileSync(
       configPath,

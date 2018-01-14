@@ -1,7 +1,3 @@
-// BUG: https://eslint.org/docs/user-guide/configuring
-// BUG: https://github.com/prettier/eslint-config-prettier
-// BUG: "eslint-plugin-node": "^5.2.0",
-// BUG: "eslint-plugin-promise": "^3.4.0",
 module.exports = {
   root: true,
   extends: [
@@ -34,19 +30,20 @@ module.exports = {
     // BUG: differs for front-end/backend code
     Vue: true,
     BASYS_CONFIG: true,
+    setPageHandler: true,
+    app: true,
   },
   plugins: [
     'html', // BUG: not compatible with a eslint-plugin-vue
     'prettier',
-    // BUG: look at https://github.com/babel/eslint-plugin-babel
   ],
   rules: {
     'prettier/prettier': [
       'error',
       {
-        // BUG: allow to override it (already possible?)
         singleQuote: true,
         trailingComma: 'all',
+        bracketSpacing: false,
         printWidth: 100,
       },
     ],
@@ -54,9 +51,6 @@ module.exports = {
     // 'html/report-bad-indent': 'error',
     // 'vue/no-duplicate-attributes': 'error',
 
-    // allow async-await
-    // 'generator-star-spacing': 0,
-    // allow debugger during development
     // 'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0, // BUG: fix NODE_ENV usage?
   },
   overrides: [

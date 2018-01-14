@@ -9,7 +9,10 @@ class BackendWebpackPlugin {
 
       for (const assetPath in stats.compilation.assets) {
         try {
-          fs.outputFileSync(path.join(compiler.options.output.path, assetPath), stats.compilation.assets[assetPath].source());
+          fs.outputFileSync(
+            path.join(compiler.options.output.path, assetPath),
+            stats.compilation.assets[assetPath].source(),
+          );
         } catch (e) {
           console.log(chalk.bold.red(e.message));
         }
