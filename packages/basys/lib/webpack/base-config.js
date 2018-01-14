@@ -140,10 +140,7 @@ module.exports = function(entryType) {
               options: {
                 loaders: Object.assign(
                   {js: babelLoader},
-                  cssLoaders({
-                    sourceMap: config.cssSourceMap,
-                    extract: config.env === 'prod',
-                  }),
+                  cssLoaders({extract: config.env === 'prod'}),
                 ),
                 cssSourceMap: config.cssSourceMap,
                 transformToRequire: {

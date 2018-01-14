@@ -11,7 +11,7 @@ function devWebpackConfigs() {
   const webpackConfigs = [
     merge(baseWebpackConfig('frontend'), {
       module: {
-        rules: styleLoaders({sourceMap: config.cssSourceMap, usePostCSS: true}),
+        rules: styleLoaders({usePostCSS: true}),
       },
       devtool: config.jsSourceMap ? 'eval-source-map' : false,
       output: {

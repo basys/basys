@@ -24,7 +24,7 @@ function cssLoaders(options) {
       {
         loader: 'css-loader',
         options: {
-          sourceMap: options.sourceMap,
+          sourceMap: config.cssSourceMap,
         },
       },
     ];
@@ -34,7 +34,7 @@ function cssLoaders(options) {
       // loaders.push({
       //   loader: 'postcss-loader',
       //   options: {
-      //     sourceMap: options.sourceMap,
+      //     sourceMap: config.cssSourceMap,
       //   },
       // });
     }
@@ -43,7 +43,7 @@ function cssLoaders(options) {
       loaders.push({
         loader: `${loader}-loader`,
         options: Object.assign({}, loaderOptions, {
-          sourceMap: options.sourceMap,
+          sourceMap: config.cssSourceMap,
         }),
       });
     }

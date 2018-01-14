@@ -28,7 +28,6 @@ function prodWebpackConfigs() {
     merge(baseWebpackConfig('frontend'), {
       module: {
         rules: styleLoaders({
-          sourceMap: config.cssSourceMap,
           extract: true,
           usePostCSS: true, // BUG: think about it
         }),

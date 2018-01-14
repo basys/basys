@@ -58,15 +58,8 @@ function loadConfig(projectDir, appName, env) {
     entry: null, // Path to UI entry file (relative to src/ directory)
     favicon: false,
     styles: [],
-
-    // CSS Sourcemaps off by default because relative paths are "buggy"
-    // with this option, according to the CSS-Loader README
-    // (https://github.com/webpack/css-loader#sourcemaps).
-    // In our experience, they generally work as expected,
-    // just be aware of this issue when enabling this option.
-    cssSourceMap: env !== 'dev',
-
-    jsSourceMap: env !== 'dev',
+    cssSourceMap: env === 'test',
+    jsSourceMap: env === 'test',
 
     // BUG: shorten the list of supported editors?
     editor: null, // 'sublime', 'atom', 'code', 'webstorm', 'phpstorm', 'idea14ce', 'vim', 'emacs', 'visualstudio'
