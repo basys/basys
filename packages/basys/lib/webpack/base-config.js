@@ -48,28 +48,31 @@ function getBabelLoader(entryType) {
 module.exports = function(entryType) {
   const babelLoader = getBabelLoader(entryType);
 
+  const jsRule = {
+    test: /\.js$/,
+    include: [
+      path.join(config.projectDir, 'src'),
+      path.join(config.projectDir, 'tests'),
+      path.join(config.projectDir, '.basys'), // Required to apply loaders to webpack entries
+    ],
+    use: [babelLoader],
+  };
+
   if (config.type === 'web' && entryType === 'backend') {
     return {
-      context: config._projectDir,
-      entry: path.join(config._tempDir, 'backend-entry.js'),
+      context: config.projectDir,
+      entry: path.join(config.tempDir, 'backend-entry.js'),
       target: 'node',
       output: {
         filename: 'backend.js',
-        path: config._distDir,
+        path: config.distDir,
       },
       resolve: {
         extensions: ['.js', '.json', '.vue'],
       },
       module: {
         // BUG: think about processing backend-specific static files
-        rules: [
-          {
-            test: /\.js$/,
-            exclude: /node_modules/,
-            // include: ['src/backend'],
-            use: [babelLoader],
-          },
-        ],
+        rules: [jsRule],
       },
       node: {
         // BUG: maybe set these values to true? `__dirname` is used in templates/backend.js and requires `false` value.
@@ -77,11 +80,8 @@ module.exports = function(entryType) {
         __filename: false,
       },
       externals: [
-        // Don't bundle packages from node_modules into backend.js
         function(context, request, callback) {
-          // BUG: Look at https://github.com/liady/webpack-node-externals and https://github.com/liady/webpack-node-externals/issues/39 .
-          //      It's not compatible with lerna and yarn new node_modules hierarchy.
-          //      Special processing for 'webpack/hot/dev-server.js' would be required.
+          // Don't bundle packages from node_modules into backend.js
           if (!request.startsWith('.') && !path.isAbsolute(request)) {
             return callback(null, `commonjs ${request}`);
           }
@@ -89,17 +89,19 @@ module.exports = function(entryType) {
         },
       ],
       plugins: [
-        // BUG: think about these plugins
-        // new webpack.IgnorePlugin(/\.(css|less)$/),
-        // new webpack.BannerPlugin('require("source-map-support").install();', { raw: true, entryOnly: false }),
+        new webpack.DefinePlugin({
+          'basys.env': JSON.stringify(config.env),
+          'basys.appName': JSON.stringify(config.appName),
+        }),
+        // BUG: new webpack.BannerPlugin('require('source-map-support').install();', {raw: true, entryOnly: false}),
       ],
     };
   }
 
-  const assets = [path.join(config._tempDir, 'frontend-entry.js')];
+  const assets = [path.join(config.tempDir, 'frontend-entry.js')];
   for (const relPath of config.styles) {
     if (!relPath.startsWith('http://') && !relPath.startsWith('https://')) {
-      const resolvePaths = [path.join(config._projectDir, 'src')].concat(require.resolve.paths(relPath));
+      const resolvePaths = [path.join(config.projectDir, 'src')].concat(require.resolve.paths(relPath));
       assets.push(require.resolve(relPath, {paths: resolvePaths}));
     }
   }
@@ -111,8 +113,21 @@ module.exports = function(entryType) {
     );
   }
 
+  const urlLoader = (extensions, dirName, limit) => ({
+    test: new RegExp(`\\.(${extensions.join('|')})(\\?.*)?$`),
+    use: [
+      {
+        loader: 'url-loader',
+        options: {
+          limit,
+          name: assetsPath(`${dirName}/[name].[hash:7].[ext]`),
+        },
+      },
+    ],
+  });
+
   return {
-    context: config._projectDir,
+    context: config.projectDir,
     entry: {
       app: assets,
     },
@@ -131,9 +146,10 @@ module.exports = function(entryType) {
     },
     module: {
       rules: [
+        jsRule,
         {
           test: /\.vue$/,
-          include: [path.join(config._projectDir, 'src')],
+          include: [path.join(config.projectDir, 'src')],
           use: [
             {
               loader: 'vue-loader',
@@ -153,52 +169,10 @@ module.exports = function(entryType) {
             },
           ],
         },
-        {
-          test: /\.js$/,
-          include: [
-            path.join(config._projectDir, 'src'),
-            path.join(config._projectDir, 'tests'),
-            path.join(config._projectDir, '.basys'), // Required to apply loaders to webpack entries
-          ],
-          use: [babelLoader],
-        },
-        // BUG: these loaders are very similar. expose (name, regexp, limit) list and generate the loader?
-        {
-          test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
-          use: [
-            {
-              loader: 'url-loader',
-              options: {
-                limit: 10000, // BUG: allow to customize these limits
-                name: assetsPath('img/[name].[hash:7].[ext]'),
-              },
-            },
-          ],
-        },
-        {
-          test: /\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/,
-          use: [
-            {
-              loader: 'url-loader',
-              options: {
-                limit: 10000,
-                name: assetsPath('media/[name].[hash:7].[ext]'),
-              },
-            },
-          ],
-        },
-        {
-          test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
-          use: [
-            {
-              loader: 'url-loader',
-              options: {
-                limit: 10000,
-                name: assetsPath('fonts/[name].[hash:7].[ext]'),
-              },
-            },
-          ],
-        },
+        // BUG: allow to customize these extensions and limits in config?
+        urlLoader(['png', 'jpg', 'jpeg', 'gif', 'svg'], 'img', 10000),
+        urlLoader(['mp4', 'webm', 'ogg', 'mp3', 'wav', 'flac', 'aac'], 'media', 10000),
+        urlLoader(['woff', 'woff2', 'eot', 'ttf', 'otf'], 'fonts', 10000),
       ],
     },
     plugins: [
@@ -206,14 +180,16 @@ module.exports = function(entryType) {
         'process.env': {
           NODE_ENV: JSON.stringify(process.env.NODE_ENV),
         },
+        'basys.env': JSON.stringify(config.env),
+        'basys.appName': JSON.stringify(config.appName),
       }),
       new webpack.ProvidePlugin({
         // Make `Vue` object available in code without import
         Vue: ['vue/dist/vue.esm.js', 'default'],
       }),
       new HtmlWebpackPlugin({
-        filename: path.join(config._distDir, 'index.html'),
-        template: path.join(config._projectDir, 'src', 'index.html'),
+        filename: path.join(config.distDir, 'index.html'),
+        template: path.join(config.projectDir, 'src', 'index.html'),
         inject: 'body',
         minify:
           config.env !== 'dev'

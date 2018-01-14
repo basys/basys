@@ -7,7 +7,7 @@ import nunjucks from 'nunjucks';
 import path from 'path';
 
 let config = {{ conf|dump(2) }};
-{% if conf.env !== 'dev' %}
+{% if env !== 'dev' %}
   // To customize deployment configuration put 'config.json' next to the bundled backend.js
   // or set BASYS_CONFIG_PATH environment variable to the path to the config file
   const configPath = process.env.BASYS_CONFIG_PATH || path.join(__dirname, 'config.json');
@@ -17,7 +17,6 @@ let config = {{ conf|dump(2) }};
     Object.assign(config, eval('require')(configPath));
   }
 {% endif %}
-global.BASYS_CONFIG = config;
 
 const pagePaths = {{ pagePaths }};
 
@@ -43,9 +42,9 @@ if (testRun) {
 // BUG: only include this code if pagePaths.length>0
 let pageHandler = (render, req, res) => render({});
 
-global.setPageHandler = func => {
+function setPageHandler(func) {
   pageHandler = func;
-};
+}
 
 const nunjucksEnv = new nunjucks.Environment(new nunjucks.FileSystemLoader(), {autoescape: false});
 nunjucksEnv.addFilter('escapeJS', js => {
@@ -59,9 +58,9 @@ const pageTemplate = nunjucks.compile(
   path.join(__dirname, 'index.html')
 );
 
-const pageRoute = (req, res) => {
+function pageRoute(req, res) {
   pageHandler(ctx => res.send(pageTemplate.render(ctx)), req, res);
-};
+}
 for (const pagePath of pagePaths) {
   app.get(pagePath, pageRoute);
 }
@@ -69,25 +68,25 @@ for (const pagePath of pagePaths) {
 // BUG: use helmet
 // BUG: validate the host on requests for security reasons (like in django)
 
-const port = {% if conf.env === 'dev' %}config.backendPort{% else %}config.port{% endif %};
+const port = {% if env === 'dev' %}config.backendPort{% else %}config.port{% endif %};
 
 // BUG: somehow express ignores this setting. allow to customize it?
-// app.set('views', [path.join(config._projectDir, 'views')]);
+// app.set('views', [path.join(config.projectDir, 'views')]);
 app.set('view engine', 'pug'); // BUG: think about it
 app.set('port', port);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true})); // BUG: configure it, see https://github.com/expressjs/body-parser
 
-// BUG: temporary hack, make `app` and `server` available only in the backend entry module
-global.app = app;
-global.server = http.createServer(app);
+const server = http.createServer(app);
+
+global.basys = {app, config, server, setPageHandler};
 
 {% if entry %}
   require({{ entry|dump }});
 {% endif %}
 
-{% if conf.env !== 'dev' %}
+{% if env !== 'dev' %}
   app.use((err, req, res, next) => {
     console.error(err.stack);
     // BUG: show custom 500 page (optional). allow to customize. only add if not added inside the app?

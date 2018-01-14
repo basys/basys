@@ -1,6 +1,6 @@
 // This is the main configuration file for Basys project. Most options are optional.
 // This file uses JSON5 format (an unofficial extension of JSON), see http://json5.org.
-// You can add custom attributes and access them in the backend code using global `BASYS_CONFIG` variable.
+// You can add custom attributes and access them in the backend code using global `basys.config`.
 {
   "apps": {
     "web": {

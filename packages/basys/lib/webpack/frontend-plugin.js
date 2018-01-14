@@ -18,7 +18,7 @@ class FrontendWebpackPlugin {
       compilation.plugin('html-webpack-plugin-alter-asset-tags', (htmlPluginData, callback) => {
         // Add favicon
         if (config.type === 'web' && config.favicon) {
-          const fullFaviconPath = path.resolve(config._projectDir, config.favicon);
+          const fullFaviconPath = path.resolve(config.projectDir, config.favicon);
 
           if (!fs.existsSync(fullFaviconPath)) {
             // BUG: improve how this error is printed

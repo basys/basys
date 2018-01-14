@@ -15,7 +15,7 @@ async function executeCommand(projectDir, command, appName) {
     // Open web app and app builder when running dev server for the first time
     if (config.type === 'web' && firstRun) {
       // BUG: exclude page paths with parameters from the search
-      const pagePaths = Object.values(config._routes).map(route => route.path);
+      const pagePaths = Object.values(config.routes).map(route => route.path);
       const pagePath = pagePaths.includes('/') ? '/' : pagePaths[0];
       if (pagePath) {
         // BUG: setTimeout() hack waits for express server to start listening
@@ -44,29 +44,25 @@ async function executeCommand(projectDir, command, appName) {
     // BUG: allow to reuse an existing production build?
     // BUG: support working with desktop and mobile apps
     // BUG: we'll need to setup a database (if relevant) and remove it once finished
-    // BUG: accept the list of apps/browsers to test on (via config, allow to override via CLI arguments)
     await require('./webpack/build').build();
     await prodRun();
 
     // BUG: look at https://github.com/DevExpress/testcafe/blob/master/src/cli/index.js
     // BUG: support remote browsers
     // BUG: look at https://devexpress.github.io/testcafe/documentation/using-testcafe/programming-interface/runner.html#screenshots
-    // BUG: looks like testcafe uses stage-2 babel preset - disallow stage-2/stage-3 features
     const testcafe = await require('testcafe')(config.host);
     const runner = testcafe.createRunner();
     await runner
       .src([path.join(projectDir, 'tests', 'e2e', config.e2eEntry)])
-      .browsers(config.testBrowsers)
-      .run(); // BUG: look at options https://devexpress.github.io/testcafe/documentation/using-testcafe/programming-interface/runner.html#run
+      .browsers(config.testBrowsers);
 
-    testcafe.close();
+    try {
+      await runner.run(); // BUG: look at options https://devexpress.github.io/testcafe/documentation/using-testcafe/programming-interface/runner.html#run
+    } finally {
+      await testcafe.close();
+    }
+
     process.exit();
-
-    // return testcafe.createBrowserConnection().then(remoteConnection => {
-    //   remoteConnection.once('ready', () => {
-    //     // BUG: call runner
-    //   });
-    // });
   }
 }
 

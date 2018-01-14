@@ -85,8 +85,8 @@ function styleLoaders(options) {
 // BUG: Perform validation of component options, at least the ones that affect whether and how they are used.
 //      Warn if component names are not unique.
 function generateEntries(init = true) {
-  const vuePattern = path.join(config._projectDir, 'src', '**', '*.vue');
-  config._vuePaths = glob.sync(vuePattern);
+  const vuePattern = path.join(config.projectDir, 'src', '**', '*.vue');
+  config.vuePaths = glob.sync(vuePattern);
 
   if (config.env === 'dev' && init) {
     // Re-generate webpack entries when .vue files are added or deleted inside src/ folder
@@ -97,8 +97,8 @@ function generateEntries(init = true) {
       .on('unlink', () => generateEntries(false));
   }
 
-  config._routes = {}; // {vuePath: routeInfo}
-  for (const vuePath of config._vuePaths) {
+  config.routes = {}; // {vuePath: routeInfo}
+  for (const vuePath of config.vuePaths) {
     const parts = parseVue(fs.readFileSync(vuePath, 'utf8'), vuePath);
     const routeBlock = parts.customBlocks.find(block => block.type === 'route');
     if (routeBlock) {
@@ -115,9 +115,9 @@ function generateEntries(init = true) {
 
       const usedInApp = !Array.isArray(routeInfo.apps) || routeInfo.apps.includes(config.appName);
       if (usedInApp) {
-        config._routes[vuePath] = routeInfo; // BUG: needs special processing to adopt for Vue and express (e.g. url params)
+        config.routes[vuePath] = routeInfo; // BUG: needs special processing to adopt for Vue and express (e.g. url params)
       } else {
-        // BUG: remove vuePath from config._vuePaths
+        // BUG: remove vuePath from config.vuePaths
       }
     }
   }
@@ -126,29 +126,30 @@ function generateEntries(init = true) {
   if (config.type === 'web') {
     // Expose only whitelisted and custom config options to backend code
     const conf = {};
-    for (const key of ['host', 'port', 'backendPort', 'appName', 'env']) {
-      conf[key] = config[key];
-    }
     for (const key in config.custom) {
       conf[key] = config.custom[key];
     }
+    for (const key of ['host', 'port', 'backendPort']) {
+      conf[key] = config[key];
+    }
 
     entries.backend = nunjucks.render('backend.js', {
-      pagePaths: JSON.stringify(Object.values(config._routes).map(route => route.path), null, 2),
-      entry: config.backendEntry && path.join(config._projectDir, 'src', config.backendEntry),
+      env: config.env,
+      pagePaths: JSON.stringify(Object.values(config.routes).map(route => route.path), null, 2),
+      entry: config.backendEntry && path.join(config.projectDir, 'src', config.backendEntry),
       conf,
     });
   }
 
   // BUG: for web app don't generate front-end bundle if there are no pages (what about mobile/desktop?)
   entries.frontend = nunjucks.render('frontend.js', {
-    vuePaths: config._vuePaths,
-    routes: config._routes,
-    entry: config.entry && path.join(config._projectDir, 'src', config.entry),
+    vuePaths: config.vuePaths,
+    routes: config.routes,
+    entry: config.entry && path.join(config.projectDir, 'src', config.entry),
   });
 
   for (const entryType in entries) {
-    const entryPath = path.join(config._tempDir, `${entryType}-entry.js`);
+    const entryPath = path.join(config.tempDir, `${entryType}-entry.js`);
     fs.writeFileSync(entryPath, entries[entryType]);
 
     if (init) {

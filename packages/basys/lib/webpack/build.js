@@ -34,7 +34,7 @@ function prodWebpackConfigs() {
       },
       devtool: config.cssSourceMap ? 'source-map' : false,
       output: {
-        path: config._distDir,
+        path: config.distDir,
         filename: assetsPath('js/[name].[chunkhash].js'),
         chunkFilename: assetsPath('js/[id].[chunkhash].js'),
       },
@@ -70,7 +70,7 @@ function prodWebpackConfigs() {
         //     // Any required modules inside node_modules are extracted to vendor
         //     return (
         //       module.resource && /\.js$/.test(module.resource) && module.resource.indexOf('/node_modules/') > 0
-        //       // module.resource.indexOf(path.join(config._projectDir, 'node_modules')) === 0
+        //       // module.resource.indexOf(path.join(config.projectDir, 'node_modules')) === 0
         //     );
         //   },
         // }),
@@ -97,7 +97,7 @@ function prodWebpackConfigs() {
         // Copy custom static assets
         // new CopyWebpackPlugin([
         //   {
-        //     from: path.join(config._projectDir, 'src', 'static'), // BUG: think about it
+        //     from: path.join(config.projectDir, 'src', 'static'), // BUG: think about it
         //     to: 'static', // BUG: is it correct?
         //     ignore: ['.*'], // BUG: what is it?
         //   },
@@ -128,7 +128,7 @@ function build() {
   const spinner = ora('building for production...');
   spinner.start();
 
-  fs.emptyDirSync(config._distDir);
+  fs.emptyDirSync(config.distDir);
 
   return new Promise((resolve, reject) => {
     generateEntries();
@@ -139,7 +139,7 @@ function build() {
 
       if (config.type === 'web') {
         // Generate package.json
-        const packageJson = JSON.parse(fs.readFileSync(path.join(config._projectDir, 'package.json'), 'utf8'));
+        const packageJson = JSON.parse(fs.readFileSync(path.join(config.projectDir, 'package.json'), 'utf8'));
         packageJson.scripts = {start: 'node backend.js'};
         delete packageJson.devDependencies;
 
@@ -149,7 +149,7 @@ function build() {
           packageJson.dependencies[name] = basysPackageJson.dependencies[name];
         }
 
-        fs.writeFileSync(path.join(config._distDir, 'package.json'), JSON.stringify(packageJson, null, 2));
+        fs.writeFileSync(path.join(config.distDir, 'package.json'), JSON.stringify(packageJson, null, 2));
       }
 
       for (const stats of multiStats.stats) {

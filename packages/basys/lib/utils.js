@@ -20,11 +20,11 @@ async function devRun() {
   let server = await startDevServer();
 
   // On basys.json changes restart the webpack dev server
-  chokidar.watch(path.join(config._projectDir, 'basys.json'), {ignoreInitial: true}).on('change', () => {
+  chokidar.watch(path.join(config.projectDir, 'basys.json'), {ignoreInitial: true}).on('change', () => {
     // BUG: not all changes in basys.json require to restart the dev server and recompile the project
     server.close(async () => {
       const {backendPort, port} = config;
-      loadConfig(config._projectDir, config.appName, 'dev');
+      loadConfig(config.projectDir, config.appName, 'dev');
       config.port = port;
       config.backendPort = backendPort;
       server = await startDevServer();
@@ -39,7 +39,7 @@ async function devRun() {
       host: config.host,
       port: config.appBuilder.port,
     });
-    const configPath = path.join(config._tempDir, 'app-builder.json');
+    const configPath = path.join(config.tempDir, 'app-builder.json');
     fs.writeFileSync(
       configPath,
       JSON.stringify({
@@ -47,7 +47,7 @@ async function devRun() {
         port: config.appBuilder.port,
         backendPort: config.appBuilder.port,
         appPort: config.port,
-        targetProjectDir: config._projectDir,
+        targetProjectDir: config.projectDir,
       }),
     );
     process.env.BASYS_CONFIG_PATH = configPath;
@@ -55,10 +55,10 @@ async function devRun() {
   }
 
   if (config.type === 'web') {
-    const backendEntryPath = path.join(config._tempDir, 'backend.js');
+    const backendEntryPath = path.join(config.tempDir, 'backend.js');
     const watchPaths = [backendEntryPath];
     // BUG: only if there are pages
-    watchPaths.push(path.join(config._tempDir, 'index.html'));
+    watchPaths.push(path.join(config.tempDir, 'index.html'));
     // BUG: watch other files (like basys.json)?
 
     nodemon({
@@ -81,7 +81,7 @@ async function prodRun() {
 
   if (config.type === 'web') {
     config.backendPort = config.port;
-    require(path.join(config._distDir, 'backend.js'));
+    require(path.join(config.distDir, 'backend.js'));
   }
 }
 

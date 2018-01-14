@@ -117,9 +117,9 @@ function loadConfig(projectDir, appName, env) {
     appName,
     env,
     assetsPublicPath: '/', // BUG: maybe set it to '/static/'? don't expose to user?
-    _tempDir: tempDir,
-    _projectDir: projectDir,
-    _distDir: env === 'prod' ? path.join(projectDir, 'dist', appName) : tempDir,
+    tempDir,
+    projectDir,
+    distDir: env === 'prod' ? path.join(projectDir, 'dist', appName) : tempDir,
   });
 
   // BUG: Validate both config files (depending on env), if invalid raise a meaningful error (with a link to local or public docs?)

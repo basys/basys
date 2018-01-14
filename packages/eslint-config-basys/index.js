@@ -27,11 +27,8 @@ module.exports = {
     // node: true,
   },
   globals: {
-    // BUG: differs for front-end/backend code
-    Vue: true,
-    BASYS_CONFIG: true,
-    setPageHandler: true,
-    app: true,
+    Vue: true, // BUG: front-end only
+    basys: true,
   },
   plugins: [
     'html', // BUG: not compatible with a eslint-plugin-vue
@@ -50,7 +47,6 @@ module.exports = {
     'import/no-extraneous-dependencies': 'off', // BUG: shouldn't report built-in dependencies
     // 'html/report-bad-indent': 'error',
     // 'vue/no-duplicate-attributes': 'error',
-
     // 'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0, // BUG: fix NODE_ENV usage?
   },
   overrides: [
