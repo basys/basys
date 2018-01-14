@@ -14,7 +14,7 @@
     "todomvc-app-css": "^2.1.0"
   },
   "devDependencies": {
-    "basys": "^0.1.0"
+    "basys": "0.1.1"
   },
   "engines": {
     "node": ">= 8"

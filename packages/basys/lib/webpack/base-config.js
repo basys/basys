@@ -82,7 +82,7 @@ module.exports = function(entryType) {
           // BUG: Look at https://github.com/liady/webpack-node-externals and https://github.com/liady/webpack-node-externals/issues/39 .
           //      It's not compatible with lerna and yarn new node_modules hierarchy.
           //      Special processing for 'webpack/hot/dev-server.js' would be required.
-          if (!request.startsWith('.') && !request.startsWith('/')) {
+          if (!request.startsWith('.') && !path.isAbsolute(request)) {
             return callback(null, `commonjs ${request}`);
           }
           callback();

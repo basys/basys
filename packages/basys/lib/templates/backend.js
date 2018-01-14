@@ -84,7 +84,7 @@ global.app = app;
 global.server = http.createServer(app);
 
 {% if entry %}
-  require('{{ entry }}');
+  require({{ entry|dump }});
 {% endif %}
 
 {% if conf.env !== 'dev' %}
