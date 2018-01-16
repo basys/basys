@@ -154,10 +154,7 @@ module.exports = function(entryType) {
             {
               loader: 'vue-loader',
               options: {
-                loaders: Object.assign(
-                  {js: babelLoader},
-                  cssLoaders({extract: config.env === 'prod'}),
-                ),
+                loaders: Object.assign({js: babelLoader}, cssLoaders({extract: config.env === 'prod'})),
                 cssSourceMap: config.cssSourceMap,
                 transformToRequire: {
                   video: 'src',

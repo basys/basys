@@ -52,9 +52,7 @@ async function executeCommand(projectDir, command, appName) {
     // BUG: look at https://devexpress.github.io/testcafe/documentation/using-testcafe/programming-interface/runner.html#screenshots
     const testcafe = await require('testcafe')(config.host);
     const runner = testcafe.createRunner();
-    await runner
-      .src([path.join(projectDir, 'tests', 'e2e', config.e2eEntry)])
-      .browsers(config.testBrowsers);
+    await runner.src([path.join(projectDir, 'tests', 'e2e', config.e2eEntry)]).browsers(config.testBrowsers);
 
     try {
       await runner.run(); // BUG: look at options https://devexpress.github.io/testcafe/documentation/using-testcafe/programming-interface/runner.html#run

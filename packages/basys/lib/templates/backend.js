@@ -59,7 +59,13 @@ const pageTemplate = nunjucks.compile(
 );
 
 function pageRoute(req, res) {
-  pageHandler(ctx => res.send(pageTemplate.render(ctx)), req, res);
+  const render = ctx => {
+    if (!ctx.basys) ctx.basys = {};
+    ctx.basys.env = {{ env|dump }};
+    ctx.basys.appName = {{ appName|dump }};
+    res.send(pageTemplate.render(ctx));
+  };
+  pageHandler(render, req, res);
 }
 for (const pagePath of pagePaths) {
   app.get(pagePath, pageRoute);

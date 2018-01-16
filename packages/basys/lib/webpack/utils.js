@@ -98,7 +98,7 @@ function generateEntries(init = true) {
   }
 
   config.routes = {}; // {vuePath: routeInfo}
-  for (const vuePath of config.vuePaths) {
+  for (const vuePath of config.vuePaths.slice()) {
     const parts = parseVue(fs.readFileSync(vuePath, 'utf8'), vuePath);
     const routeBlock = parts.customBlocks.find(block => block.type === 'route');
     if (routeBlock) {
@@ -117,7 +117,7 @@ function generateEntries(init = true) {
       if (usedInApp) {
         config.routes[vuePath] = routeInfo; // BUG: needs special processing to adopt for Vue and express (e.g. url params)
       } else {
-        // BUG: remove vuePath from config.vuePaths
+        config.vuePaths.splice(config.vuePaths.indexOf(vuePath), 1);
       }
     }
   }
@@ -135,6 +135,7 @@ function generateEntries(init = true) {
 
     entries.backend = nunjucks.render('backend.js', {
       env: config.env,
+      appName: config.appName,
       pagePaths: JSON.stringify(Object.values(config.routes).map(route => route.path), null, 2),
       entry: config.backendEntry && path.join(config.projectDir, 'src', config.backendEntry),
       conf,
