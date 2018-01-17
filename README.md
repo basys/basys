@@ -8,7 +8,7 @@ A JavaScript framework for building cross-plaform applications with a focus on d
 thanks to [Babel](http://babeljs.io), [PostCSS](http://postcss.org) and [Browserlist](https://github.com/ai/browserslist)
 * Dev server with hot module reload and automatic restart with [nodemon](https://nodemon.io)
 * [Webpack](https://webpack.js.org)-based bundler for production builds with automatic minification
-* Code linting using [Airbnb Style Guide](https://github.com/airbnb/javascript) and [Prettier](https://prettier.io)
+* Code linting using [Prettier](https://prettier.io)
 * An easy way to create new pages - .vue files with custom <route> block are automatically registered
 * End-to-end testing with [TestCafe](https://devexpress.github.io/testcafe) is built-in
 
