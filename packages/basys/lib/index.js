@@ -15,7 +15,7 @@ async function executeCommand(projectDir, command, appName) {
     // Open web app and app builder when running dev server for the first time
     if (config.type === 'web' && firstRun) {
       // BUG: exclude page paths with parameters from the search
-      const pagePaths = Object.values(config.routes).map(route => route.path);
+      const pagePaths = Object.values(config.vueComponents).map(info => info.path);
       const pagePath = pagePaths.includes('/') ? '/' : pagePaths[0];
       if (pagePath) {
         // BUG: setTimeout() hack waits for express server to start listening

@@ -51,8 +51,8 @@ export default {
 </script>
 
 <!-- If this section is present the Vue component is treated as a page -->
-<route>
+<info>
 {
   path: '/',
 }
-</route>
+</info>

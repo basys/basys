@@ -83,43 +83,45 @@ function styleLoaders(options) {
 }
 
 // BUG: Perform validation of component options, at least the ones that affect whether and how they are used.
-//      Warn if component names are not unique.
+//      Warn if component names are not unique or missing.
 function generateEntries(init = true) {
   const vuePattern = path.join(config.projectDir, 'src', '**', '*.vue');
-  config.vuePaths = glob.sync(vuePattern);
-
-  if (config.env === 'dev' && init) {
-    // Re-generate webpack entries when .vue files are added or deleted inside src/ folder
-    chokidar
-      .watch(vuePattern, {ignoreInitial: true})
-      .on('add', () => generateEntries(false))
-      .on('change', () => generateEntries(false))
-      .on('unlink', () => generateEntries(false));
-  }
-
-  config.routes = {}; // {vuePath: routeInfo}
-  for (const vuePath of config.vuePaths.slice()) {
+  const vuePaths = glob.sync(vuePattern);
+  config.vueComponents = {}; // {vuePath: info}
+  for (const vuePath of vuePaths) {
     const parts = parseVue(fs.readFileSync(vuePath, 'utf8'), vuePath);
-    const routeBlock = parts.customBlocks.find(block => block.type === 'route');
-    if (routeBlock) {
+    const infoBlock = parts.customBlocks.find(block => block.type === 'info');
+    if (infoBlock) {
       // BUG: can it contain js code?
-      let routeInfo;
+      let info;
       try {
-        routeInfo = JSON5.parse(routeBlock.content);
+        info = JSON5.parse(infoBlock.content);
       } catch (e) {
         exit(`${vuePath}: ${e.message}`);
       }
-      // BUG: validate the data inside routeInfo (e.g. path starts with '/')
+      // BUG: validate the data inside info (e.g. path starts with '/' if present)
 
-      routeInfo.file = vuePath;
-
-      const usedInApp = !Array.isArray(routeInfo.apps) || routeInfo.apps.includes(config.appName);
+      const usedInApp = !Array.isArray(info.apps) || info.apps.includes(config.appName);
       if (usedInApp) {
-        config.routes[vuePath] = routeInfo; // BUG: needs special processing to adopt for Vue and express (e.g. url params)
-      } else {
-        config.vuePaths.splice(config.vuePaths.indexOf(vuePath), 1);
+        config.vueComponents[vuePath] = info; // BUG: needs special processing to adopt for Vue and express (e.g. url params)
       }
+    } else {
+      config.vueComponents[vuePath] = {};
     }
+  }
+
+  if (config.env === 'dev' && init) {
+    // Re-generate webpack entries when .vue files inside src/ folder are change.
+    // Ignore changes of Vue components from other apps.
+    chokidar
+      .watch(vuePattern, {ignoreInitial: true})
+      .on('add', () => generateEntries(false))
+      .on('change', filePath => {
+        if (filePath in config.vueComponents) generateEntries(false);
+      })
+      .on('unlink', filePath => {
+        if (filePath in config.vueComponents) generateEntries(false);
+      });
   }
 
   const entries = {};
@@ -136,7 +138,7 @@ function generateEntries(init = true) {
     entries.backend = nunjucks.render('backend.js', {
       env: config.env,
       appName: config.appName,
-      pagePaths: JSON.stringify(Object.values(config.routes).map(route => route.path), null, 2),
+      pagePaths: JSON.stringify(Object.values(config.vueComponents).filter(info => info.path).map(info => info.path), null, 2),
       entry: config.backendEntry && path.join(config.projectDir, 'src', config.backendEntry),
       conf,
     });
@@ -144,8 +146,7 @@ function generateEntries(init = true) {
 
   // BUG: for web app don't generate front-end bundle if there are no pages (what about mobile/desktop?)
   entries.frontend = nunjucks.render('frontend.js', {
-    vuePaths: config.vuePaths,
-    routes: config.routes,
+    vueComponents: config.vueComponents,
     entry: config.entry && path.join(config.projectDir, 'src', config.entry),
   });
 

@@ -9,7 +9,7 @@ thanks to [Babel](http://babeljs.io), [PostCSS](http://postcss.org) and [Browser
 * Dev server with hot module reload and automatic restart with [nodemon](https://nodemon.io)
 * [Webpack](https://webpack.js.org)-based bundler for production builds with automatic minification
 * Code linting using [Prettier](https://prettier.io)
-* An easy way to create new pages - .vue files with custom <route> block are automatically registered
+* An easy way to create new pages - .vue files with custom <info> block are automatically registered
 * End-to-end testing with [TestCafe](https://devexpress.github.io/testcafe) is built-in
 
 ## Getting started

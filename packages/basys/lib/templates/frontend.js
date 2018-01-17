@@ -2,26 +2,21 @@ import 'babel-polyfill';
 import Meta from 'vue-meta';
 import Router from 'vue-router';
 
-
 const routes = [];
 let options;
 let comp;
 
-
 Vue.use(Meta);
 Vue.use(Router);
 
-
-{% for vuePath in vuePaths %}
-  {# BUG: if !options.name just skip the component? #}
-  options = require('{{ vuePath }}').default;
+{% for vuePath, info in vueComponents %}
+  options = require({{ vuePath|dump }}).default;
   comp = Vue.component(options.name, options);
 
-  {% if routes[vuePath] %}
+  {% if info.path %}
     {# BUG: pass other route info #}
     routes.push({
-      {# BUG: better use JSON.stringify(routes[vuePath].path) #}
-      path: `{{ routes[vuePath].path }}`,
+      path: {{ info.path|dump }},
       name: options.name,
       component: comp,
     });
@@ -35,7 +30,6 @@ const router = new Router({
   fallback: false,
   routes,
 });
-
 
 {# BUG: add Vuex #}
 
