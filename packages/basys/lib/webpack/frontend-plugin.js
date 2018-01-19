@@ -6,15 +6,6 @@ const {config} = require('../config');
 class FrontendWebpackPlugin {
   apply(compiler) {
     compiler.plugin('compilation', compilation => {
-      // Insert external CSS URLs into HTML before project chunks
-      compilation.plugin('html-webpack-plugin-before-html-generation', (htmlPluginData, callback) => {
-        const externalStyleUrls = config.styles.filter(
-          entry => entry.startsWith('http://') || entry.startsWith('https://'),
-        );
-        htmlPluginData.assets.css = externalStyleUrls.concat(htmlPluginData.assets.css);
-        callback(null, htmlPluginData);
-      });
-
       compilation.plugin('html-webpack-plugin-alter-asset-tags', (htmlPluginData, callback) => {
         // Add favicon
         if (config.type === 'web' && config.favicon) {

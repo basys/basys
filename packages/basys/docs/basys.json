@@ -14,12 +14,9 @@
       // See https://github.com/basys/basys/blob/master/packages/basys/lib/templates/frontend.js .
       // entry: 'web.js',
 
-      // These styles will be included into <head> element of all pages.
-      // You can use:
-      // 1) URLs to include external resources (e.g. 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css');
-      // 2) Project files using a path relative to src/ directory (e.g. 'theme.css');
-      // 3) Files from NPM modules using a path relative to project's node_modules directory (e.g. 'bootstrap/dist/css/bootstrap.min.css').
-      // External styles will be loaded first, then project's style bundle.
+      // These styles will be included into <head> element of all pages. You can include:
+      // 1) Project files using a path relative to src/ directory (e.g. 'theme.css');
+      // 2) Files from NPM modules using a path relative to project's node_modules directory (e.g. 'bootstrap/dist/css/bootstrap.min.css').
       "styles": [
         "todomvc-app-css/index.css",
       ],

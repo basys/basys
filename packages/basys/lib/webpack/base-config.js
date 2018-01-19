@@ -100,10 +100,8 @@ module.exports = function(entryType) {
 
   const assets = [path.join(config.tempDir, 'frontend-entry.js')];
   for (const relPath of config.styles) {
-    if (!relPath.startsWith('http://') && !relPath.startsWith('https://')) {
-      const resolvePaths = [path.join(config.projectDir, 'src')].concat(require.resolve.paths(relPath));
-      assets.push(require.resolve(relPath, {paths: resolvePaths}));
-    }
+    const resolvePaths = [path.join(config.projectDir, 'src')].concat(require.resolve.paths(relPath));
+    assets.push(require.resolve(relPath, {paths: resolvePaths}));
   }
 
   if (config.env === 'dev') {
