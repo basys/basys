@@ -5,6 +5,7 @@ const glob = require('glob');
 const JSON5 = require('json5');
 const nunjucks = require('nunjucks');
 const path = require('path');
+const pathToRegexp = require('path-to-regexp');
 const parseVue = require('vue-loader/lib/parser');
 const {exit} = require('../utils');
 const {config} = require('../config');
@@ -125,6 +126,8 @@ function generateEntries(init = true) {
   }
 
   const entries = {};
+
+  // Generate backend entry for web apps
   if (config.type === 'web') {
     // Expose only whitelisted and custom config options to backend code
     const conf = {};
@@ -135,10 +138,23 @@ function generateEntries(init = true) {
       conf[key] = config[key];
     }
 
+    const pagePaths = [];
+    for (const vuePath in config.vueComponents) {
+      const info = config.vueComponents[vuePath];
+      if (info.path) {
+        try {
+          // We use the version 1.7.0 of path-to-regexp package, which is used in vue-router
+          pagePaths.push(pathToRegexp(info.path, [], {sensitive: config.caseSensitive}).toString());
+        } catch (e) {
+          exit(`${vuePath} path: ${e.message}`);
+        }
+      }
+    }
+
     entries.backend = nunjucks.render('backend.js', {
       env: config.env,
       appName: config.appName,
-      pagePaths: JSON.stringify(Object.values(config.vueComponents).filter(info => info.path).map(info => info.path), null, 2),
+      pagePaths,
       entry: config.backendEntry && path.join(config.projectDir, 'src', config.backendEntry),
       conf,
     });
@@ -148,6 +164,7 @@ function generateEntries(init = true) {
   entries.frontend = nunjucks.render('frontend.js', {
     vueComponents: config.vueComponents,
     entry: config.entry && path.join(config.projectDir, 'src', config.entry),
+    caseSensitive: !!config.caseSensitive,
   });
 
   for (const entryType in entries) {

@@ -78,6 +78,8 @@ function loadConfig(projectDir, appName, env) {
     defaultConfig.appBuilder = merge({port: 8090}, projectConfig.appBuilder);
   }
 
+  defaultConfig.caseSensitive = projectConfig.caseSensitive || false;
+
   if (conf.type === 'web') {
     Object.assign(defaultConfig, {
       backendEntry: null, // Path to backend entry file (relative to src/ directory)

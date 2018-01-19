@@ -18,8 +18,6 @@ let config = {{ conf|dump(2) }};
   }
 {% endif %}
 
-const pagePaths = {{ pagePaths }};
-
 const app = express();
 
 // BUG: think about it. should be false when deployed to production (not during `npm run dev/start`). take it as an argument?
@@ -67,9 +65,10 @@ function pageRoute(req, res) {
   };
   pageHandler(render, req, res);
 }
-for (const pagePath of pagePaths) {
-  app.get(pagePath, pageRoute);
-}
+
+{% for pagePath in pagePaths %}
+  app.get({{ pagePath }}, pageRoute);
+{% endfor %}
 
 // BUG: use helmet
 // BUG: validate the host on requests for security reasons (like in django)

@@ -26,7 +26,7 @@ Vue.use(Router);
 {# BUG: allow to customize `scrollBehaviour` #}
 const router = new Router({
   mode: 'history',
-  caseSensitive: true,
+  caseSensitive: {{ caseSensitive }},
   fallback: false,
   routes,
 });
