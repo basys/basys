@@ -4,6 +4,7 @@ const webpack = require('webpack');
 const {config} = require('../config');
 const FrontendWebpackPlugin = require('./frontend-plugin');
 const {assetsPath, cssLoaders} = require('./utils');
+const {exit} = require('../utils');
 
 function getBabelLoader(entryType) {
   let targets;
@@ -101,7 +102,11 @@ module.exports = function(entryType) {
   const assets = [path.join(config.tempDir, 'frontend-entry.js')];
   for (const relPath of config.styles) {
     const resolvePaths = [path.join(config.projectDir, 'src')].concat(require.resolve.paths(relPath));
-    assets.push(require.resolve(relPath, {paths: resolvePaths}));
+    try {
+      assets.push(require.resolve(relPath, {paths: resolvePaths}));
+    } catch (e) {
+      exit(e.message);
+    }
   }
 
   if (config.env === 'dev') {

@@ -11,7 +11,8 @@ const webpack = require('webpack');
 const {config} = require('../config');
 const {exit} = require('../utils');
 const baseWebpackConfig = require('./base-config');
-const {assetsPath, generateEntries, styleLoaders} = require('./utils');
+const GenerateEntriesWebpackPlugin = require('./generate-entries-plugin');
+const {assetsPath, styleLoaders} = require('./utils');
 
 function prodWebpackConfigs() {
   const uglifyJsPlugin = new UglifyJsPlugin({
@@ -131,9 +132,9 @@ function build() {
   fs.emptyDirSync(config.distDir);
 
   return new Promise((resolve, reject) => {
-    generateEntries();
-
-    webpack(prodWebpackConfigs(), (err, multiStats) => {
+    const compiler = webpack(prodWebpackConfigs());
+    compiler.apply(new GenerateEntriesWebpackPlugin());
+    compiler.run((err, multiStats) => {
       spinner.stop();
       if (err) return reject(err);
 
@@ -156,17 +157,17 @@ function build() {
         // BUG: print the name of stats (app type)?
         process.stdout.write(
           `${stats.toString({
+            all: false,
+            assets: true,
             colors: true,
-            modules: false,
-            children: false,
-            chunks: false,
-            chunkModules: false,
+            errors: true,
+            errorDetails: true,
+            performance: true,
+            warnings: true,
           })}\n\n`,
         );
 
-        if (stats.hasErrors()) {
-          exit('  Build failed with errors.\n');
-        }
+        if (stats.hasErrors()) exit('  Build failed with errors.\n');
       }
 
       console.log(chalk.cyan('Build complete.\n'));

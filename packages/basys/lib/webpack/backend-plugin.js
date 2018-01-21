@@ -14,7 +14,7 @@ class BackendWebpackPlugin {
             stats.compilation.assets[assetPath].source(),
           );
         } catch (e) {
-          console.log(chalk.bold.red(e.message));
+          stats.compilation.errors.push(e);
         }
       }
     });

@@ -99,9 +99,9 @@ global.basys = {app, config, server, setPageHandler};
   });
 {% endif %}
 
-// BUG: show custom 404 page
+// BUG: allow to customize 404 page
 app.use((req, res) => {
-  res.status(404).end();
+  res.status(404).send('Page not found');
 });
 
 server.listen({host: config.host, port}, err => {

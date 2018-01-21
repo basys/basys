@@ -1,4 +1,3 @@
-const chalk = require('chalk');
 const fs = require('fs-extra');
 const path = require('path');
 const {config} = require('../config');
@@ -12,8 +11,7 @@ class FrontendWebpackPlugin {
           const fullFaviconPath = path.resolve(config.projectDir, config.favicon);
 
           if (!fs.existsSync(fullFaviconPath)) {
-            // BUG: improve how this error is printed
-            console.log(chalk.red(`Favicon file is missing: ${fullFaviconPath}`));
+            compilation.errors.push(new Error(`Favicon file is missing: ${fullFaviconPath}`));
             return callback(null, htmlPluginData);
           }
 

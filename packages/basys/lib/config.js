@@ -20,7 +20,7 @@ function loadConfig(projectDir, appName, env) {
   try {
     projectConfig = fs.readFileSync(configPath, 'utf8');
   } catch (e) {
-    exit(`${e.message}\n`);
+    exit(`Couldn't read configuration file ${configPath}\n`);
   }
 
   try {
@@ -48,10 +48,14 @@ function loadConfig(projectDir, appName, env) {
     appName = appNames[0];
   }
 
-  if (!appNames.includes(appName)) exit(`Incorrect app name. Available names are: ${appNames.join(', ')}.`);
+  if (!appNames.includes(appName)) {
+    exit(`Incorrect app name: '${appName}'. Available names are: '${appNames.join("', '")}'.`);
+  }
 
   let conf = projectConfig.apps[appName];
-  if (!['web', 'mobile', 'desktop'].includes(conf.type)) exit(`Incorrect app type: ${conf.type}`);
+  if (!['web', 'mobile', 'desktop'].includes(conf.type)) {
+    exit(`Incorrect ${appName} app type: '${conf.type}'. Allowed values are: 'web', 'mobile', 'desktop'.`);
+  }
 
   // Default app configuration
   const defaultConfig = {
