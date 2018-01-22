@@ -1,8 +1,8 @@
 const fs = require('fs-extra');
 const opn = require('opn');
 const path = require('path');
-const {config, loadConfig} = require('./config');
-const {devRun, exit, prodRun} = require('./utils');
+const {config, exit, loadConfig} = require('./config');
+const {devRun, lint, prodRun} = require('./utils');
 
 // command='dev'/'start'/'build'/'e2e'
 async function executeCommand(projectDir, command, appName) {
@@ -61,6 +61,10 @@ async function executeCommand(projectDir, command, appName) {
     }
 
     process.exit();
+  } else if (command === 'lint') {
+    lint(projectDir);
+  } else if (command === 'lint:fix') {
+    lint(projectDir, true);
   }
 }
 

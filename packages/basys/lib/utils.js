@@ -1,14 +1,13 @@
-const chalk = require('chalk');
 const chokidar = require('chokidar');
+const CLIEngine = require('eslint/lib/cli-engine');
 const fs = require('fs');
 const nodemon = require('nodemon');
 const path = require('path');
 const portfinder = require('portfinder');
+const {config, loadConfig} = require('./config');
+const {startDevServer} = require('./webpack/server');
 
 async function devRun() {
-  const {config, loadConfig} = require('./config');
-  const {startDevServer} = require('./webpack/server');
-
   config.port = await portfinder.getPortPromise({host: config.host, port: config.port});
   if (config.type === 'web') {
     config.backendPort = await portfinder.getPortPromise({
@@ -77,17 +76,28 @@ async function devRun() {
 }
 
 async function prodRun() {
-  const {config} = require('./config');
-
   if (config.type === 'web') {
     config.backendPort = config.port;
     require(path.join(config.distDir, 'backend.js'));
   }
 }
 
-function exit(error) {
-  console.log(chalk.bold.red(error));
-  process.exit(1);
+function lint(projectDir, fix) {
+  const engine = new CLIEngine({
+      cwd: projectDir,
+      extensions: ['.js', '.vue'],
+      cache: true,
+      cacheLocation: '.basys/.eslintcache',
+      reportUnusedDisableDirectives: true,
+      fix,
+  });
+  const report = engine.executeOnFiles(['src', 'tests']);
+
+  if (fix) CLIEngine.outputFixes(report);
+
+  const formatter = engine.getFormatter();
+  const output = formatter(report.results);
+  if (output) console.log(output);
 }
 
-module.exports = {devRun, exit, prodRun};
+module.exports = {devRun, lint, prodRun};

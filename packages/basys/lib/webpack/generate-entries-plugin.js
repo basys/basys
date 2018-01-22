@@ -9,10 +9,6 @@ const pathToRegexp = require('path-to-regexp');
 const parseVue = require('vue-loader/lib/parser');
 const {config} = require('../config');
 
-nunjucks.configure(path.join(__dirname, '..', 'templates'), {autoescape: false});
-
-const vuePattern = path.join(config.projectDir, 'src', '**', '*.vue');
-
 class GenerateEntriesWebpackPlugin {
   apply(compiler) {
     this.generateEntries(true);
@@ -20,7 +16,7 @@ class GenerateEntriesWebpackPlugin {
     if (config.env === 'dev') {
       // Re-generate webpack entries when .vue files inside src/ folder change
       chokidar
-        .watch(vuePattern, {ignoreInitial: true})
+        .watch(this.vuePattern, {ignoreInitial: true})
         .on('add', () => this.generateEntries())
         .on('change', () => this.generateEntries())
         .on('unlink', filePath => {
@@ -37,7 +33,9 @@ class GenerateEntriesWebpackPlugin {
   // BUG: Perform validation of component options, at least the ones that affect whether and how they are used.
   //      Warn if component names are not unique or missing.
   generateEntries(init) {
+    nunjucks.configure(path.join(__dirname, '..', 'templates'), {autoescape: false});
     this.errors = [];
+    this.vuePattern = path.join(config.projectDir, 'src', '**', '*.vue');
 
     const vuePaths = glob.sync(vuePattern);
     config.vueComponents = {}; // {vuePath: info}

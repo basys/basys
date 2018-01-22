@@ -1,10 +1,9 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 const webpack = require('webpack');
-const {config} = require('../config');
+const {config, exit} = require('../config');
 const FrontendWebpackPlugin = require('./frontend-plugin');
 const {assetsPath, cssLoaders} = require('./utils');
-const {exit} = require('../utils');
 
 function getBabelLoader(entryType) {
   let targets;

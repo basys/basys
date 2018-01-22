@@ -18,13 +18,15 @@ const {argv} = yargs
   .command('e2e [<app-name>]', 'Run end-to-end tests', yargs => {
     yargs.positional('app-name', {type: 'string'});
   })
+  .command('lint', 'Lint the project code')
+  .command('lint:fix', 'Lint the project code and apply fixes')
   .help();
 
 const command = argv._[0];
 try {
   if (argv._.length < 1) throw new Error('You need to provide a command');
 
-  if (!['dev', 'build', 'start', 'e2e'].includes(command)) {
+  if (!['dev', 'build', 'start', 'e2e', 'lint', 'lint:fix'].includes(command)) {
     throw new Error('Invalid command provided');
   }
 } catch (e) {
