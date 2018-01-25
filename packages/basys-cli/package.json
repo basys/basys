@@ -1,0 +1,28 @@
+{
+  "name": "basys-cli",
+  "version": "0.1.0",
+  "description": "CLI for developing Basys projects",
+  "homepage": "https://basys.io",
+  "bugs": {
+    "url": "https://github.com/basys/basys/issues"
+  },
+  "license": "MIT",
+  "author": "Sergey Kopylov <sergey@basys.io>",
+  "bin": {
+    "basys": "./index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/basys/basys/tree/master/packages/basys-cli"
+  },
+  "dependencies": {
+    "download": "^6.2.5",
+    "fs-extra": "^5.0.0",
+    "inquirer": "^5.0.1",
+    "ora": "^1.3.0",
+    "yargs": "^10.1.1"
+  },
+  "engines": {
+    "node": ">= 8"
+  }
+}

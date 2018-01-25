@@ -84,12 +84,12 @@ async function prodRun() {
 
 function lint(projectDir, fix) {
   const engine = new CLIEngine({
-      cwd: projectDir,
-      extensions: ['.js', '.vue'],
-      cache: true,
-      cacheLocation: '.basys/.eslintcache',
-      reportUnusedDisableDirectives: true,
-      fix,
+    cwd: projectDir,
+    extensions: ['.js', '.vue'],
+    cache: true,
+    cacheLocation: '.basys/.eslintcache',
+    reportUnusedDisableDirectives: true,
+    fix,
   });
   const report = engine.executeOnFiles(['src', 'tests']);
 

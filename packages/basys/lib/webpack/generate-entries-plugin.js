@@ -37,7 +37,7 @@ class GenerateEntriesWebpackPlugin {
     this.errors = [];
     this.vuePattern = path.join(config.projectDir, 'src', '**', '*.vue');
 
-    const vuePaths = glob.sync(vuePattern);
+    const vuePaths = glob.sync(this.vuePattern);
     config.vueComponents = {}; // {vuePath: info}
     for (const vuePath of vuePaths) {
       const parts = parseVue(fs.readFileSync(vuePath, 'utf8'), vuePath);

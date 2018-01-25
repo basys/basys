@@ -8,9 +8,6 @@
   },
   "license": "MIT",
   "author": "Sergey Kopylov <sergey@basys.io>",
-  "bin": {
-    "basys": "./index.js"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/basys/basys/tree/master/packages/basys"
@@ -25,6 +22,7 @@
     "babel-polyfill": "6.26.0",
     "babel-preset-env": "1.6.1",
     "basys-app-builder": "0.1.1",
+    "basys-cli": "0.1.0",
     "body-parser": "1.18.2",
     "chalk": "2.3.0",
     "chokidar": "2.0.0",
@@ -78,8 +76,7 @@
     "webpack": "3.10.0",
     "webpack-bundle-analyzer": "2.9.2",
     "webpack-dev-server": "2.11.1",
-    "webpack-merge": "4.1.1",
-    "yargs": "10.1.1"
+    "webpack-merge": "4.1.1"
   },
   "engines": {
     "node": ">= 8"

@@ -34,7 +34,7 @@ const testBasysAPI = async () => {
   });
   // BUG: stop webpack and backend servers
 
-  // BUG: test other operations: build, start, lint, e2e and check outcomes
+  // BUG: test other operations: build, start, lint, lint:fix, test:e2e and check outcomes
 
   await fs.remove(tempDir);
 };

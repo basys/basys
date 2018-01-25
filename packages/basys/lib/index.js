@@ -4,7 +4,7 @@ const path = require('path');
 const {config, exit, loadConfig} = require('./config');
 const {devRun, lint, prodRun} = require('./utils');
 
-// command='dev'/'start'/'build'/'e2e'
+// command='dev'/'start'/'build'/'test:e2e'/'lint'/'lint:fix'
 async function executeCommand(projectDir, command, appName) {
   const firstRun = !fs.pathExistsSync(path.join(projectDir, '.basys'));
 
@@ -36,7 +36,7 @@ async function executeCommand(projectDir, command, appName) {
   } else if (command === 'build') {
     loadConfig(projectDir, appName, 'prod');
     await require('./webpack/build').build();
-  } else if (command === 'e2e') {
+  } else if (command === 'test:e2e') {
     loadConfig(projectDir, appName, 'test');
 
     if (!config.e2eEntry) exit('End-to-end tests are not configured for this app');

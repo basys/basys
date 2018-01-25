@@ -13,7 +13,10 @@ thanks to [Babel](http://babeljs.io), [PostCSS](http://postcss.org) and [Browser
 * End-to-end testing with [TestCafe](https://devexpress.github.io/testcafe) is built-in
 
 ## Getting started
-To get started download a starter project from [basys.io](http://basys.io/#getting-started) and follow the instructions in README.md file.
+```sh
+npm i -g basys-cli && basys init
+basys dev
+```
 
 ## Inspiration
 Basys was created with the goal of making app development accessible to a wider audience by automating the boring parts of technology stack, building tools for visual editing and focusing on a great developer experience. It was heavily inspired and shaped by the following projects:
