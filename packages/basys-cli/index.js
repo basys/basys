@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 const {exec} = require('child_process');
-const downloadUrl = require('download');
 const fs = require('fs-extra');
 const inquirer = require('inquirer');
 const ora = require('ora');
@@ -76,7 +75,7 @@ async function runCommand() {
     if (command === 'help') {
       // BUG: show help for command if provided
       yargs.showHelp();
-    } if (command === 'init') {
+    } else if (command === 'init') {
       // Starter project can be an absolute/relative path or a github repo (with an optional branch)
       let templateName = argv['template-name'];
       let destDir;
@@ -84,15 +83,17 @@ async function runCommand() {
       if (!argv['template-name']) {
         // If starter project is not provided in command arguments ask to select one
         promise = inquirer
-          .prompt([{
-            type: 'list',
-            name: 'name',
-            message: 'Select a starter project',
-            choices: [
-              {name: 'Blank project', value: 'basys/basys-starter-project'},
-              {name: 'Todo list sample web app', value: 'basys/basys-todomvc'},
-            ],
-          }])
+          .prompt([
+            {
+              type: 'list',
+              name: 'name',
+              message: 'Select a starter project',
+              choices: [
+                {name: 'Blank project', value: 'basys/basys-starter-project'},
+                {name: 'Todo list sample web app', value: 'basys/basys-todomvc'},
+              ],
+            },
+          ])
           .then(answers => {
             templateName = answers.name;
           });
@@ -100,25 +101,29 @@ async function runCommand() {
 
       let spinner;
       return promise
-        .then(() => inquirer.prompt([{
-          type: 'input',
-          name: 'dest',
-          message: 'Project location',
-          default: '.',
-          validate(dest) {
-            if (!dest || dest.startsWith('.')) {
-              destDir = path.join(process.cwd(), dest);
-            } else {
-              destDir = dest;
-            }
-            destDir = path.normalize(destDir);
+        .then(() =>
+          inquirer.prompt([
+            {
+              type: 'input',
+              name: 'dest',
+              message: 'Project location',
+              default: '.',
+              validate(dest) {
+                if (!dest || dest.startsWith('.')) {
+                  destDir = path.join(process.cwd(), dest);
+                } else {
+                  destDir = dest;
+                }
+                destDir = path.normalize(destDir);
 
-            if (detectBasysProject(destDir)) return false; // BUG: provide error message about another Basys project
-            // BUG: check that directory doesn't exist or empty, attempt to create if needed or show an error.
+                if (detectBasysProject(destDir)) return false; // BUG: provide error message about another Basys project
+                // BUG: check that directory doesn't exist or empty, attempt to create if needed or show an error.
 
-            return true;
-          },
-        }]))
+                return true;
+              },
+            },
+          ]),
+        )
         .then(() => {
           spinner = ora('Downloading starter project').start();
           if (path.isAbsolute(templateName) || templateName.startsWith('.') || templateName.startsWith('~')) {
@@ -134,7 +139,13 @@ async function runCommand() {
             // Github repository
             const m = /^([^/]+)\/([^#]+)(#(.+))?$/.exec(templateName);
             const url = `https://github.com/${m[1]}/${m[2]}/archive/${m[4] || 'master'}.zip`;
-            return downloadUrl(url, destDir, {extract: true, strip: 1, mode: '666', headers: {accept: 'application/zip'}});
+            const downloadUrl = require('download');
+            return downloadUrl(url, destDir, {
+              extract: true,
+              strip: 1,
+              mode: '666',
+              headers: {accept: 'application/zip'},
+            });
           }
         })
         .then(async () => {

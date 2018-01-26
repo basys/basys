@@ -12,9 +12,8 @@ let config = {{ conf|dump(2) }};
   // or set BASYS_CONFIG_PATH environment variable to the path to the config file
   const configPath = process.env.BASYS_CONFIG_PATH || path.join(__dirname, 'config.json');
   if (fs.existsSync(configPath)) {
-    // BUG: a hack to prevent a smartass webpack from bundling config.json
     // BUG: parse file as a json, don't use require()?
-    Object.assign(config, eval('require')(configPath));
+    Object.assign(config, __non_webpack_require__(configPath));
   }
 {% endif %}
 
