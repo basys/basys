@@ -5,7 +5,13 @@
   },
   "devDependencies": {
     "eslint": "^4.15.0",
+    "husky": "0.15.0-rc.3",
     "lerna": "^2.7.1"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "eslint packages --fix"
+    }
   },
   "workspaces": [
     "packages/*"
