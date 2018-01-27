@@ -3,11 +3,7 @@ const {config} = require('../config');
 
 class FriendlyErrorsWebpackPlugin extends FriendlyErrorsPlugin {
   constructor(options) {
-    super({
-      compilationSuccessInfo: {
-        messages: [`Your application is available at http://${config.host}:${config.port}`],
-      },
-    });
+    super();
 
     this.transformers = [
       require('friendly-errors-webpack-plugin/src/transformers/moduleNotFound'),

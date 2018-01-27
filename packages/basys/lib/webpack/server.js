@@ -1,8 +1,8 @@
-const net = require('net');
 const webpack = require('webpack');
 const Server = require('webpack-dev-server/lib/Server');
 const merge = require('webpack-merge');
 const {config} = require('../config');
+const {monitorServerStatus} = require('../utils');
 const BackendWebpackPlugin = require('./backend-plugin');
 const baseWebpackConfig = require('./base-config');
 const FriendlyErrorsWebpackPlugin = require('./friendly-errors-plugin');
@@ -71,19 +71,13 @@ function startDevServer() {
       before(app) {
         if (config.type === 'web') {
           // Wait for backend server to restart and prevent page load errors
-          const opts = {host: config.host, port: config.backendPort};
-          const socket = net.connect(opts);
-          let connected = false;
-          socket.on('connect', () => {
-            connected = true;
+          let isConnected = false;
+          const socket = monitorServerStatus(config.host, config.backendPort, false, connected => {
+            isConnected = connected;
           });
-          socket.on('error', () => {});
-          socket.on('close', err => {
-            connected = false;
-            setTimeout(() => socket.connect(opts), 1000); // BUG: retry several times?
-          });
+
           app.use((req, res, next) => {
-            if (connected) {
+            if (isConnected) {
               next();
             } else {
               socket.once('connect', next);
