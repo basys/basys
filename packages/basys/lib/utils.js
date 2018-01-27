@@ -1,3 +1,4 @@
+const chalk = require('chalk');
 const net = require('net');
 
 // Calls `onChange(connected)` callback when connection is established or closed.
@@ -27,4 +28,9 @@ function monitorServerStatus(host, port, once, onChange) {
   return socket;
 }
 
-module.exports = {monitorServerStatus};
+function exit(error) {
+  console.log(chalk.bold.red(error));
+  process.exit(1);
+}
+
+module.exports = {exit, monitorServerStatus};

@@ -63,10 +63,12 @@ async function runCommand() {
   }
 }
 
-runCommand().catch(err => {
-  // BUG: some errors are not bugs (like incorrect commands) - print error.message instead (errors without special attribute?)
-  console.log(err.stack);
-  process.exit(1);
-});
+runCommand()
+  .then(() => process.exit()) // BUG: introduced because of testcafe
+  .catch(err => {
+    // BUG: some errors are not bugs (like incorrect commands) - print error.message instead (errors without special attribute?)
+    console.log(err.stack);
+    process.exit(1);
+  });
 
 process.on('SIGINT', () => process.exit());

@@ -1,15 +1,10 @@
-const chalk = require('chalk');
 const deepmerge = require('deepmerge');
 const fs = require('fs-extra');
 const JSON5 = require('json5');
 const path = require('path');
+const {exit} = require('./utils');
 
 const config = {};
-
-function exit(error) {
-  console.log(chalk.bold.red(error));
-  process.exit(1);
-}
 
 function merge(dest, src) {
   return deepmerge(dest, src, {arrayMerge: (destination, source) => source});

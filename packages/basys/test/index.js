@@ -5,6 +5,7 @@ const http = require('http');
 const path = require('path');
 const util = require('util');
 const {executeCommand} = require('../lib/index');
+const {config} = require('../lib/config');
 
 const testBasysAPI = async () => {
   const tempDir = path.join(__dirname, '..', '..', 'basys-test');
@@ -19,11 +20,13 @@ const testBasysAPI = async () => {
   const {stdout, stderr} = await util.promisify(exec)(`cd ${tempDir}; yarn install`);
   console.log(stdout, stderr);
 
+  await executeCommand(tempDir, 'lint:fix');
+  await executeCommand(tempDir, 'test:e2e');
+
   // Test dev server
   await executeCommand(tempDir, 'dev');
   await new Promise((resolve, reject) => {
-    // BUG: localhost and port should come from the result of command execution
-    http.get('http://localhost:8080/', res => {
+    http.get(`http://${config.host}:${config.port}/`, res => {
       if (res.statusCode === 200) {
         resolve();
       } else {
@@ -31,14 +34,11 @@ const testBasysAPI = async () => {
       }
     });
   });
-  // BUG: stop webpack and backend servers
-
-  // BUG: test other operations: build, start, lint, lint:fix, test:e2e and check outcomes
 
   await fs.remove(tempDir);
 };
 
 testBasysAPI()
   .then(() => console.log(chalk.bold.green('Tests completed successfully')))
-  .catch(err => console.log(chalk.bold.red(err)))
+  .catch(err => console.log(chalk.bold.red(err.stack)))
   .then(() => process.exit());
