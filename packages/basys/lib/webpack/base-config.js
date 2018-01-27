@@ -6,7 +6,7 @@ const {exit} = require('../utils');
 const FrontendWebpackPlugin = require('./frontend-plugin');
 const {assetsPath, cssLoaders} = require('./utils');
 
-function getBabelLoader(entryType) {
+function getBabelLoader(config, entryType) {
   let targets;
   if (config.type === 'web') {
     if (entryType === 'backend') targets = {node: config.nodeVersion};
@@ -46,8 +46,8 @@ function getBabelLoader(entryType) {
   };
 }
 
-module.exports = function(entryType) {
-  const babelLoader = getBabelLoader(entryType);
+module.exports = function(config, entryType) {
+  const babelLoader = getBabelLoader(config, entryType);
 
   const jsRule = {
     test: /\.js$/,
@@ -158,7 +158,10 @@ module.exports = function(entryType) {
               {
                 loader: 'vue-loader',
                 options: {
-                  loaders: Object.assign({js: babelLoader}, cssLoaders({extract: config.env === 'prod'})),
+                  loaders: Object.assign(
+                    {js: babelLoader},
+                    cssLoaders({extract: config.env === 'prod', sourceMap: config.cssSourceMap}),
+                  ),
                   cssSourceMap: config.cssSourceMap,
                   transformToRequire: {
                     video: 'src',
@@ -204,7 +207,7 @@ module.exports = function(entryType) {
                 }
               : false,
         }),
-        new FrontendWebpackPlugin(),
+        new FrontendWebpackPlugin(config),
       ],
       // BUG: think about it
       // node: {

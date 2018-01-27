@@ -7,13 +7,16 @@ const nunjucks = require('nunjucks');
 const path = require('path');
 const pathToRegexp = require('path-to-regexp');
 const parseVue = require('vue-loader/lib/parser');
-const {config} = require('../config');
 
 class GenerateEntriesWebpackPlugin {
+  constructor(config) {
+    this.config = config;
+  }
+
   apply(compiler) {
     this.generateEntries(true);
 
-    if (config.env === 'dev') {
+    if (this.config.env === 'dev') {
       // Re-generate webpack entries when .vue files inside src/ folder change
       chokidar
         .watch(this.vuePattern, {ignoreInitial: true})
@@ -21,7 +24,7 @@ class GenerateEntriesWebpackPlugin {
         .on('change', () => this.generateEntries())
         .on('unlink', filePath => {
           // Ignore deleting Vue components from other apps
-          if (filePath in config.vueComponents) this.generateEntries();
+          if (filePath in this.config.vueComponents) this.generateEntries();
         });
     }
 
@@ -35,10 +38,10 @@ class GenerateEntriesWebpackPlugin {
   generateEntries(init) {
     nunjucks.configure(path.join(__dirname, '..', 'templates'), {autoescape: false});
     this.errors = [];
-    this.vuePattern = path.join(config.projectDir, 'src', '**', '*.vue');
+    this.vuePattern = path.join(this.config.projectDir, 'src', '**', '*.vue');
 
     const vuePaths = glob.sync(this.vuePattern);
-    config.vueComponents = {}; // {vuePath: info}
+    this.config.vueComponents = {}; // {vuePath: info}
     for (const vuePath of vuePaths) {
       const parts = parseVue(fs.readFileSync(vuePath, 'utf8'), vuePath);
       const infoBlock = parts.customBlocks.find(block => block.type === 'info');
@@ -52,35 +55,35 @@ class GenerateEntriesWebpackPlugin {
         }
         // BUG: validate the data inside info (e.g. path starts with '/' if present)
 
-        const usedInApp = !Array.isArray(info.apps) || info.apps.includes(config.appName);
+        const usedInApp = !Array.isArray(info.apps) || info.apps.includes(this.config.appName);
         if (usedInApp) {
-          config.vueComponents[vuePath] = info; // BUG: needs special processing to adopt for Vue and express (e.g. url params)
+          this.config.vueComponents[vuePath] = info; // BUG: needs special processing to adopt for Vue and express (e.g. url params)
         }
       } else {
-        config.vueComponents[vuePath] = {};
+        this.config.vueComponents[vuePath] = {};
       }
     }
 
     const entries = {};
 
     // Generate backend entry for web apps
-    if (config.type === 'web') {
+    if (this.config.type === 'web') {
       // Expose only whitelisted and custom config options to backend code
       const conf = {};
-      for (const key in config.custom) {
-        conf[key] = config.custom[key];
+      for (const key in this.config.custom) {
+        conf[key] = this.config.custom[key];
       }
       for (const key of ['host', 'port', 'backendPort']) {
-        conf[key] = config[key];
+        conf[key] = this.config[key];
       }
 
       const pagePaths = [];
-      for (const vuePath in config.vueComponents) {
-        const info = config.vueComponents[vuePath];
+      for (const vuePath in this.config.vueComponents) {
+        const info = this.config.vueComponents[vuePath];
         if (info.path) {
           try {
             // We use the version 1.7.0 of path-to-regexp package, which is used in vue-router
-            pagePaths.push(pathToRegexp(info.path, [], {sensitive: config.caseSensitive}).toString());
+            pagePaths.push(pathToRegexp(info.path, [], {sensitive: this.config.caseSensitive}).toString());
           } catch (e) {
             this.errors.push(new Error(`${vuePath} page path error: ${e.message}`));
             continue;
@@ -89,23 +92,23 @@ class GenerateEntriesWebpackPlugin {
       }
 
       entries.backend = nunjucks.render('backend.js', {
-        env: config.env,
-        appName: config.appName,
+        env: this.config.env,
+        appName: this.config.appName,
         pagePaths,
-        entry: config.backendEntry && path.join(config.projectDir, 'src', config.backendEntry),
+        entry: this.config.backendEntry && path.join(this.config.projectDir, 'src', this.config.backendEntry),
         conf,
       });
     }
 
     // BUG: for web app don't generate front-end bundle if there are no pages (what about mobile/desktop?)
     entries.frontend = nunjucks.render('frontend.js', {
-      vueComponents: config.vueComponents,
-      entry: config.entry && path.join(config.projectDir, 'src', config.entry),
-      caseSensitive: !!config.caseSensitive,
+      vueComponents: this.config.vueComponents,
+      entry: this.config.entry && path.join(this.config.projectDir, 'src', this.config.entry),
+      caseSensitive: !!this.config.caseSensitive,
     });
 
     for (const entryType in entries) {
-      const entryPath = path.join(config.tempDir, `${entryType}-entry.js`);
+      const entryPath = path.join(this.config.tempDir, `${entryType}-entry.js`);
       fs.writeFileSync(entryPath, entries[entryType]);
 
       if (init) {

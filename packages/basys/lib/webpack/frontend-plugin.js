@@ -1,21 +1,24 @@
 const fs = require('fs-extra');
 const path = require('path');
-const {config} = require('../config');
 
 class FrontendWebpackPlugin {
+  constructor(config) {
+    this.config = config;
+  }
+
   apply(compiler) {
     compiler.plugin('compilation', compilation => {
       compilation.plugin('html-webpack-plugin-alter-asset-tags', (htmlPluginData, callback) => {
         // Add favicon
-        if (config.type === 'web' && config.favicon) {
-          const fullFaviconPath = path.resolve(config.projectDir, config.favicon);
+        if (this.config.type === 'web' && this.config.favicon) {
+          const fullFaviconPath = path.resolve(this.config.projectDir, this.config.favicon);
 
           if (!fs.existsSync(fullFaviconPath)) {
             compilation.errors.push(new Error(`Favicon file is missing: ${fullFaviconPath}`));
             return callback(null, htmlPluginData);
           }
 
-          // BUG: use config.assetsPublicPath here?
+          // BUG: use this.config.assetsPublicPath here?
           const faviconPath = 'static/' + path.basename(fullFaviconPath);
           compilation.fileDependencies.push(fullFaviconPath);
           // BUG: prevent overlap with other files
@@ -29,7 +32,7 @@ class FrontendWebpackPlugin {
             selfClosingTag: false,
             attributes: {
               rel: 'shortcut icon',
-              href: `/${faviconPath}` + (config.env === 'dev' ? `?${compilation.hash}` : ''),
+              href: `/${faviconPath}` + (this.config.env === 'dev' ? `?${compilation.hash}` : ''),
             },
           });
         }

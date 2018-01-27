@@ -1,7 +1,6 @@
 const webpack = require('webpack');
 const Server = require('webpack-dev-server/lib/Server');
 const merge = require('webpack-merge');
-const {config} = require('../config');
 const {monitorServerStatus} = require('../utils');
 const BackendWebpackPlugin = require('./backend-plugin');
 const baseWebpackConfig = require('./base-config');
@@ -9,11 +8,11 @@ const FriendlyErrorsWebpackPlugin = require('./friendly-errors-plugin');
 const GenerateEntriesWebpackPlugin = require('./generate-entries-plugin');
 const {styleLoaders} = require('./utils');
 
-function devWebpackConfigs() {
+function devWebpackConfigs(config) {
   const webpackConfigs = [
-    merge(baseWebpackConfig('frontend'), {
+    merge(baseWebpackConfig(config, 'frontend'), {
       module: {
-        rules: styleLoaders({usePostCSS: true}),
+        rules: styleLoaders({usePostCSS: true, sourceMap: config.cssSourceMap}),
       },
       devtool: config.jsSourceMap ? 'eval-source-map' : false,
       output: {
@@ -29,7 +28,7 @@ function devWebpackConfigs() {
 
   if (config.type === 'web') {
     webpackConfigs.push(
-      merge(baseWebpackConfig('backend'), {
+      merge(baseWebpackConfig(config, 'backend'), {
         plugins: [new BackendWebpackPlugin()],
       }),
     );
@@ -38,10 +37,10 @@ function devWebpackConfigs() {
   return webpackConfigs;
 }
 
-function startDevServer() {
+function startDevServer(config) {
   return new Promise((resolve, reject) => {
-    const compiler = webpack(devWebpackConfigs());
-    compiler.apply(new GenerateEntriesWebpackPlugin());
+    const compiler = webpack(devWebpackConfigs(config));
+    compiler.apply(new GenerateEntriesWebpackPlugin(config));
     compiler.apply(new webpack.ProgressPlugin());
     compiler.apply(new FriendlyErrorsWebpackPlugin());
     compiler.plugin('done', () => resolve(server));

@@ -49,8 +49,24 @@ async function runCommand() {
       console.log(`Basys project detected at ${projectDir}`);
     }
 
-    const {executeCommand} = require(require.resolve('basys/lib/index', {paths: [projectDir, __dirname]}));
-    return executeCommand(projectDir, command, argv['app-name']);
+    const {build, dev, e2eTest, lint, start} = require(require.resolve('basys/lib/index', {
+      paths: [projectDir, __dirname],
+    }));
+    const appName = argv['app-name'];
+    if (command === 'dev') {
+      return await dev(projectDir, appName);
+    } else if (command === 'start') {
+      return await start(projectDir, appName);
+    } else if (command === 'build') {
+      return await build(projectDir, appName);
+    } else if (command === 'test:e2e') {
+      await e2eTest(projectDir, appName);
+      process.exit();
+    } else if (command === 'lint') {
+      return lint(projectDir);
+    } else if (command === 'lint:fix') {
+      return lint(projectDir, true);
+    }
   } else {
     if (isProjectCommand) throw new Error('This command must be run inside a Basys project directory');
 
@@ -63,12 +79,10 @@ async function runCommand() {
   }
 }
 
-runCommand()
-  .then(() => process.exit()) // BUG: introduced because of testcafe
-  .catch(err => {
-    // BUG: some errors are not bugs (like incorrect commands) - print error.message instead (errors without special attribute?)
-    console.log(err.stack);
-    process.exit(1);
-  });
+runCommand().catch(err => {
+  // BUG: some errors are not bugs (like incorrect commands) - print error.message instead (errors without special attribute?)
+  console.log(err.stack);
+  process.exit(1);
+});
 
 process.on('SIGINT', () => process.exit());

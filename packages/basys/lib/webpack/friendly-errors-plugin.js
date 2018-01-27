@@ -1,5 +1,4 @@
 const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin');
-const {config} = require('../config');
 
 class FriendlyErrorsWebpackPlugin extends FriendlyErrorsPlugin {
   constructor(options) {

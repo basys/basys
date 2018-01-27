@@ -4,10 +4,9 @@ const fs = require('fs-extra');
 const http = require('http');
 const path = require('path');
 const util = require('util');
-const {executeCommand} = require('../lib/index');
-const {config} = require('../lib/config');
+const {dev, e2eTest, lint} = require('../lib/index');
 
-const testBasysAPI = async () => {
+async function testBasysAPI() {
   const tempDir = path.join(__dirname, '..', '..', 'basys-test');
   await fs.emptyDir(tempDir);
 
@@ -20,13 +19,12 @@ const testBasysAPI = async () => {
   const {stdout, stderr} = await util.promisify(exec)(`cd ${tempDir}; yarn install`);
   console.log(stdout, stderr);
 
-  await executeCommand(tempDir, 'lint:fix');
-  await executeCommand(tempDir, 'test:e2e');
+  await lint(tempDir, true);
+  await e2eTest(tempDir);
 
-  // Test dev server
-  await executeCommand(tempDir, 'dev');
+  const devConfig = await dev(tempDir);
   await new Promise((resolve, reject) => {
-    http.get(`http://${config.host}:${config.port}/`, res => {
+    http.get(`http://${devConfig.host}:${devConfig.port}/`, res => {
       if (res.statusCode === 200) {
         resolve();
       } else {
@@ -36,7 +34,7 @@ const testBasysAPI = async () => {
   });
 
   await fs.remove(tempDir);
-};
+}
 
 testBasysAPI()
   .then(() => console.log(chalk.bold.green('Tests completed successfully')))

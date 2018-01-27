@@ -1,21 +1,18 @@
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const path = require('path');
-const {config} = require('../config');
 
 function assetsPath(_path) {
   return path.posix.join('static', _path);
 }
 
 function cssLoaders(options) {
-  options = options || {};
-
   // Generate loader string to be used with extract text plugin
   function generateLoaders(loader, loaderOptions) {
     const loaders = [
       {
         loader: 'css-loader',
         options: {
-          sourceMap: config.cssSourceMap,
+          sourceMap: options.sourceMap,
         },
       },
     ];
@@ -25,7 +22,7 @@ function cssLoaders(options) {
       // loaders.push({
       //   loader: 'postcss-loader',
       //   options: {
-      //     sourceMap: config.cssSourceMap,
+      //     sourceMap: options.sourceMap,
       //   },
       // });
     }
@@ -34,7 +31,7 @@ function cssLoaders(options) {
       loaders.push({
         loader: `${loader}-loader`,
         options: Object.assign({}, loaderOptions, {
-          sourceMap: config.cssSourceMap,
+          sourceMap: options.sourceMap,
         }),
       });
     }

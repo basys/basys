@@ -8,13 +8,13 @@ const path = require('path');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const merge = require('webpack-merge');
 const webpack = require('webpack');
-const {config} = require('../config');
+const {getConfig} = require('../config');
 const {exit} = require('../utils');
 const baseWebpackConfig = require('./base-config');
 const GenerateEntriesWebpackPlugin = require('./generate-entries-plugin');
 const {assetsPath, styleLoaders} = require('./utils');
 
-function prodWebpackConfigs() {
+function prodWebpackConfigs(config) {
   const uglifyJsPlugin = new UglifyJsPlugin({
     uglifyOptions: {
       compress: {
@@ -26,11 +26,12 @@ function prodWebpackConfigs() {
   });
 
   const webpackConfigs = [
-    merge(baseWebpackConfig('frontend'), {
+    merge(baseWebpackConfig(config, 'frontend'), {
       module: {
         rules: styleLoaders({
           extract: true,
           usePostCSS: true, // BUG: think about it
+          sourceMap: config.cssSourceMap,
         }),
       },
       devtool: config.cssSourceMap ? 'source-map' : false,
@@ -116,7 +117,7 @@ function prodWebpackConfigs() {
 
   if (config.type === 'web') {
     webpackConfigs.push(
-      merge(baseWebpackConfig('backend'), {
+      merge(baseWebpackConfig(config, 'backend'), {
         plugins: [uglifyJsPlugin],
       }),
     );
@@ -125,22 +126,24 @@ function prodWebpackConfigs() {
   return webpackConfigs;
 }
 
-function build() {
+async function build(projectDir, appName) {
+  const config = getConfig(projectDir, appName, 'prod');
+
   const spinner = ora('building for production...');
   spinner.start();
 
   fs.emptyDirSync(config.distDir);
 
-  return new Promise((resolve, reject) => {
-    const compiler = webpack(prodWebpackConfigs());
-    compiler.apply(new GenerateEntriesWebpackPlugin());
+  await new Promise((resolve, reject) => {
+    const compiler = webpack(prodWebpackConfigs(config));
+    compiler.apply(new GenerateEntriesWebpackPlugin(config));
     compiler.run((err, multiStats) => {
       spinner.stop();
       if (err) return reject(err);
 
       if (config.type === 'web') {
         // Generate package.json
-        const packageJson = JSON.parse(fs.readFileSync(path.join(config.projectDir, 'package.json'), 'utf8'));
+        const packageJson = JSON.parse(fs.readFileSync(path.join(projectDir, 'package.json'), 'utf8'));
         packageJson.scripts = {start: 'node backend.js'};
         delete packageJson.devDependencies;
 
@@ -181,6 +184,8 @@ function build() {
       resolve();
     });
   });
+
+  return config;
 }
 
 module.exports = {build};

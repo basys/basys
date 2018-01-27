@@ -4,14 +4,12 @@ const JSON5 = require('json5');
 const path = require('path');
 const {exit} = require('./utils');
 
-const config = {};
-
 function merge(dest, src) {
   return deepmerge(dest, src, {arrayMerge: (destination, source) => source});
 }
 
 // `appName` may be null if config defines only 1 app
-function loadConfig(projectDir, appName, env) {
+function getConfig(projectDir, appName, env) {
   if (!['dev', 'test', 'prod'].includes(env)) exit(`Incorrect env value: ${env}`);
   process.env.NODE_ENV = {dev: 'development', test: 'testing', prod: 'production'}[env];
 
@@ -52,9 +50,9 @@ function loadConfig(projectDir, appName, env) {
     exit(`Incorrect app name: '${appName}'. Available names are: '${appNames.join("', '")}'.`);
   }
 
-  let conf = projectConfig.apps[appName];
-  if (!['web', 'mobile', 'desktop'].includes(conf.type)) {
-    exit(`Incorrect ${appName} app type: '${conf.type}'. Allowed values are: 'web', 'mobile', 'desktop'.`);
+  let config = projectConfig.apps[appName];
+  if (!['web', 'mobile', 'desktop'].includes(config.type)) {
+    exit(`Incorrect ${appName} app type: '${config.type}'. Allowed values are: 'web', 'mobile', 'desktop'.`);
   }
 
   // Default app configuration
@@ -84,7 +82,7 @@ function loadConfig(projectDir, appName, env) {
 
   defaultConfig.caseSensitive = projectConfig.caseSensitive || false;
 
-  if (conf.type === 'web') {
+  if (config.type === 'web') {
     Object.assign(defaultConfig, {
       backendEntry: null, // Path to backend entry file (relative to src/ directory)
       backendPort: 3000,
@@ -102,24 +100,24 @@ function loadConfig(projectDir, appName, env) {
   }
   // BUG: for mobile apps provide ios/android configuration, supported versions
 
-  if (conf[env]) {
-    conf = merge(conf, conf[env]);
-    delete conf.dev;
-    delete conf.test;
-    delete conf.prod;
+  if (config[env]) {
+    config = merge(config, config[env]);
+    delete config.dev;
+    delete config.test;
+    delete config.prod;
   }
 
-  conf = merge(defaultConfig, conf);
+  config = merge(defaultConfig, config);
 
   // Validate that custom options don't overlap with any built-in options
-  for (const key in conf.custom) {
-    if (key in conf) exit(`Custom config option '${key}' is not allowed`);
+  for (const key in config.custom) {
+    if (key in config) exit(`Custom config option '${key}' is not allowed`);
   }
 
   const tempDir = path.join(projectDir, '.basys', appName, env);
   fs.ensureDirSync(tempDir);
 
-  conf = merge(conf, {
+  config = merge(config, {
     appName,
     env,
     assetsPublicPath: '/', // BUG: maybe set it to '/static/'? don't expose to user?
@@ -131,10 +129,7 @@ function loadConfig(projectDir, appName, env) {
   // BUG: Validate both config files (depending on env), if invalid raise a meaningful error (with a link to local or public docs?)
   //      Look at https://github.com/mozilla/node-convict , https://github.com/ianstormtaylor/superstruct
 
-  for (const key in config) {
-    delete config[key];
-  }
-  Object.assign(config, conf);
+  return config;
 }
 
-module.exports = {config, loadConfig};
+module.exports = {getConfig};

@@ -5,27 +5,30 @@ const nodemon = require('nodemon');
 const opn = require('opn');
 const path = require('path');
 const portfinder = require('portfinder');
-const {config, loadConfig} = require('./config');
+const {getConfig} = require('./config');
 const {exit, monitorServerStatus} = require('./utils');
+const {build} = require('./webpack/build');
 const {startDevServer} = require('./webpack/server');
 
-async function devRun() {
+async function dev(projectDir, appName) {
+  let config = getConfig(projectDir, appName, 'dev');
   const host = config.host;
-  const firstRun = !fs.pathExistsSync(path.join(config.projectDir, '.basys'));
+  const firstRun = !fs.pathExistsSync(path.join(projectDir, '.basys'));
 
   config.port = await portfinder.getPortPromise({host, port: config.port});
   if (config.type === 'web') {
     config.backendPort = await portfinder.getPortPromise({host, port: config.backendPort});
   }
 
-  let server = await startDevServer();
+  let server = await startDevServer(config);
 
   // On basys.json changes restart the webpack dev server
-  chokidar.watch(path.join(config.projectDir, 'basys.json'), {ignoreInitial: true}).on('change', () => {
+  chokidar.watch(path.join(projectDir, 'basys.json'), {ignoreInitial: true}).on('change', () => {
     // BUG: not all changes in basys.json require to restart the dev server and recompile the project
+    // BUG: if host or app name changes dev server should be stopped
     server.close(async () => {
       const {backendPort, port} = config;
-      loadConfig(config.projectDir, config.appName, 'dev');
+      config = getConfig(projectDir, config.appName, 'dev');
       config.port = port;
       config.backendPort = backendPort;
       server = await startDevServer();
@@ -53,7 +56,7 @@ async function devRun() {
         .on('restart', () => console.log('Express app restarted'));
     });
 
-    const appUrl = `http://${config.host}:${config.port}`;
+    const appUrl = `http://${host}:${config.port}`;
     console.log(`Your application is available at ${appUrl}`);
 
     // Open web app when running dev server for the first time
@@ -76,17 +79,17 @@ async function devRun() {
         port: config.appBuilder.port,
         backendPort: config.appBuilder.port,
         appPort: config.port,
-        targetProjectDir: config.projectDir,
+        targetProjectDir: projectDir,
       }),
     );
     process.env.BASYS_CONFIG_PATH = configPath;
     require('basys-app-builder/backend.js');
 
     // Open app builder when running dev server for the first time
-    await new Promise((resolve, reject) => {
-      monitorServerStatus(config.host, config.appBuilder.port, true, connected => {
+    await new Promise(resolve => {
+      monitorServerStatus(host, config.appBuilder.port, true, connected => {
         if (connected) {
-          const appBuilderUrl = `http://${config.host}:${config.appBuilder.port}`;
+          const appBuilderUrl = `http://${host}:${config.appBuilder.port}`;
           console.log(`App builder is available at ${appBuilderUrl}`);
           if (firstRun) opn(appBuilderUrl);
 
@@ -96,14 +99,17 @@ async function devRun() {
     });
   }
 
-  // BUG: return an object with port info and API for stopping the server?
+  // BUG: expose API for stopping the dev server?
+  return config;
 }
 
-async function prodRun() {
+async function start(projectDir, appName) {
+  const config = getConfig(projectDir, appName, 'prod');
   if (config.type === 'web') {
     config.backendPort = config.port;
     require(path.join(config.distDir, 'backend.js'));
   }
+  return config;
 }
 
 function lint(projectDir, fix) {
@@ -116,53 +122,39 @@ function lint(projectDir, fix) {
     fix,
   });
   const report = engine.executeOnFiles(['src', 'tests']);
-
   if (fix) CLIEngine.outputFixes(report);
-
   const formatter = engine.getFormatter();
   const output = formatter(report.results);
   if (output) console.log(output);
 }
 
-// command='dev'/'start'/'build'/'test:e2e'/'lint'/'lint:fix'
-async function executeCommand(projectDir, command, appName) {
-  if (command === 'dev') {
-    loadConfig(projectDir, appName, 'dev');
-    await devRun();
-  } else if (command === 'start') {
-    loadConfig(projectDir, appName, 'prod');
-    await prodRun();
-  } else if (command === 'build') {
-    loadConfig(projectDir, appName, 'prod');
-    await require('./webpack/build').build();
-  } else if (command === 'test:e2e') {
-    loadConfig(projectDir, appName, 'test');
+async function e2eTest(projectDir, appName) {
+  const config = getConfig(projectDir, appName, 'test');
 
-    if (!config.e2eEntry) exit('End-to-end tests are not configured for this app');
+  // BUG: Improve error message. Introduce a default e2eEntry location?
+  if (!config.e2eEntry) exit('End-to-end tests are not configured for this app');
 
-    // BUG: allow to reuse an existing production build?
-    // BUG: support working with desktop and mobile apps
-    // BUG: we'll need to setup a database (if relevant) and remove it once finished
-    await require('./webpack/build').build();
-    await prodRun();
+  // BUG: we don't want to load config inside again
+  // BUG: allow to reuse an existing production build?
+  // BUG: support working with desktop and mobile apps
+  // BUG: we'll need to setup a database (if relevant) and remove it once finished
+  await build(projectDir, appName);
+  await start(projectDir, appName);
 
-    // BUG: look at https://github.com/DevExpress/testcafe/blob/master/src/cli/index.js
-    // BUG: support remote browsers
-    // BUG: look at https://devexpress.github.io/testcafe/documentation/using-testcafe/programming-interface/runner.html#screenshots
-    const testcafe = await require('testcafe')(config.host);
-    const runner = testcafe.createRunner();
-    await runner.src([path.join(projectDir, 'tests', 'e2e', config.e2eEntry)]).browsers(config.testBrowsers);
+  // BUG: look at https://github.com/DevExpress/testcafe/blob/master/src/cli/index.js
+  // BUG: support remote browsers
+  // BUG: look at https://devexpress.github.io/testcafe/documentation/using-testcafe/programming-interface/runner.html#screenshots
+  const testcafe = await require('testcafe')(config.host);
+  const runner = testcafe.createRunner();
+  await runner.src([path.join(projectDir, 'tests', 'e2e', config.e2eEntry)]).browsers(config.testBrowsers);
 
-    try {
-      await runner.run(); // BUG: look at options https://devexpress.github.io/testcafe/documentation/using-testcafe/programming-interface/runner.html#run
-    } finally {
-      await testcafe.close();
-    }
-  } else if (command === 'lint') {
-    lint(projectDir);
-  } else if (command === 'lint:fix') {
-    lint(projectDir, true);
+  try {
+    await runner.run(); // BUG: look at options https://devexpress.github.io/testcafe/documentation/using-testcafe/programming-interface/runner.html#run
+  } finally {
+    await testcafe.close();
   }
+
+  return config;
 }
 
-module.exports = {executeCommand};
+module.exports = {build, dev, e2eTest, lint, start};
