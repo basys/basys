@@ -126,8 +126,8 @@ function prodWebpackConfigs(config) {
   return webpackConfigs;
 }
 
-async function build(projectDir, appName) {
-  const config = getConfig(projectDir, appName, 'prod');
+async function build(projectDir, appName, env = 'prod') {
+  const config = getConfig(projectDir, appName, env);
 
   const spinner = ora('building for production...');
   spinner.start();

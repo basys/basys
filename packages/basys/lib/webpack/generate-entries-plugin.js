@@ -7,6 +7,7 @@ const nunjucks = require('nunjucks');
 const path = require('path');
 const pathToRegexp = require('path-to-regexp');
 const parseVue = require('vue-loader/lib/parser');
+const {codeConfig} = require('../config');
 
 class GenerateEntriesWebpackPlugin {
   constructor(config) {
@@ -68,15 +69,6 @@ class GenerateEntriesWebpackPlugin {
 
     // Generate backend entry for web apps
     if (this.config.type === 'web') {
-      // Expose only whitelisted and custom config options to backend code
-      const conf = {};
-      for (const key in this.config.custom) {
-        conf[key] = this.config.custom[key];
-      }
-      for (const key of ['host', 'port', 'backendPort']) {
-        conf[key] = this.config[key];
-      }
-
       const pagePaths = [];
       for (const vuePath in this.config.vueComponents) {
         const info = this.config.vueComponents[vuePath];
@@ -96,7 +88,7 @@ class GenerateEntriesWebpackPlugin {
         appName: this.config.appName,
         pagePaths,
         entry: this.config.backendEntry && path.join(this.config.projectDir, 'src', this.config.backendEntry),
-        conf,
+        conf: codeConfig(this.config),
       });
     }
 

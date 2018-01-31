@@ -58,7 +58,7 @@ function getConfig(projectDir, appName, env) {
   // Default app configuration
   const defaultConfig = {
     entry: null, // Path to UI entry file (relative to src/ directory)
-    favicon: false,
+    favicon: null,
     styles: [],
     cssSourceMap: env === 'test',
     jsSourceMap: env === 'test',
@@ -132,4 +132,16 @@ function getConfig(projectDir, appName, env) {
   return config;
 }
 
-module.exports = {getConfig};
+// Returns only whitelisted and custom config options
+function codeConfig(config) {
+  const conf = Object.create(null);
+  for (const key in config.custom) {
+    conf[key] = config.custom[key];
+  }
+  for (const key of ['host', 'port', 'backendPort']) {
+    conf[key] = config[key];
+  }
+  return conf;
+}
+
+module.exports = {codeConfig, getConfig};

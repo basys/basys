@@ -1,11 +1,12 @@
 const chokidar = require('chokidar');
 const CLIEngine = require('eslint/lib/cli-engine');
 const fs = require('fs-extra');
+const glob = require('glob');
 const nodemon = require('nodemon');
 const opn = require('opn');
 const path = require('path');
 const portfinder = require('portfinder');
-const {getConfig} = require('./config');
+const {codeConfig, getConfig} = require('./config');
 const {exit, monitorServerStatus} = require('./utils');
 const {build} = require('./webpack/build');
 const {startDevServer} = require('./webpack/server');
@@ -31,7 +32,7 @@ async function dev(projectDir, appName) {
       config = getConfig(projectDir, config.appName, 'dev');
       config.port = port;
       config.backendPort = backendPort;
-      server = await startDevServer();
+      server = await startDevServer(config);
     });
 
     // BUG: nodemon may need to be stopped or started (if config.type === 'web')
@@ -103,11 +104,23 @@ async function dev(projectDir, appName) {
   return config;
 }
 
-async function start(projectDir, appName) {
-  const config = getConfig(projectDir, appName, 'prod');
+async function start(projectDir, appName, env = 'prod') {
+  const config = getConfig(projectDir, appName, env);
   if (config.type === 'web') {
-    config.backendPort = config.port;
-    require(path.join(config.distDir, 'backend.js'));
+    const backendPath = path.join(config.distDir, 'backend.js');
+    if (!fs.pathExistsSync(backendPath)) {
+      exit(`Please run \`basys build${appName ? ' ' + appName : ''}\` command first`);
+    }
+
+    const port = await portfinder.getPortPromise({host: config.host, port: config.port});
+    config.port = port;
+    config.backendPort = port;
+    fs.ensureDirSync(config.distDir);
+    fs.writeFileSync(path.join(config.distDir, 'config.json'), JSON.stringify({port}));
+
+    require(backendPath);
+
+    console.log(`Your application is available at http://${config.host}:${port}`);
   }
   return config;
 }
@@ -129,24 +142,25 @@ function lint(projectDir, fix) {
 }
 
 async function e2eTest(projectDir, appName) {
-  const config = getConfig(projectDir, appName, 'test');
+  // BUG: get fixture file detection in line with testcafe (see https://github.com/DevExpress/testcafe/issues/2074)
+  const testPaths = glob.sync(path.join(projectDir, 'tests', 'e2e', '**', '*.js'));
+  if (testPaths.length === 0) exit(`No tests found in ${path.join(projectDir, 'tests', 'e2e')}`);
 
-  // BUG: Improve error message. Introduce a default e2eEntry location?
-  if (!config.e2eEntry) exit('End-to-end tests are not configured for this app');
+  await build(projectDir, appName, 'test');
+  const config = await start(projectDir, appName, 'test');
 
-  // BUG: we don't want to load config inside again
-  // BUG: allow to reuse an existing production build?
-  // BUG: support working with desktop and mobile apps
-  // BUG: we'll need to setup a database (if relevant) and remove it once finished
-  await build(projectDir, appName);
-  await start(projectDir, appName);
+  // Set the global variable accessible in test files
+  global.basys = {
+    appName,
+    config: codeConfig(config),
+  };
 
   // BUG: look at https://github.com/DevExpress/testcafe/blob/master/src/cli/index.js
   // BUG: support remote browsers
   // BUG: look at https://devexpress.github.io/testcafe/documentation/using-testcafe/programming-interface/runner.html#screenshots
   const testcafe = await require('testcafe')(config.host);
   const runner = testcafe.createRunner();
-  await runner.src([path.join(projectDir, 'tests', 'e2e', config.e2eEntry)]).browsers(config.testBrowsers);
+  await runner.src(testPaths).browsers(config.testBrowsers);
 
   try {
     await runner.run(); // BUG: look at options https://devexpress.github.io/testcafe/documentation/using-testcafe/programming-interface/runner.html#run
