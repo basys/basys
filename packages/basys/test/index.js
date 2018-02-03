@@ -7,22 +7,22 @@ const util = require('util');
 const {dev, e2eTest, lint} = require('../lib/index');
 
 async function testBasysAPI() {
-  const tempDir = path.join(__dirname, '..', '..', 'basys-test');
-  await fs.emptyDir(tempDir);
+  const projectDir = path.join(__dirname, '..', '..', 'basys-test');
+  await fs.emptyDir(projectDir);
 
   const {initProject} = require('../../basys-cli/utils');
-  await initProject({name: '../basys-todomvc', dest: tempDir}, false);
+  await initProject({name: '../basys-todomvc', dest: projectDir}, false);
 
   // Prevent the app from being opened in the browser on first start of dev server
-  await fs.ensureDir(path.join(tempDir, '.basys'));
+  await fs.ensureFile(path.join(projectDir, '.basys', 'todomvc', 'dev', 'index.html'));
 
-  const {stdout, stderr} = await util.promisify(exec)(`cd ${tempDir}; yarn install`);
+  const {stdout, stderr} = await util.promisify(exec)(`cd ${projectDir}; yarn install`);
   console.log(stdout, stderr);
 
-  await lint(tempDir, true);
-  await e2eTest(tempDir);
+  await lint(projectDir, true);
+  await e2eTest(projectDir);
 
-  const devConfig = await dev(tempDir);
+  const devConfig = await dev(projectDir);
   await new Promise((resolve, reject) => {
     http.get(`http://${devConfig.host}:${devConfig.port}/`, res => {
       if (res.statusCode === 200) {
@@ -33,7 +33,7 @@ async function testBasysAPI() {
     });
   });
 
-  await fs.remove(tempDir);
+  await fs.remove(projectDir);
 }
 
 testBasysAPI()
