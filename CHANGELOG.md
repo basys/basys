@@ -1,3 +1,12 @@
+## 0.2.0 (3 February 2018)
+
+* Basys CLI for creating new projects and working with existing ones
+* Improved error handling during the compilation
+* Support for parameters in page paths
+* Global `basys` object is accessible in code
+* JS linting improvements
+* Documentation is available on basys.io
+
 ## 0.1.1 (12 January 2018)
 
 * Expose API for working with projects: running dev server, building for production, end-to-end testing

@@ -143,15 +143,25 @@ async function build(projectDir, appName, env = 'prod') {
 
       if (config.type === 'web') {
         // Generate package.json
-        const packageJson = JSON.parse(fs.readFileSync(path.join(projectDir, 'package.json'), 'utf8'));
-        packageJson.scripts = {start: 'node backend.js'};
-        delete packageJson.devDependencies;
+        const data = JSON.parse(fs.readFileSync(path.join(projectDir, 'package.json'), 'utf8'));
 
-        packageJson.dependencies = packageJson.dependencies || {};
+        const dependencies = data.dependencies || {};
         const basysPackageJson = require('basys/package.json');
         for (const name of ['body-parser', 'express', 'morgan', 'nunjucks']) {
-          packageJson.dependencies[name] = basysPackageJson.dependencies[name];
+          dependencies[name] = basysPackageJson.dependencies[name];
         }
+
+        const packageJson = {
+          name: data.name,
+          version: data.version,
+          description: data.description,
+          homepage: data.homepage,
+          author: data.author,
+          license: data.license,
+          private: true,
+          scripts: {start: 'node backend.js'},
+          dependencies,
+        };
 
         fs.writeFileSync(path.join(config.distDir, 'package.json'), JSON.stringify(packageJson, null, 2));
       }
