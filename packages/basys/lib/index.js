@@ -10,7 +10,7 @@ const {startDevServer} = require('./webpack/server');
 async function dev(projectDir, appName) {
   let config = getConfig(projectDir, appName, 'dev');
   const host = config.host;
-  const firstRun = !fs.pathExistsSync(path.join(projectDir, '.basys'));
+  const firstRun = !fs.pathExistsSync(path.join(config.tempDir, 'index.html'));
 
   config.port = await portfinder.getPortPromise({host, port: config.port});
   if (config.type === 'web') {

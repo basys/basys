@@ -36,20 +36,21 @@ const {argv} = cli
   })
   .help();
 
-function exit(error) {
-  console.log('\x1b[31m\x1b[1m%s\x1b[22m\x1b[0m', error);
+function exit(error, showHelp = false) {
+  console.log('\x1b[31m\x1b[1m%s\x1b[22m\x1b[0m\n', error);
+  if (showHelp) yargs.showHelp();
   process.exit(1);
 }
 
 async function runCommand() {
-  if (argv._.length < 1) exit('You need to provide a command');
+  if (argv._.length < 1) exit('You need to provide a command', true);
 
   const command = argv._[0];
   const isProjectCommand = ['dev', 'build', 'start', 'test:e2e', 'lint', 'lint:fix'].includes(command);
   const isGenericCommand = ['help', 'init'].includes(command);
-  if (!isProjectCommand && !isGenericCommand) exit(`Invalid command: ${command}`);
+  if (!isProjectCommand && !isGenericCommand) exit(`Invalid command: ${command}`, true);
 
-  if (projectDir) {
+  if (isProjectCommand) {
     if (projectDir !== process.cwd()) {
       console.log(`Basys project detected at ${projectDir}`);
     }
@@ -73,8 +74,6 @@ async function runCommand() {
       return lint(projectDir, true);
     }
   } else {
-    if (isProjectCommand) exit('This command must be run inside a Basys project directory');
-
     if (command === 'help') {
       // BUG: show help for command if provided
       yargs.showHelp();
