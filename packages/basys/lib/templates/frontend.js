@@ -9,6 +9,10 @@ let comp;
 Vue.use(Meta);
 Vue.use(Router);
 
+{% if entry %}
+  require('{{ entry }}');
+{% endif %}
+
 {% for vuePath, info in vueComponents %}
   options = require({{ vuePath|dump }}).default;
   comp = Vue.component(options.name, options);
@@ -35,13 +39,11 @@ const router = new Router({
 
 Vue.config.productionTip = false;
 
-{% if entry %}
-  require('{{ entry }}');
-{% endif %}
-
-/* eslint-disable no-new */
-new Vue({
+{# BUG: do not expose it to `window`, but make accessible in the code #}
+const useDefaultTemplate = document.getElementById('app').children.length === 0;
+window.app = new Vue({
   el: '#app',
   router,
-  render: h => h('router-view'), {# BUG: this is a default layout component. allow to override it on per-page basis. #}
+  {# BUG: this is a default layout component. allow to override it on per-page basis. #}
+  render: useDefaultTemplate ? (h => h('router-view')) : null,
 });

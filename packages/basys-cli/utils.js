@@ -1,9 +1,5 @@
-const {exec} = require('child_process');
 const fs = require('fs-extra');
-const inquirer = require('inquirer');
-const ora = require('ora');
 const path = require('path');
-const util = require('util');
 
 // Detect whether `dir` is inside a Basys project directory
 function detectBasysProject(dir) {
@@ -20,6 +16,7 @@ function detectBasysProject(dir) {
 
 // `answers.name` can be an absolute/relative directory path or a github repo (with an optional branch)
 function initProject(answers, install = true) {
+  const inquirer = require('inquirer');
   let promise;
   let templateName;
   if (answers.name) {
@@ -80,6 +77,7 @@ function initProject(answers, install = true) {
       }
     })
     .then(() => {
+      const ora = require('ora');
       spinner = ora('Downloading starter project').start();
       if (path.isAbsolute(templateName) || templateName.startsWith('.') || templateName.startsWith('~')) {
         // Local directory
@@ -112,7 +110,7 @@ function initProject(answers, install = true) {
       if (install) {
         spinner.text = 'Installing packages';
         process.chdir(destDir);
-        await util.promisify(exec)('npm install');
+        await require('util').promisify(require('child_process').exec)('npm install');
       }
 
       spinner.stop();

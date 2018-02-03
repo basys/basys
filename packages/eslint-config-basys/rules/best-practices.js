@@ -17,9 +17,6 @@ module.exports = {
     // http://eslint.org/docs/rules/eqeqeq
     eqeqeq: ['error', 'always', {null: 'ignore'}],
 
-    // disallow the use of alert, confirm, and prompt
-    'no-alert': 'warn',
-
     // disallow use of arguments.caller or arguments.callee
     'no-caller': 'error',
 

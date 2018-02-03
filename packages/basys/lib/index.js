@@ -1,8 +1,4 @@
-const chokidar = require('chokidar');
-const CLIEngine = require('eslint/lib/cli-engine');
 const fs = require('fs-extra');
-const glob = require('glob');
-const nodemon = require('nodemon');
 const opn = require('opn');
 const path = require('path');
 const portfinder = require('portfinder');
@@ -24,19 +20,21 @@ async function dev(projectDir, appName) {
   let server = await startDevServer(config);
 
   // On basys.json changes restart the webpack dev server
-  chokidar.watch(path.join(projectDir, 'basys.json'), {ignoreInitial: true}).on('change', () => {
-    // BUG: not all changes in basys.json require to restart the dev server and recompile the project
-    // BUG: if host or app name changes dev server should be stopped
-    server.close(async () => {
-      const {backendPort, port} = config;
-      config = getConfig(projectDir, config.appName, 'dev');
-      config.port = port;
-      config.backendPort = backendPort;
-      server = await startDevServer(config);
-    });
+  require('chokidar')
+    .watch(path.join(projectDir, 'basys.json'), {ignoreInitial: true})
+    .on('change', () => {
+      // BUG: not all changes in basys.json require to restart the dev server and recompile the project
+      // BUG: if host or app name changes dev server should be stopped
+      server.close(async () => {
+        const {backendPort, port} = config;
+        config = getConfig(projectDir, config.appName, 'dev');
+        config.port = port;
+        config.backendPort = backendPort;
+        server = await startDevServer(config);
+      });
 
-    // BUG: nodemon may need to be stopped or started (if config.type === 'web')
-  });
+      // BUG: nodemon may need to be stopped or started (if config.type === 'web')
+    });
 
   if (config.type === 'web') {
     const backendEntryPath = path.join(config.tempDir, 'backend.js');
@@ -45,6 +43,7 @@ async function dev(projectDir, appName) {
     watchPaths.push(path.join(config.tempDir, 'index.html'));
     // BUG: watch other files (like basys.json)?
 
+    const nodemon = require('nodemon');
     nodemon({
       script: backendEntryPath,
       watch: watchPaths,
@@ -126,6 +125,7 @@ async function start(projectDir, appName, env = 'prod') {
 }
 
 function lint(projectDir, fix) {
+  const CLIEngine = require('eslint/lib/cli-engine');
   const engine = new CLIEngine({
     cwd: projectDir,
     extensions: ['.js', '.vue'],
@@ -143,14 +143,16 @@ function lint(projectDir, fix) {
 
 async function e2eTest(projectDir, appName) {
   // BUG: get fixture file detection in line with testcafe (see https://github.com/DevExpress/testcafe/issues/2074)
-  const testPaths = glob.sync(path.join(projectDir, 'tests', 'e2e', '**', '*.js'));
+  const testPaths = require('glob').sync(path.join(projectDir, 'tests', 'e2e', '**', '*.js'));
   if (testPaths.length === 0) exit(`No tests found in ${path.join(projectDir, 'tests', 'e2e')}`);
 
-  await build(projectDir, appName, 'test');
-  const config = await start(projectDir, appName, 'test');
+  const env = 'test';
+  await build(projectDir, appName, env);
+  const config = await start(projectDir, appName, env);
 
   // Set the global variable accessible in test files
   global.basys = {
+    env,
     appName,
     config: codeConfig(config),
   };
