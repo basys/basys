@@ -48,11 +48,12 @@ function getBabelLoader(config, entryType) {
 
 module.exports = function(config, entryType) {
   const babelLoader = getBabelLoader(config, entryType);
+  const srcDir = path.join(config.projectDir, 'src');
 
   const jsRule = {
     test: /\.js$/,
     include: [
-      path.join(config.projectDir, 'src'),
+      srcDir,
       path.join(config.projectDir, 'tests'),
       path.join(config.projectDir, '.basys'), // Required to apply loaders to webpack entries
     ],
@@ -70,6 +71,9 @@ module.exports = function(config, entryType) {
       },
       resolve: {
         extensions: ['.js', '.json', '.vue'],
+        alias: {
+          '~': srcDir,
+        },
       },
       module: {
         // BUG: think about processing backend-specific static files
@@ -83,7 +87,7 @@ module.exports = function(config, entryType) {
       externals: [
         function(context, request, callback) {
           // Don't bundle packages from node_modules into backend.js
-          if (!request.startsWith('.') && !path.isAbsolute(request)) {
+          if (!request.startsWith('.') && !request.startsWith('~') && !path.isAbsolute(request)) {
             return callback(null, `commonjs ${request}`);
           }
           callback();
@@ -102,7 +106,7 @@ module.exports = function(config, entryType) {
   if (entryType === 'frontend') {
     const assets = [path.join(config.tempDir, 'frontend-entry.js')];
     for (const relPath of config.styles) {
-      const resolvePaths = [path.join(config.projectDir, 'src')].concat(require.resolve.paths(relPath));
+      const resolvePaths = [srcDir].concat(require.resolve.paths(relPath));
       try {
         assets.push(require.resolve(relPath, {paths: resolvePaths}));
       } catch (e) {
@@ -144,8 +148,7 @@ module.exports = function(config, entryType) {
       resolve: {
         extensions: ['.js', '.json', '.vue'],
         alias: {
-          vue$: 'vue/dist/vue.esm.js', // BUG: do we need it?
-          // '@': 'src',
+          '~': srcDir,
         },
       },
       module: {
@@ -153,7 +156,7 @@ module.exports = function(config, entryType) {
           jsRule,
           {
             test: /\.vue$/,
-            include: [path.join(config.projectDir, 'src')],
+            include: [srcDir],
             use: [
               {
                 loader: 'vue-loader',
@@ -193,7 +196,7 @@ module.exports = function(config, entryType) {
         }),
         new HtmlWebpackPlugin({
           filename: path.join(config.distDir, 'index.html'),
-          template: path.join(config.projectDir, 'src', 'index.html'),
+          template: path.join(srcDir, 'index.html'),
           inject: 'body',
           minify:
             config.env !== 'dev'
