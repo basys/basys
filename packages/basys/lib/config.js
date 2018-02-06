@@ -72,7 +72,6 @@ function getConfig(projectDir, appName, env) {
     port: 8080,
 
     poll: false, // dev env only, see https://webpack.js.org/configuration/dev-server/#devserver-watchoptions-
-    bundleAnalyzerReport: false, // BUG: think about it, makes sense only if env==='prod'
     custom: {}, // Holds custom config options (shouldn't overlap with any built-in options)
   };
 

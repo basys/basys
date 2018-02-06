@@ -6,8 +6,9 @@ const OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin');
 const ora = require('ora');
 const path = require('path');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-const merge = require('webpack-merge');
 const webpack = require('webpack');
+const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer');
+const merge = require('webpack-merge');
 const {getConfig} = require('../config');
 const {exit} = require('../utils');
 const baseWebpackConfig = require('./base-config');
@@ -104,16 +105,14 @@ function prodWebpackConfigs(config) {
         //     ignore: ['.*'], // BUG: what is it?
         //   },
         // ]),
+        new BundleAnalyzerPlugin({
+          analyzerMode: 'static',
+          openAnalyzer: false,
+          reportFilename: path.join(config.tempDir, 'report.html'),
+        }),
       ],
     }),
   ];
-
-  // BUG: document it
-  // BUG: does it work with multiple apps? (see https://github.com/webpack-contrib/webpack-bundle-analyzer/issues/12)
-  if (config.bundleAnalyzerReport) {
-    const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer');
-    webpackConfigs[0].plugins.push(new BundleAnalyzerPlugin()); // BUG: pass configuration?
-  }
 
   if (config.type === 'web') {
     webpackConfigs.push(
