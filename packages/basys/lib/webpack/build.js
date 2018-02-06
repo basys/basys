@@ -23,8 +23,88 @@ function prodWebpackConfigs(config) {
       },
     },
     sourceMap: config.jsSourceMap,
+    cache: true,
     parallel: true,
   });
+
+  const plugins = [
+    // Extract css into its own file
+    new ExtractTextPlugin({
+      filename: assetsPath('css/[name].[contenthash].css'),
+      // Set the following option to `true` if you want to extract CSS from
+      // codesplit chunks into this main css file as well.
+      // This will result in *all* of your app's CSS being loaded upfront.
+      allChunks: false,
+    }),
+    // Keep module.id stable when vendor modules don't change
+    new webpack.HashedModuleIdsPlugin(),
+    // Enable scope hoisting
+    new webpack.optimize.ModuleConcatenationPlugin(),
+    // // Split vendor js into its own file
+    // new webpack.optimize.CommonsChunkPlugin({
+    //   name: 'vendor',
+    //   minChunks(module) {
+    //     // Any required modules inside node_modules are extracted to vendor
+    //     return (
+    //       module.resource && /\.js$/.test(module.resource) && module.resource.indexOf('/node_modules/') > 0
+    //       // module.resource.indexOf(path.join(config.projectDir, 'node_modules')) === 0
+    //     );
+    //   },
+    // }),
+    // // Extract webpack runtime and module manifest to its own file in order to
+    // // prevent vendor hash from being updated whenever app bundle is updated
+    // new webpack.optimize.CommonsChunkPlugin({
+    //   name: 'manifest',
+    //   minChunks: Infinity,
+    // }),
+    // // This instance extracts shared chunks from code splitted chunks and bundles them
+    // // in a separate chunk, similar to the vendor chunk.
+    // // See: https://webpack.js.org/plugins/commons-chunk-plugin/#extra-async-commons-chunk
+    // new webpack.optimize.CommonsChunkPlugin({
+    //   name: 'app',
+    //   async: 'vendor-async',
+    //   children: true,
+    //   minChunks: 3,
+    // }),
+    // BUG: Exclude files like css. Most static files will be bundled. Introduce a separate directory for copy-only files?
+    //      Or copy files that are not processed by webpack (not entry depends on them)?
+    //      Or just use `static` directory for files that are simply copied?
+    //      See http://vuejs-templates.github.io/webpack/static.html .
+    // BUG: should be customizable - there can be separate dist directories/sets of assets per app?
+    // Copy custom static assets
+    // new CopyWebpackPlugin([
+    //   {
+    //     from: path.join(config.projectDir, 'src', 'static'), // BUG: think about it
+    //     to: 'static', // BUG: is it correct?
+    //     ignore: ['.*'], // BUG: what is it?
+    //   },
+    // ]),
+  ];
+
+  if (config.env === 'prod') {
+    plugins.unshift(
+      uglifyJsPlugin,
+      // BUG: think about using cssnano in postcss-loader instead (no dedupe then)
+      // Compress extracted CSS. We are using this plugin so that possible
+      // duplicated CSS from different components can be deduped.
+      new OptimizeCSSPlugin({
+        cssProcessorOptions: {
+          safe: true,
+          // BUG: existing prefixes don't seem to get removed
+          autoprefixer: {browsers: config.browsers, add: true},
+          map: config.cssSourceMap ? {inline: false} : undefined,
+        },
+      }),
+    );
+
+    plugins.push(
+      new BundleAnalyzerPlugin({
+        analyzerMode: 'static',
+        openAnalyzer: false,
+        reportFilename: path.join(config.tempDir, 'report.html'),
+      }),
+    );
+  }
 
   const webpackConfigs = [
     merge(baseWebpackConfig(config, 'frontend'), {
@@ -36,81 +116,13 @@ function prodWebpackConfigs(config) {
         }),
       },
       devtool: config.cssSourceMap ? 'source-map' : false,
+      recordsPath: path.join(config.tempDir, 'records.json'),
       output: {
         path: config.distDir,
         filename: assetsPath('js/[name].[chunkhash].js'),
         chunkFilename: assetsPath('js/[id].[chunkhash].js'),
       },
-      plugins: [
-        uglifyJsPlugin,
-        // Extract css into its own file
-        new ExtractTextPlugin({
-          filename: assetsPath('css/[name].[contenthash].css'),
-          // Set the following option to `true` if you want to extract CSS from
-          // codesplit chunks into this main css file as well.
-          // This will result in *all* of your app's CSS being loaded upfront.
-          allChunks: false,
-        }),
-        // BUG: think about using cssnano in postcss-loader instead (no dedupe then)
-        // Compress extracted CSS. We are using this plugin so that possible
-        // duplicated CSS from different components can be deduped.
-        new OptimizeCSSPlugin({
-          cssProcessorOptions: {
-            safe: true,
-            // BUG: existing prefixes don't seem to get removed
-            autoprefixer: {browsers: config.browsers, add: true},
-            map: config.cssSourceMap ? {inline: false} : undefined,
-          },
-        }),
-        // Keep module.id stable when vendor modules don't change
-        new webpack.HashedModuleIdsPlugin(),
-        // Enable scope hoisting
-        new webpack.optimize.ModuleConcatenationPlugin(),
-        // // Split vendor js into its own file
-        // new webpack.optimize.CommonsChunkPlugin({
-        //   name: 'vendor',
-        //   minChunks(module) {
-        //     // Any required modules inside node_modules are extracted to vendor
-        //     return (
-        //       module.resource && /\.js$/.test(module.resource) && module.resource.indexOf('/node_modules/') > 0
-        //       // module.resource.indexOf(path.join(config.projectDir, 'node_modules')) === 0
-        //     );
-        //   },
-        // }),
-        // // Extract webpack runtime and module manifest to its own file in order to
-        // // prevent vendor hash from being updated whenever app bundle is updated
-        // new webpack.optimize.CommonsChunkPlugin({
-        //   name: 'manifest',
-        //   minChunks: Infinity,
-        // }),
-        // // This instance extracts shared chunks from code splitted chunks and bundles them
-        // // in a separate chunk, similar to the vendor chunk.
-        // // See: https://webpack.js.org/plugins/commons-chunk-plugin/#extra-async-commons-chunk
-        // new webpack.optimize.CommonsChunkPlugin({
-        //   name: 'app',
-        //   async: 'vendor-async',
-        //   children: true,
-        //   minChunks: 3,
-        // }),
-        // BUG: Exclude files like css. Most static files will be bundled. Introduce a separate directory for copy-only files?
-        //      Or copy files that are not processed by webpack (not entry depends on them)?
-        //      Or just use `static` directory for files that are simply copied?
-        //      See http://vuejs-templates.github.io/webpack/static.html .
-        // BUG: should be customizable - there can be separate dist directories/sets of assets per app?
-        // Copy custom static assets
-        // new CopyWebpackPlugin([
-        //   {
-        //     from: path.join(config.projectDir, 'src', 'static'), // BUG: think about it
-        //     to: 'static', // BUG: is it correct?
-        //     ignore: ['.*'], // BUG: what is it?
-        //   },
-        // ]),
-        new BundleAnalyzerPlugin({
-          analyzerMode: 'static',
-          openAnalyzer: false,
-          reportFilename: path.join(config.tempDir, 'report.html'),
-        }),
-      ],
+      plugins,
     }),
   ];
 

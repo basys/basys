@@ -55,7 +55,6 @@ module.exports = function(config, entryType) {
     test: /\.js$/,
     include: [
       srcDir,
-      path.join(config.projectDir, 'tests'),
       path.join(config.projectDir, '.basys'), // Required to apply loaders to webpack entries
     ],
     use: [babelLoader],
@@ -193,7 +192,7 @@ module.exports = function(config, entryType) {
         }),
         new webpack.ProvidePlugin({
           // Make `Vue` object available in code without import
-          Vue: ['vue/dist/vue.esm.js', 'default'],
+          Vue: ['vue/dist/vue.runtime.esm.js', 'default'],
         }),
         new HtmlWebpackPlugin({
           filename: path.join(config.distDir, 'index.html'),
