@@ -6,7 +6,7 @@ const routes = [];
 let options;
 let comp;
 
-Vue.use(Meta);
+Vue.use(Meta, {keyName: 'head'});
 Vue.use(Router);
 
 {% if entry %}

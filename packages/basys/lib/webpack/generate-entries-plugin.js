@@ -1,12 +1,11 @@
 const chalk = require('chalk');
 const chokidar = require('chokidar');
+const espree = require('espree');
 const fs = require('fs-extra');
 const glob = require('glob');
-const JSON5 = require('json5');
 const nunjucks = require('nunjucks');
 const path = require('path');
 const pathToRegexp = require('path-to-regexp');
-const parseVue = require('vue-loader/lib/parser');
 const {codeConfig} = require('../config');
 
 class GenerateEntriesWebpackPlugin {
@@ -44,25 +43,84 @@ class GenerateEntriesWebpackPlugin {
     const vuePaths = glob.sync(this.vuePattern);
     this.config.vueComponents = {}; // {vuePath: info}
     for (const vuePath of vuePaths) {
-      const parts = parseVue(fs.readFileSync(vuePath, 'utf8'), vuePath);
-      const infoBlock = parts.customBlocks.find(block => block.type === 'info');
-      if (infoBlock) {
-        let info;
-        try {
-          info = JSON5.parse(infoBlock.content);
-        } catch (e) {
-          this.errors.push(new Error(`${vuePath}: ${e.message}`));
+      const content = fs.readFileSync(vuePath, 'utf8');
+      const start = content.indexOf('<script>');
+      const end = content.indexOf('</script>');
+      if (start === -1 || end === -1 || start > end) {
+        this.errors.push(new Error(`${vuePath}: <script>...</script> block was not found`));
+        continue;
+      }
+
+      let ast;
+      try {
+        ast = espree.parse(content.substring(start + 8, end), {
+          range: false,
+          loc: true,
+          comment: false,
+          attachComment: true,
+          tokens: true,
+          ecmaVersion: 8,
+          sourceType: 'module',
+          ecmaFeatures: {impliedStrict: true},
+        });
+      } catch (e) {
+        continue;
+      }
+
+      const exportNode = ast.body.find(node => node.type === 'ExportDefaultDeclaration');
+      if (!exportNode || exportNode.declaration.type !== 'ObjectExpression') {
+        this.errors.push(new Error(`${vuePath}: Expected \`export default { ... }\` inside <script> block`));
+        continue;
+      }
+
+      const info = {}; // {path}
+      const infoProp = exportNode.declaration.properties.find(
+        node => node.key.type === 'Identifier' && node.key.name === 'info',
+      );
+      if (infoProp) {
+        if (infoProp.value.type !== 'ObjectExpression') {
+          this.errors.push(new Error(`${vuePath}: 'info' option must be an object`));
           continue;
         }
-        // BUG: validate the data inside info (e.g. path starts with '/' if present)
+        const props = infoProp.value.properties;
 
-        const usedInApp = !Array.isArray(info.apps) || info.apps.includes(this.config.appName);
-        if (usedInApp) {
-          this.config.vueComponents[vuePath] = info; // BUG: needs special processing to adopt for Vue and express (e.g. url params)
+        const appsProp = props.find(node => node.key.type === 'Identifier' && node.key.name === 'apps');
+        if (appsProp) {
+          if (appsProp.value.type !== 'ArrayExpression') {
+            this.errors.push(new Error(`${vuePath}: 'info.apps' option must be an array of string literals`));
+            continue;
+          }
+
+          if (appsProp.value.elements.length > 0) {
+            const apps = [];
+            for (const appElem of appsProp.value.elements) {
+              if (appElem.type !== 'Literal' || typeof appElem.value !== 'string') {
+                this.errors.push(new Error(`${vuePath}: all items of 'info.apps' option be string literals`));
+                continue;
+              }
+              apps.push(appElem.value);
+            }
+
+            if (!apps.includes(this.config.appName)) continue;
+          }
         }
-      } else {
-        this.config.vueComponents[vuePath] = {};
+
+        const pathProp = props.find(node => node.key.type === 'Identifier' && node.key.name === 'path');
+        if (pathProp) {
+          if (pathProp.value.type !== 'Literal' || typeof pathProp.value.value !== 'string') {
+            this.errors.push(new Error(`${vuePath}: 'info.path' option must be a string literal`));
+            continue;
+          }
+
+          if (!pathProp.value.value.startsWith('/')) {
+            this.errors.push(new Error(`${vuePath}: 'info.path' option must start with '/'`));
+            continue;
+          }
+
+          info.path = pathProp.value.value;
+        }
       }
+      this.config.vueComponents[vuePath] = info;
     }
 
     const entries = {};

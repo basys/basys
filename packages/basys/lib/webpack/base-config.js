@@ -34,6 +34,7 @@ function getBabelLoader(config, entryType) {
         'syntax-trailing-function-commas',
         'transform-async-to-generator',
         'transform-exponentiation-operator',
+        ...(config.type !== 'web' || entryType === 'frontend' ? [path.join(__dirname, 'babel-vue-plugin')] : []),
       ],
       // BUG: do we need it?
       // env: {
