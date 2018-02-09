@@ -4,7 +4,7 @@ const webpack = require('webpack');
 const {config} = require('../config');
 const {exit} = require('../utils');
 const FrontendWebpackPlugin = require('./frontend-plugin');
-const {assetsPath, cssLoaders} = require('./utils');
+const {assetsPath, generateLoaders} = require('./utils');
 
 function getBabelLoader(config, entryType) {
   let targets;
@@ -49,6 +49,7 @@ function getBabelLoader(config, entryType) {
 
 module.exports = function(config, entryType) {
   const babelLoader = getBabelLoader(config, entryType);
+  const assetsDir = path.join(config.projectDir, 'assets');
   const srcDir = path.join(config.projectDir, 'src');
 
   const jsRule = {
@@ -70,8 +71,9 @@ module.exports = function(config, entryType) {
         path: config.distDir,
       },
       resolve: {
-        extensions: ['.js', '.json', '.vue'],
+        extensions: ['.js', '.json'],
         alias: {
+          '@': assetsDir,
           '~': srcDir,
         },
       },
@@ -106,7 +108,7 @@ module.exports = function(config, entryType) {
   if (entryType === 'frontend') {
     const assets = [path.join(config.tempDir, 'frontend-entry.js')];
     for (const relPath of config.styles) {
-      const resolvePaths = [srcDir].concat(require.resolve.paths(relPath));
+      const resolvePaths = [assetsDir].concat(require.resolve.paths(relPath));
       try {
         assets.push(require.resolve(relPath, {paths: resolvePaths}));
       } catch (e) {
@@ -148,6 +150,7 @@ module.exports = function(config, entryType) {
       resolve: {
         extensions: ['.js', '.json', '.vue'],
         alias: {
+          '@': assetsDir,
           '~': srcDir,
         },
       },
@@ -155,16 +158,38 @@ module.exports = function(config, entryType) {
         rules: [
           jsRule,
           {
+            test: /\.css$/,
+            use: generateLoaders(config, true),
+          },
+          {
+            test: /\.less$/,
+            use: generateLoaders(config, true, 'less'),
+          },
+          {
+            test: /\.sass$/,
+            use: generateLoaders(config, true, 'sass'),
+          },
+          {
+            test: /\.scss$/,
+            use: generateLoaders(config, true, 'scss'),
+          },
+          {
             test: /\.vue$/,
             include: [srcDir],
             use: [
               {
                 loader: 'vue-loader',
                 options: {
-                  loaders: Object.assign(
-                    {js: babelLoader},
-                    cssLoaders({extract: config.env === 'prod', sourceMap: config.cssSourceMap}),
-                  ),
+                  loaders: {
+                    js: babelLoader,
+                    css: generateLoaders(config),
+                  },
+                  postcss: {
+                    config: {
+                      path: __dirname,
+                      ctx: config,
+                    },
+                  },
                   cssSourceMap: config.cssSourceMap,
                   transformToRequire: {
                     video: 'src',

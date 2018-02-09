@@ -10,7 +10,10 @@ Vue.use(Meta, {keyName: 'head'});
 Vue.use(Router);
 
 {% if entry %}
-  require('{{ entry }}');
+  const entry = require('{{ entry }}');
+  const conf = (entry && entry.default) || {};
+{% else %}
+  const conf = {};
 {% endif %}
 
 {% for vuePath, info in vueComponents %}
@@ -40,10 +43,9 @@ const router = new Router({
 Vue.config.productionTip = false;
 
 {# BUG: do not expose it to `window`, but make accessible in the code #}
-const useDefaultTemplate = document.getElementById('app').children.length === 0;
 window.app = new Vue({
   el: '#app',
   router,
   {# BUG: this is a default layout component. allow to override it on per-page basis. #}
-  render: useDefaultTemplate ? (h => h('router-view')) : null,
+  render: conf.render || (h => h('router-view')),
 });

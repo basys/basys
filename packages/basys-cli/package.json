@@ -18,7 +18,7 @@
   "dependencies": {
     "download": "^6.2.5",
     "fs-extra": "^5.0.0",
-    "inquirer": "^5.0.1",
+    "inquirer": "^5.1.0",
     "ora": "^1.4.0",
     "yargs": "^11.0.0"
   },

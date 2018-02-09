@@ -13,7 +13,7 @@ const {getConfig} = require('../config');
 const {exit} = require('../utils');
 const baseWebpackConfig = require('./base-config');
 const GenerateEntriesWebpackPlugin = require('./generate-entries-plugin');
-const {assetsPath, styleLoaders} = require('./utils');
+const {assetsPath} = require('./utils');
 
 function prodWebpackConfigs(config) {
   const uglifyJsPlugin = new UglifyJsPlugin({
@@ -84,9 +84,6 @@ function prodWebpackConfigs(config) {
   if (config.env === 'prod') {
     plugins.unshift(
       uglifyJsPlugin,
-      // BUG: think about using cssnano in postcss-loader instead (no dedupe then)
-      // Compress extracted CSS. We are using this plugin so that possible
-      // duplicated CSS from different components can be deduped.
       new OptimizeCSSPlugin({
         cssProcessorOptions: {
           safe: true,
@@ -108,13 +105,6 @@ function prodWebpackConfigs(config) {
 
   const webpackConfigs = [
     merge(baseWebpackConfig(config, 'frontend'), {
-      module: {
-        rules: styleLoaders({
-          extract: true,
-          usePostCSS: true, // BUG: think about it
-          sourceMap: config.cssSourceMap,
-        }),
-      },
       devtool: config.cssSourceMap ? 'source-map' : false,
       recordsPath: path.join(config.tempDir, 'records.json'),
       output: {

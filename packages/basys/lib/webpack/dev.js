@@ -6,14 +6,10 @@ const BackendWebpackPlugin = require('./backend-plugin');
 const baseWebpackConfig = require('./base-config');
 const FriendlyErrorsWebpackPlugin = require('./friendly-errors-plugin');
 const GenerateEntriesWebpackPlugin = require('./generate-entries-plugin');
-const {styleLoaders} = require('./utils');
 
 function devWebpackConfigs(config) {
   const webpackConfigs = [
     merge(baseWebpackConfig(config, 'frontend'), {
-      module: {
-        rules: styleLoaders({usePostCSS: true, sourceMap: config.cssSourceMap}),
-      },
       devtool: config.jsSourceMap ? 'eval-source-map' : false,
       output: {
         filename: '[name].js',
@@ -42,7 +38,7 @@ function startDevServer(config) {
     const compiler = webpack(devWebpackConfigs(config));
     compiler.apply(new GenerateEntriesWebpackPlugin(config));
     compiler.apply(new webpack.ProgressPlugin());
-    compiler.apply(new FriendlyErrorsWebpackPlugin());
+    compiler.apply(new FriendlyErrorsWebpackPlugin(config));
     compiler.plugin('done', () => resolve(server));
     compiler.plugin('failed', reject);
 

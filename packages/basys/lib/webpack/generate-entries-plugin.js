@@ -33,6 +33,13 @@ class GenerateEntriesWebpackPlugin {
     });
   }
 
+  // BUG: accept optional location and save inside error
+  error(filePath, message) {
+    const err = new Error(message);
+    err.file = path.relative(this.config.projectDir, filePath);
+    this.errors.push(err);
+  }
+
   // BUG: Perform validation of component options, at least the ones that affect whether and how they are used.
   //      Warn if component names are not unique or missing.
   generateEntries(init) {
@@ -43,11 +50,13 @@ class GenerateEntriesWebpackPlugin {
     const vuePaths = glob.sync(this.vuePattern);
     this.config.vueComponents = {}; // {vuePath: info}
     for (const vuePath of vuePaths) {
+      this.config.vueComponents[vuePath] = {};
+
       const content = fs.readFileSync(vuePath, 'utf8');
       const start = content.indexOf('<script>');
       const end = content.indexOf('</script>');
       if (start === -1 || end === -1 || start > end) {
-        this.errors.push(new Error(`${vuePath}: <script>...</script> block was not found`));
+        this.error(vuePath, `<script>...</script> block was not found`);
         continue;
       }
 
@@ -69,17 +78,16 @@ class GenerateEntriesWebpackPlugin {
 
       const exportNode = ast.body.find(node => node.type === 'ExportDefaultDeclaration');
       if (!exportNode || exportNode.declaration.type !== 'ObjectExpression') {
-        this.errors.push(new Error(`${vuePath}: Expected \`export default { ... }\` inside <script> block`));
+        this.error(vuePath, 'Expected `export default { ... }` inside <script> block');
         continue;
       }
 
-      const info = {}; // {path}
       const infoProp = exportNode.declaration.properties.find(
         node => node.key.type === 'Identifier' && node.key.name === 'info',
       );
       if (infoProp) {
         if (infoProp.value.type !== 'ObjectExpression') {
-          this.errors.push(new Error(`${vuePath}: 'info' option must be an object`));
+          this.error(vuePath, "'info' option must be an object");
           continue;
         }
         const props = infoProp.value.properties;
@@ -87,7 +95,7 @@ class GenerateEntriesWebpackPlugin {
         const appsProp = props.find(node => node.key.type === 'Identifier' && node.key.name === 'apps');
         if (appsProp) {
           if (appsProp.value.type !== 'ArrayExpression') {
-            this.errors.push(new Error(`${vuePath}: 'info.apps' option must be an array of string literals`));
+            this.error(vuePath, "'info.apps' option must be an array of string literals");
             continue;
           }
 
@@ -95,32 +103,34 @@ class GenerateEntriesWebpackPlugin {
             const apps = [];
             for (const appElem of appsProp.value.elements) {
               if (appElem.type !== 'Literal' || typeof appElem.value !== 'string') {
-                this.errors.push(new Error(`${vuePath}: all items of 'info.apps' option be string literals`));
+                this.error(vuePath, "All items of 'info.apps' option be string literals");
                 continue;
               }
               apps.push(appElem.value);
             }
 
-            if (!apps.includes(this.config.appName)) continue;
+            if (!apps.includes(this.config.appName)) {
+              delete this.config.vueComponents[vuePath];
+              continue;
+            }
           }
         }
 
         const pathProp = props.find(node => node.key.type === 'Identifier' && node.key.name === 'path');
         if (pathProp) {
           if (pathProp.value.type !== 'Literal' || typeof pathProp.value.value !== 'string') {
-            this.errors.push(new Error(`${vuePath}: 'info.path' option must be a string literal`));
+            this.error(vuePath, "'info.path' option must be a string literal");
             continue;
           }
 
           if (!pathProp.value.value.startsWith('/')) {
-            this.errors.push(new Error(`${vuePath}: 'info.path' option must start with '/'`));
+            this.error(vuePath, "'info.path' option must start with '/'");
             continue;
           }
 
-          info.path = pathProp.value.value;
+          this.config.vueComponents[vuePath].path = pathProp.value.value;
         }
       }
-      this.config.vueComponents[vuePath] = info;
     }
 
     const entries = {};

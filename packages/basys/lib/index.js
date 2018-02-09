@@ -5,7 +5,7 @@ const portfinder = require('portfinder');
 const {codeConfig, getConfig} = require('./config');
 const {exit, monitorServerStatus} = require('./utils');
 const {build} = require('./webpack/build');
-const {startDevServer} = require('./webpack/server');
+const {startDevServer} = require('./webpack/dev');
 
 async function dev(projectDir, appName) {
   let config = getConfig(projectDir, appName, 'dev');
