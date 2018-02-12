@@ -1,0 +1,14 @@
+{
+  "name": "stylelint-config-basys",
+  "version": "0.1.0",
+  "description": "Stylelint configuration used by Basys projects",
+  "bugs": {
+    "url": "https://github.com/basys/basys/issues"
+  },
+  "license": "MIT",
+  "author": "Sergey Kopylov <sergey@basys.io>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/basys/basys/tree/master/packages/stylelint-config-basys"
+  }
+}

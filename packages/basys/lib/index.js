@@ -1,4 +1,5 @@
 const fs = require('fs-extra');
+const glob = require('glob');
 const opn = require('opn');
 const path = require('path');
 const portfinder = require('portfinder');
@@ -124,26 +125,129 @@ async function start(projectDir, appName, env = 'prod') {
   return config;
 }
 
-function lint(projectDir, fix) {
+async function lint(projectDir, fix) {
+  const stats = {
+    js: {formatting: 0, linting: 0},
+    style: {formatting: 0, linting: 0},
+  };
+
+  // Style linting
+  const ignorer = require('ignore')();
+  try {
+    ignorer.add(await fs.readFile(path.join(projectDir, '.stylelintignore'), 'utf8'));
+  } catch (e) {}
+
+  const stylePaths = glob
+    .sync(path.join(projectDir, 'assets', '**/*.@(css|less|scss)'))
+    .filter(stylePath => !ignorer.ignores(path.relative(projectDir, stylePath)));
+
+  if (fix) {
+    const prettier = require('prettier');
+    await Promise.all(
+      stylePaths.map(async filePath => {
+        const css = await fs.readFile(filePath, 'utf8');
+        let prettyCss;
+        try {
+          prettyCss = prettier.format(css, {
+            printWidth: 100,
+            tabWidth: 2,
+            filepath: filePath,
+          });
+        } catch (e) {
+          // Syntax errors are reported by stylelint
+        }
+
+        if (typeof prettyCss === 'string' && css !== prettyCss) {
+          await fs.writeFile(filePath, prettyCss);
+        }
+      }),
+    );
+  }
+
+  const stylelintrcPath = path.join(projectDir, '.stylelintrc');
+  const useStylelintrc = await fs.pathExists(stylelintrcPath);
+  const stylelint = require('stylelint');
+  const res = await stylelint.lint({
+    config: useStylelintrc ? undefined : {extends: 'stylelint-config-basys'},
+    configBasedir: projectDir,
+    configFile: useStylelintrc ? stylelintrcPath : null,
+    files: stylePaths,
+    // cache: true, // BUG: temporary deactivated - syntax errors get ignored because of it
+    cacheLocation: path.join(projectDir, '.basys', '.stylelintcache'),
+    reportNeedlessDisables: true,
+    fix,
+  });
+
+  // Don't show style formatting rule warnings, only their statistics. All these rules must be autofixable.
+  const stylelintFormattingRules = [
+    'at-rule-name-case',
+    'at-rule-name-space-after',
+    'at-rule-semicolon-space-before',
+    'declaration-bang-space-after',
+    'declaration-bang-space-before',
+    'media-feature-colon-space-after',
+    'media-feature-colon-space-before',
+    'media-feature-parentheses-space-inside',
+    'media-query-list-comma-space-after',
+    'media-query-list-comma-space-before',
+    'selector-attribute-brackets-space-inside',
+    'selector-attribute-quotes',
+    'selector-combinator-space-after',
+    'selector-combinator-space-before',
+    'selector-descendant-combinator-no-non-space',
+    'selector-pseudo-class-parentheses-space-inside',
+  ];
+  for (const result of res.results) {
+    const numWarnings = result.warnings.length;
+    result.warnings = result.warnings.filter(warning => !stylelintFormattingRules.includes(warning.rule));
+    stats.style.formatting += numWarnings - result.warnings.length;
+    stats.style.linting += result.warnings.length;
+  }
+
+  const stylelintOutput = require('stylelint/lib/formatters/stringFormatter')(res.results);
+  console.log(stylelintOutput.substr(0, stylelintOutput.length - 1));
+
+  // Javascript linting
   const CLIEngine = require('eslint/lib/cli-engine');
   const engine = new CLIEngine({
     cwd: projectDir,
     extensions: ['.js', '.vue'],
     cache: true,
-    cacheLocation: '.basys/.eslintcache',
+    cacheLocation: path.join(projectDir, '.basys', '.eslintcache'),
     reportUnusedDisableDirectives: true,
     fix,
   });
   const report = engine.executeOnFiles(['src', 'tests']);
   if (fix) CLIEngine.outputFixes(report);
-  const formatter = engine.getFormatter();
-  const output = formatter(report.results);
-  if (output) console.log(output);
+
+  // Exclude fixable errors from the printed output
+  for (const result of report.results) {
+    const numMessages = result.messages.length;
+    result.messages = result.messages.filter(message => !message.fix);
+    stats.js.formatting += numMessages - result.messages.length;
+    stats.js.linting += result.messages.length;
+  }
+  const output = engine.getFormatter()(report.results);
+  if (output) {
+    // Strip error statistics added by the ESLint formatter
+    console.log(output.substr(0, output.indexOf('\u2716') - 11));
+  }
+
+  const chalk = require('chalk');
+  console.log(chalk.red.bold(`\n${stats.js.linting} code and ${stats.style.linting} style linting errors.`));
+  if (stats.js.formatting + stats.style.formatting > 0) {
+    console.log(
+      chalk.yellow.bold(
+        `Also detected ${stats.js.formatting} code and ${stats.style.formatting} style ` +
+          `formatting errors, that can be fixed with \`basys lint:fix\`.`,
+      ),
+    );
+  }
 }
 
 async function e2eTest(projectDir, appName) {
   // BUG: get fixture file detection in line with testcafe (see https://github.com/DevExpress/testcafe/issues/2074)
-  const testPaths = require('glob').sync(path.join(projectDir, 'tests', 'e2e', '**', '*.js'));
+  const testPaths = glob.sync(path.join(projectDir, 'tests', 'e2e', '**', '*.js'));
   if (testPaths.length === 0) exit(`No tests found in ${path.join(projectDir, 'tests', 'e2e')}`);
 
   const env = 'test';

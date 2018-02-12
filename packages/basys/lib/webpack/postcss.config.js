@@ -3,7 +3,7 @@ const resolve = require('postcss-import/lib/resolve-id');
 
 module.exports = function({file, options}) {
   if (file) {
-    // BUG: Apply parser and some plugins for css/sass/less files? Expose appName and env depending in sass/less files?
+    // BUG: Apply parser and some plugins for css/scss/less files? Expose appName and env depending in scss/less files?
     //      Configure ~/@ in imports.
     return {};
   } else {

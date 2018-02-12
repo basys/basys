@@ -6,7 +6,7 @@ function assetsPath(_path) {
 }
 
 // Generate loader string to be used with extract text plugin
-function generateLoaders(config, usePostCSS, loader) {
+function generateLoaders(config, extension, usePostCSS) {
   const loaders = [
     {
       loader: 'css-loader',
@@ -29,10 +29,10 @@ function generateLoaders(config, usePostCSS, loader) {
     });
   }
 
-  if (loader) {
+  if (extension !== 'css') {
     loaders.push({
-      loader: loader !== 'scss' ? `${loader}-loader` : 'sass-loader',
-      options: Object.assign({sourceMap: config.sourceMap}, loader === 'sass' ? {indentedSyntax: true} : {}),
+      loader: extension !== 'scss' ? `${extension}-loader` : 'sass-loader',
+      options: {sourceMap: config.sourceMap},
     });
   }
 

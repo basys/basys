@@ -123,6 +123,12 @@ module.exports = function(config, entryType) {
       );
     }
 
+    const styleLoader = extension => ({
+      test: new RegExp(`\\.${extension}$`),
+      include: [assetsDir, path.join(config.projectDir, 'node_modules')],
+      use: generateLoaders(config, extension, true),
+    });
+
     const urlLoader = (extensions, dirName, limit) => ({
       test: new RegExp(`\\.(${extensions.join('|')})(\\?.*)?$`),
       use: [
@@ -157,22 +163,9 @@ module.exports = function(config, entryType) {
       module: {
         rules: [
           jsRule,
-          {
-            test: /\.css$/,
-            use: generateLoaders(config, true),
-          },
-          {
-            test: /\.less$/,
-            use: generateLoaders(config, true, 'less'),
-          },
-          {
-            test: /\.sass$/,
-            use: generateLoaders(config, true, 'sass'),
-          },
-          {
-            test: /\.scss$/,
-            use: generateLoaders(config, true, 'scss'),
-          },
+          styleLoader('css'),
+          styleLoader('less'),
+          styleLoader('scss'),
           {
             test: /\.vue$/,
             include: [srcDir],
@@ -182,7 +175,7 @@ module.exports = function(config, entryType) {
                 options: {
                   loaders: {
                     js: babelLoader,
-                    css: generateLoaders(config),
+                    css: generateLoaders(config, 'css'),
                   },
                   postcss: {
                     config: {
