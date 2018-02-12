@@ -78,7 +78,7 @@ async function runCommand() {
       // BUG: show help for command if provided
       yargs.showHelp();
     } else if (command === 'init') {
-      initProject({name: argv['template-name']});
+      return initProject({name: argv['template-name']});
     }
   }
 }

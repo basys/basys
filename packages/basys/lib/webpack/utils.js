@@ -1,4 +1,3 @@
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const path = require('path');
 
 function assetsPath(_path) {
@@ -38,6 +37,7 @@ function generateLoaders(config, extension, usePostCSS) {
 
   // Extract CSS when that option is specified (which is the case during production build)
   if (config.env === 'prod') {
+    const ExtractTextPlugin = require('extract-text-webpack-plugin');
     return ExtractTextPlugin.extract({
       use: loaders,
       fallback: 'vue-style-loader',

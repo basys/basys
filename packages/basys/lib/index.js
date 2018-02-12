@@ -6,9 +6,9 @@ const portfinder = require('portfinder');
 const {codeConfig, getConfig} = require('./config');
 const {exit, monitorServerStatus} = require('./utils');
 const {build} = require('./webpack/build');
-const {startDevServer} = require('./webpack/dev');
 
 async function dev(projectDir, appName) {
+  const {startDevServer} = require('./webpack/dev');
   let config = getConfig(projectDir, appName, 'dev');
   const host = config.host;
   const firstRun = !fs.pathExistsSync(path.join(config.tempDir, 'index.html'));
@@ -73,7 +73,7 @@ async function dev(projectDir, appName) {
     // BUG: what if config.appBuilder option changes?
     config.appBuilder.port = await portfinder.getPortPromise({host, port: config.appBuilder.port});
     const configPath = path.join(config.tempDir, 'app-builder.json');
-    fs.writeFileSync(
+    await fs.writeFile(
       configPath,
       JSON.stringify({
         host,
@@ -115,8 +115,8 @@ async function start(projectDir, appName, env = 'prod') {
     const port = await portfinder.getPortPromise({host: config.host, port: config.port});
     config.port = port;
     config.backendPort = port;
-    fs.ensureDirSync(config.distDir);
-    fs.writeFileSync(path.join(config.distDir, 'config.json'), JSON.stringify({port}));
+    await fs.ensureDir(config.distDir);
+    await fs.writeFile(path.join(config.distDir, 'config.json'), JSON.stringify({port}));
 
     require(backendPath);
 

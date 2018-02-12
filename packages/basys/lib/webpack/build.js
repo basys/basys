@@ -1,21 +1,20 @@
 const chalk = require('chalk');
-// const CopyWebpackPlugin = require('copy-webpack-plugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const fs = require('fs-extra');
-const OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin');
 const ora = require('ora');
 const path = require('path');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-const webpack = require('webpack');
-const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer');
-const merge = require('webpack-merge');
 const {getConfig} = require('../config');
 const {exit} = require('../utils');
-const baseWebpackConfig = require('./base-config');
-const GenerateEntriesWebpackPlugin = require('./generate-entries-plugin');
 const {assetsPath} = require('./utils');
 
 function prodWebpackConfigs(config) {
+  // const CopyWebpackPlugin = require('copy-webpack-plugin');
+  const ExtractTextPlugin = require('extract-text-webpack-plugin');
+  const OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin');
+  const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+  const webpack = require('webpack');
+  const merge = require('webpack-merge');
+  const baseWebpackConfig = require('./base-config');
+
   const uglifyJsPlugin = new UglifyJsPlugin({
     uglifyOptions: {
       compress: {
@@ -94,6 +93,7 @@ function prodWebpackConfigs(config) {
       }),
     );
 
+    const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer');
     plugins.push(
       new BundleAnalyzerPlugin({
         analyzerMode: 'static',
@@ -119,7 +119,7 @@ function prodWebpackConfigs(config) {
   if (config.type === 'web') {
     webpackConfigs.push(
       merge(baseWebpackConfig(config, 'backend'), {
-        plugins: [uglifyJsPlugin],
+        plugins: config.env === 'prod' ? [uglifyJsPlugin] : [],
       }),
     );
   }
@@ -128,6 +128,9 @@ function prodWebpackConfigs(config) {
 }
 
 async function build(projectDir, appName, env = 'prod') {
+  const GenerateEntriesWebpackPlugin = require('./generate-entries-plugin');
+  const webpack = require('webpack');
+
   const config = getConfig(projectDir, appName, env);
 
   const spinner = ora('building for production...');
