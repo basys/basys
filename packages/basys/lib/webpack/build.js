@@ -187,12 +187,13 @@ async function build(projectDir, appName, env = 'prod') {
         if (stats.hasErrors()) exit('  Build failed with errors.\n');
       }
 
-      console.log(chalk.cyan('Build complete.\n'));
-
-      // BUG: depends on the list of apps built
       // BUG: fix the command, show deployment name if needed?
       if (config.env === 'prod') {
-        console.log(chalk.yellow(`Use \`npm run start\` to test the production build on your machine.\n`));
+        console.log('Build complete, you can find it in ' + chalk.cyan.bold(config.distDir) + '.');
+        const command = 'basys start' + (appName ? ' ' + appName : '');
+        console.log('Use `' + chalk.green.bold(command) + '` to test the production build on your machine.');
+      } else {
+        console.log(chalk.cyan('Build complete.'));
       }
 
       resolve();

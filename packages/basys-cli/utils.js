@@ -1,3 +1,4 @@
+const chalk = require('chalk');
 const fs = require('fs-extra');
 const path = require('path');
 
@@ -35,12 +36,13 @@ async function initProject(answers, install = true) {
     ])).name;
   }
 
+  const cwd = process.cwd();
   let destDir;
   let spinner;
 
   function validateDestPath(dest) {
-    if (!dest || dest.startsWith('.')) {
-      destDir = path.join(process.cwd(), dest);
+    if (!dest || !path.isAbsolute(dest)) {
+      destDir = path.join(cwd, dest);
     } else {
       destDir = dest;
     }
@@ -73,7 +75,7 @@ async function initProject(answers, install = true) {
     // Local directory
     let templateDir;
     if (templateName.startsWith('.')) {
-      templateDir = path.join(process.cwd(), templateName);
+      templateDir = path.join(cwd, templateName);
     } else {
       templateDir = path.normalize(templateName);
     }
@@ -108,9 +110,15 @@ async function initProject(answers, install = true) {
   }
 
   spinner.stop();
-  // BUG: add a message about 'cd' (what about windows?), only if needed
-  // BUG: add colors? change message if this is a local basys-cli instance?
-  spinner.succeed('Successfully generated the project. To start the dev server run `basys dev`.');
+
+  // BUG: change commands to 'npm/yarn basys dev' if this is a local basys-cli instance is used?
+  let commands = '';
+  if (cwd !== destDir) {
+    // BUG: what about windows?
+    commands += '`' + chalk.green.bold('cd ' + path.relative(cwd, destDir)) + '`, then ';
+  }
+  commands += '`' + chalk.green.bold('basys dev') + '`';
+  spinner.succeed(`Successfully generated the project. To start the dev server run ${commands}.`);
 }
 
 module.exports = {detectBasysProject, initProject};

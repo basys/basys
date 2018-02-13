@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+const chalk = require('chalk');
 const yargs = require('yargs');
 const {detectBasysProject, initProject} = require('./utils');
 
@@ -37,7 +38,7 @@ const {argv} = cli
   .help();
 
 function exit(error, showHelp = false) {
-  console.log('\x1b[31m\x1b[1m%s\x1b[22m\x1b[0m\n', error);
+  console.log(chalk.red.bold(error));
   if (showHelp) yargs.showHelp();
   process.exit(1);
 }
