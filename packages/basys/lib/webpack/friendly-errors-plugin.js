@@ -6,8 +6,22 @@ class FriendlyErrorsWebpackPlugin extends FriendlyErrorsPlugin {
     super();
 
     this.transformers = [
-      require('friendly-errors-webpack-plugin/src/transformers/moduleNotFound'),
       function(error) {
+        if (error.name === 'ModuleNotFoundError') {
+          const module = error.webpackError.dependencies[0].request;
+          let message;
+          if (module.startsWith('./') || module.startsWith('../')) {
+            message = `Module not found: ${error.webpackError.error.message}`;
+          } else {
+            message = `Module not found: Can't resolve '${module}'`;
+          }
+          return Object.assign({}, error, {
+            message,
+            severity: 1000,
+            origin: null,
+          });
+        }
+
         if (error.name === 'ModuleError' && error.message.includes('Error compiling template:')) {
           // BUG: add colors to the error
           return Object.assign({}, error, {
@@ -39,8 +53,18 @@ class FriendlyErrorsWebpackPlugin extends FriendlyErrorsPlugin {
             });
           }
 
+          // Missing style module import in .vue file
+          if (err.name === 'Error' && err.message.indexOf('File to import not found') >= 0) {
+            // BUG: improve error message
+            return Object.assign({}, error, {
+              message: err.message.substr(1),
+              severity: 1000,
+              origin: null,
+            });
+          }
+
           // Babel syntax error
-          if (error.name === 'ModuleBuildError' && error.message.indexOf('SyntaxError') >= 0) {
+          if (error.message.indexOf('SyntaxError') >= 0) {
             // Clean the message. Match until the last semicolon followed by a space.
             // This should match:
             // linux => "(SyntaxError: )Unexpected token (5:11)"
@@ -58,7 +82,7 @@ class FriendlyErrorsWebpackPlugin extends FriendlyErrorsPlugin {
           }
 
           // Happens when resolving an import with postcss-import fails
-          if (error.name === 'ModuleBuildError' && err.code === 'RESOLVE_POSTCSS_IMPORT') {
+          if (err.code === 'RESOLVE_POSTCSS_IMPORT') {
             return Object.assign({}, error, {
               message: `Cannot resolve '${err.resolvePath}' module in <style> block`,
               severity: 1000,
@@ -71,10 +95,7 @@ class FriendlyErrorsWebpackPlugin extends FriendlyErrorsPlugin {
       },
     ];
 
-    this.formatters = [
-      require('friendly-errors-webpack-plugin/src/formatters/moduleNotFound'),
-      require('friendly-errors-webpack-plugin/src/formatters/defaultError'),
-    ];
+    this.formatters = [require('friendly-errors-webpack-plugin/src/formatters/defaultError')];
   }
 }
 
