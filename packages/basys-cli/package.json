@@ -1,6 +1,6 @@
 {
   "name": "basys-cli",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "CLI for developing Basys projects",
   "homepage": "https://basys.io",
   "bugs": {
@@ -20,7 +20,7 @@
     "download": "^6.2.5",
     "fs-extra": "^5.0.0",
     "inquirer": "^5.1.0",
-    "ora": "^1.4.0",
+    "ora": "^2.0.0",
     "yargs": "^11.0.0"
   },
   "engines": {
