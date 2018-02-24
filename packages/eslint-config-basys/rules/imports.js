@@ -98,5 +98,9 @@ module.exports = {
     // Prevent importing the default as if it were named
     // https://github.com/benmosher/eslint-plugin-import/blob/master/docs/rules/no-named-default.md
     'import/no-named-default': 'error',
+
+    // Forbid a module from importing itself
+    // https://github.com/benmosher/eslint-plugin-import/blob/master/docs/rules/no-self-import.md
+    'no-self-import': 'error',
   },
 };
