@@ -69,8 +69,23 @@ async function initProject(answers, install = true) {
     ]);
   }
 
+  // Generate Visual Studio Code workspace settings
+  let addVSCode;
+  if (typeof answers.vscode === 'boolean') {
+    addVSCode = answers.vscode;
+  } else {
+    addVSCode = (await inquirer.prompt([
+      {
+        type: 'confirm',
+        name: 'vscode',
+        message: 'Would you like to add Visual Studio Code settings?',
+        default: true,
+      },
+    ])).vscode;
+  }
+
   const ora = require('ora');
-  spinner = ora('Downloading starter project').start();
+  spinner = ora('Downloading starter project');
   if (path.isAbsolute(templateName) || templateName.startsWith('.') || templateName.startsWith('~')) {
     // Local directory
     let templateDir;
@@ -81,6 +96,7 @@ async function initProject(answers, install = true) {
     }
     await fs.copy(templateDir, destDir);
   } else {
+    spinner.start();
     // Github repository
     const m = /^([^/]+)\/([^#]+)(#(.+))?$/.exec(templateName);
     const url = `https://github.com/${m[1]}/${m[2]}/archive/${m[4] || 'master'}.zip`;
@@ -91,15 +107,21 @@ async function initProject(answers, install = true) {
       mode: '666',
       headers: {accept: 'application/zip'},
     });
+    spinner.stop();
   }
 
   if (!detectBasysProject(destDir)) {
-    spinner.stop();
+    await fs.remove(destDir); // BUG: don't remove the directory if it existed before
     throw new Error('Project provided with starter template is missing basys.json or package.json file');
   }
 
+  if (addVSCode) {
+    await fs.copy(path.join(__dirname, 'vscode', 'jsconfig.json'), path.join(destDir, 'jsconfig.json'));
+    await fs.copy(path.join(__dirname, 'vscode', 'settings.json'), path.join(destDir, '.vscode', 'settings.json'));
+  }
+
   if (install) {
-    spinner.text = 'Installing packages';
+    spinner.start('Installing packages');
     process.chdir(destDir);
     try {
       await require('util').promisify(require('child_process').exec)('npm install');
@@ -107,9 +129,8 @@ async function initProject(answers, install = true) {
       spinner.stop();
       throw new Error('Installing npm packages failed');
     }
+    spinner.stop();
   }
-
-  spinner.stop();
 
   // BUG: change commands to 'npm/yarn basys dev' if this is a local basys-cli instance is used?
   let commands = '';

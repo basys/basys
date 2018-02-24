@@ -1,0 +1,27 @@
+{
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "files.exclude": {
+    "**/.basys": true,
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/.vscode": true,
+    "yarn-error.log": true,
+    "yarn.lock": true,
+    "package-lock.json": true,
+  },
+  "editor.wordWrapColumn": 100,
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+  },
+  "files.associations": {
+    "basys.json": "jsonc",
+    ".stylelintrc": "json",
+    "index.html": "basys-nunjucks",
+  },
+  "javascript.format.enable": false,
+  "scss.validate": false,
+  "css.validate": false,
+  "less.validate": false,
+}
