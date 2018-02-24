@@ -63,9 +63,6 @@ function getConfig(projectDir, appName, env) {
     cssSourceMap: env === 'test',
     jsSourceMap: env === 'test',
 
-    // BUG: shorten the list of supported editors?
-    editor: null, // 'sublime', 'atom', 'code', 'webstorm', 'phpstorm', 'idea14ce', 'vim', 'emacs', 'visualstudio'
-
     host: 'localhost',
     // In dev env another free port will be determined if this one is occupied.
     // In other envs the server will fail to start.
