@@ -1,3 +1,4 @@
+const fs = require('fs-extra');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 const webpack = require('webpack');
@@ -214,7 +215,9 @@ module.exports = function(config, entryType) {
         }),
         new HtmlWebpackPlugin({
           filename: path.join(config.distDir, 'index.html'),
-          template: path.join(srcDir, 'index.html'),
+          template: fs.pathExistsSync(path.join(config.projectDir, 'index.html'))
+            ? path.join(config.projectDir, 'index.html')
+            : path.join(__dirname, '..', 'templates', 'index.html'),
           inject: 'body',
           minify:
             config.env !== 'dev'
