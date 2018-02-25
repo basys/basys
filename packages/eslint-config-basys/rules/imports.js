@@ -1,16 +1,11 @@
+const path = require('path');
+
 module.exports = {
   plugins: ['import'],
   settings: {
-    'import/resolver': {
-      node: {
-        extensions: ['.js', '.json'],
-      },
-    },
+    'import/resolver': path.join(__dirname, 'import-resolver'),
     'import/core-modules': [],
     'import/ignore': ['node_modules', '\\.(scss|css|less|svg|json)$'],
-    // BUG: maybe use https://www.npmjs.com/package/eslint-import-resolver-webpack
-    // BUG: we probably never want to import .vue files
-    'import/extensions': ['.js', '.vue'],
   },
   rules: {
     // Static analysis:
@@ -75,10 +70,6 @@ module.exports = {
     // https://github.com/benmosher/eslint-plugin-import/blob/master/docs/rules/no-duplicates.md
     'import/no-duplicates': 'error',
 
-    // Ensure consistent use of file extension within the import path
-    // https://github.com/benmosher/eslint-plugin-import/blob/master/docs/rules/extensions.md
-    'import/extensions': ['error', 'always', {js: 'never'}],
-
     // Require a newline after the last import/require in a group
     // https://github.com/benmosher/eslint-plugin-import/blob/master/docs/rules/newline-after-import.md
     'import/newline-after-import': 'error',
@@ -101,6 +92,6 @@ module.exports = {
 
     // Forbid a module from importing itself
     // https://github.com/benmosher/eslint-plugin-import/blob/master/docs/rules/no-self-import.md
-    'no-self-import': 'error',
+    'import/no-self-import': 'error',
   },
 };

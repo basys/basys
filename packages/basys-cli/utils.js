@@ -6,11 +6,7 @@ const path = require('path');
 function detectBasysProject(dir) {
   while (true) {
     if (dir === path.dirname(dir)) break;
-
-    if (fs.existsSync(path.join(dir, 'basys.json')) && fs.existsSync(path.join(dir, 'package.json'))) {
-      return dir;
-    }
-
+    if (fs.existsSync(path.join(dir, 'basys.json'))) return dir;
     dir = path.dirname(dir);
   }
 }

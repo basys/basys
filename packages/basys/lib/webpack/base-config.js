@@ -90,7 +90,12 @@ module.exports = function(config, entryType) {
       externals: [
         function(context, request, callback) {
           // Don't bundle packages from node_modules into backend.js
-          if (!request.startsWith('.') && !request.startsWith('~') && !path.isAbsolute(request)) {
+          if (
+            !request.startsWith('.') &&
+            !request.startsWith('~') &&
+            !request.startsWith('@') &&
+            !path.isAbsolute(request)
+          ) {
             return callback(null, `commonjs ${request}`);
           }
           callback();
