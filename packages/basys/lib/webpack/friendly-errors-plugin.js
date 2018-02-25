@@ -43,11 +43,37 @@ class FriendlyErrorsWebpackPlugin extends FriendlyErrorsPlugin {
             });
           }
 
-          // Style syntax error in a .vue file or its imports
+          // PostCSS syntax error in a .vue file or its imports
           if (err.name === 'CssSyntaxError') {
             return Object.assign({}, error, {
               message: `Syntax error: ${err.reason} (${err.line}:${err.column})\n\n${err.showSourceCode()}`,
               file: path.relative(config.projectDir, err.file),
+              severity: 1000,
+              origin: null,
+            });
+          }
+
+          // SCSS syntax error
+          if (err.formatted && err.formatted.startsWith('Error: Invalid CSS')) {
+            return Object.assign({}, error, {
+              message:
+                err.message
+                  .split('\n')
+                  .slice(1, -1)
+                  .join('\n') + ` (line ${err.line}, column ${err.column})`,
+              severity: 1000,
+              origin: null,
+            });
+          }
+
+          // LESS syntax error
+          if (err.type === 'Parse') {
+            return Object.assign({}, error, {
+              message:
+                err.message
+                  .split('\n')
+                  .slice(2, -1)
+                  .join('\n') + ` (line ${err.line}, column ${err.column})`,
               severity: 1000,
               origin: null,
             });

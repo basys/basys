@@ -73,7 +73,6 @@
     "vue-meta": "1.4.3",
     "vue-router": "3.0.1",
     "vue-style-loader": "4.0.2",
-    "vue-template-compiler": "2.5.13",
     "vuex": "3.0.1",
     "webpack": "3.11.0",
     "webpack-bundle-analyzer": "2.10.1",
