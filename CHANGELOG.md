@@ -1,3 +1,12 @@
+## 0.3.0 (26 February 2018)
+
+* [Visual Studio Code extension](https://marketplace.visualstudio.com/items?itemName=basys.vscode-basys) for improved developer experience
+* Style linting using styleling and Prettier
+* Add ~ and @ aliases for `src/` and `assets/` directories
+* Made index.html template optional
+* Bundle size report is generated along with the production build
+* CLI performance improvements
+
 ## 0.2.0 (3 February 2018)
 
 * Basys CLI for creating new projects and working with existing ones

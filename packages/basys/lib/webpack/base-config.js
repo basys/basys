@@ -131,7 +131,7 @@ module.exports = function(config, entryType) {
 
     const styleLoader = extension => ({
       test: new RegExp(`\\.${extension}$`),
-      include: [assetsDir, path.join(config.projectDir, 'node_modules')],
+      include: [assetsDir, /node_modules/],
       use: generateLoaders(config, extension, true),
     });
 

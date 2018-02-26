@@ -11,7 +11,7 @@ async function testBasysAPI() {
   await fs.emptyDir(projectDir);
 
   const {initProject} = require('../../basys-cli/utils');
-  await initProject({name: '../basys-todomvc', dest: projectDir}, false);
+  await initProject({name: '../basys-todomvc', dest: projectDir, vscode: false}, false);
 
   // Prevent the app from being opened in the browser on first start of dev server
   await fs.ensureFile(path.join(projectDir, '.basys', 'todomvc', 'dev', 'index.html'));
