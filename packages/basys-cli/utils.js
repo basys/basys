@@ -34,7 +34,6 @@ async function initProject(answers, install = true) {
 
   const cwd = process.cwd();
   let destDir;
-  let spinner;
 
   function validateDestPath(dest) {
     if (!dest || !path.isAbsolute(dest)) {
@@ -44,8 +43,10 @@ async function initProject(answers, install = true) {
     }
     destDir = path.normalize(destDir);
 
-    if (fs.pathExistsSync(destDir) && fs.readdirSync(destDir).length > 0) return 'Provided directory is not empty';
-    if (detectBasysProject(destDir)) return 'Provided location is already inside another Basys project';
+    if (fs.pathExistsSync(destDir) && fs.readdirSync(destDir).length > 0)
+      return 'Provided directory is not empty';
+    if (detectBasysProject(destDir))
+      return 'Provided location is already inside another Basys project';
 
     return true;
   }
@@ -81,8 +82,12 @@ async function initProject(answers, install = true) {
   }
 
   const ora = require('ora');
-  spinner = ora('Downloading starter project');
-  if (path.isAbsolute(templateName) || templateName.startsWith('.') || templateName.startsWith('~')) {
+  const spinner = ora('Downloading starter project');
+  if (
+    path.isAbsolute(templateName) ||
+    templateName.startsWith('.') ||
+    templateName.startsWith('~')
+  ) {
     // Local directory
     let templateDir;
     if (templateName.startsWith('.')) {
@@ -108,12 +113,20 @@ async function initProject(answers, install = true) {
 
   if (!detectBasysProject(destDir)) {
     await fs.remove(destDir); // BUG: don't remove the directory if it existed before
-    throw new Error('Project provided with starter template is missing basys.json or package.json file');
+    throw new Error(
+      'Project provided with starter template is missing basys.json or package.json file',
+    );
   }
 
   if (addVSCode) {
-    await fs.copy(path.join(__dirname, 'vscode', 'jsconfig.json'), path.join(destDir, 'jsconfig.json'));
-    await fs.copy(path.join(__dirname, 'vscode', 'settings.json'), path.join(destDir, '.vscode', 'settings.json'));
+    await fs.copy(
+      path.join(__dirname, 'vscode', 'jsconfig.json'),
+      path.join(destDir, 'jsconfig.json'),
+    );
+    await fs.copy(
+      path.join(__dirname, 'vscode', 'settings.json'),
+      path.join(destDir, '.vscode', 'settings.json'),
+    );
   }
 
   if (install) {
@@ -132,9 +145,9 @@ async function initProject(answers, install = true) {
   let commands = '';
   if (cwd !== destDir) {
     // BUG: what about windows?
-    commands += '`' + chalk.green.bold('cd ' + path.relative(cwd, destDir)) + '`, then ';
+    commands += `\`${chalk.green.bold(`cd ${path.relative(cwd, destDir)}`)}\`, then `;
   }
-  commands += '`' + chalk.green.bold('basys dev') + '`';
+  commands += `\`${chalk.green.bold('basys dev')}\``;
   spinner.succeed(`Successfully generated the project. To start the dev server run ${commands}.`);
 }
 

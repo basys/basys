@@ -52,7 +52,11 @@ function getConfig(projectDir, appName, env) {
 
   let config = projectConfig.apps[appName];
   if (!['web', 'mobile', 'desktop'].includes(config.type)) {
-    exit(`Incorrect ${appName} app type: '${config.type}'. Allowed values are: 'web', 'mobile', 'desktop'.`);
+    exit(
+      `Incorrect ${appName} app type: '${
+        config.type
+      }'. Allowed values are: 'web', 'mobile', 'desktop'.`,
+    );
   }
 
   // Default app configuration

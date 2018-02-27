@@ -162,7 +162,10 @@ async function build(projectDir, appName, env = 'prod') {
           dependencies,
         };
 
-        fs.writeFileSync(path.join(config.distDir, 'package.json'), JSON.stringify(packageJson, null, 2));
+        fs.writeFileSync(
+          path.join(config.distDir, 'package.json'),
+          JSON.stringify(packageJson, null, 2),
+        );
       }
 
       for (const stats of multiStats.stats) {
@@ -184,9 +187,11 @@ async function build(projectDir, appName, env = 'prod') {
 
       // BUG: fix the command, show deployment name if needed?
       if (config.env === 'prod') {
-        console.log('Build complete, you can find it in ' + chalk.cyan.bold(config.distDir) + '.');
-        const command = 'basys start' + (appName ? ' ' + appName : '');
-        console.log('Use `' + chalk.green.bold(command) + '` to test the production build on your machine.');
+        console.log(`Build complete, you can find it in ${chalk.cyan.bold(config.distDir)}.`);
+        const command = `basys start${appName ? ` ${appName}` : ''}`;
+        console.log(
+          `Use \`${chalk.green.bold(command)}\` to test the production build on your machine.`,
+        );
       } else {
         console.log(chalk.cyan('Build complete.'));
       }

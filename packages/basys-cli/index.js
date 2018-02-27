@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
 const chalk = require('chalk');
-const yargs = require('yargs');
+const {showHelp, usage} = require('yargs');
 const {detectBasysProject, initProject} = require('./utils');
 
 const projectDir = detectBasysProject(process.cwd());
-let cli = yargs.usage('$0 <command> [<arguments>]');
+let cli = usage('$0 <command> [<arguments>]');
 
 if (projectDir) {
   cli = cli
@@ -37,9 +37,9 @@ const {argv} = cli
   })
   .help();
 
-function exit(error, showHelp = false) {
+function exit(error, help = false) {
   console.log(chalk.red.bold(error));
-  if (showHelp) yargs.showHelp();
+  if (help) showHelp();
   process.exit(1);
 }
 
@@ -47,7 +47,9 @@ async function runCommand() {
   if (argv._.length < 1) exit('You need to provide a command', true);
 
   const command = argv._[0];
-  const isProjectCommand = ['dev', 'build', 'start', 'test:e2e', 'lint', 'lint:fix'].includes(command);
+  const isProjectCommand = ['dev', 'build', 'start', 'test:e2e', 'lint', 'lint:fix'].includes(
+    command,
+  );
   const isGenericCommand = ['help', 'init'].includes(command);
   if (!isProjectCommand && !isGenericCommand) exit(`Invalid command: ${command}`, true);
 
@@ -61,11 +63,11 @@ async function runCommand() {
     }));
     const appName = argv['app-name'];
     if (command === 'dev') {
-      return await dev(projectDir, appName);
+      return dev(projectDir, appName);
     } else if (command === 'start') {
-      return await start(projectDir, appName);
+      return start(projectDir, appName);
     } else if (command === 'build') {
-      return await build(projectDir, appName);
+      return build(projectDir, appName);
     } else if (command === 'test:e2e') {
       await e2eTest(projectDir, appName);
       process.exit();
@@ -77,7 +79,7 @@ async function runCommand() {
   } else {
     if (command === 'help') {
       // BUG: show help for command if provided
-      yargs.showHelp();
+      showHelp();
     } else if (command === 'init') {
       return initProject({name: argv['template-name']});
     }

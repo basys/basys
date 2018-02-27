@@ -1,3 +1,4 @@
+<!--- This file should be editing in the repository root directory, maintain a copy of it in packages/basys/README.md  -->
 # Basys
 
 A JavaScript framework for building cross-plaform applications with a focus on developer experience.

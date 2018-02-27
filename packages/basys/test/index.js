@@ -28,7 +28,7 @@ async function testBasysAPI() {
       if (res.statusCode === 200) {
         resolve();
       } else {
-        reject('Failed to start dev server');
+        reject(new Error('Failed to start dev server'));
       }
     });
   });

@@ -25,7 +25,7 @@ class OptimizeCssAssetsPlugin {
     const result = csso.minify(asset.source(), Object.assign({filename: assetName}, this.options));
     let css = result.css;
     if (this.options.sourceMap) {
-      assets.setAsset(assetName + '.map', result.map.toString());
+      assets.setAsset(`${assetName}.map`, result.map.toString());
       css += `/*# sourceMappingURL=${path.basename(assetName)}.map */`;
     }
     return Promise.resolve(css);

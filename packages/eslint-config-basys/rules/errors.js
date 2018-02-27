@@ -20,7 +20,7 @@ module.exports = {
     'no-cond-assign': ['error', 'always'],
 
     // disallow use of constant expressions in conditions
-    'no-constant-condition': 'warn',
+    // 'no-constant-condition': 'warn',
 
     // disallow control characters in regular expressions
     'no-control-regex': 'error',
@@ -38,7 +38,7 @@ module.exports = {
     'no-duplicate-case': 'error',
 
     // disallow empty statements
-    'no-empty': 'error',
+    'no-empty': ['error', {allowEmptyCatch: true}],
 
     // disallow the use of empty character classes in regular expressions
     'no-empty-character-class': 'error',

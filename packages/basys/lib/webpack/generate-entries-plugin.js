@@ -1,4 +1,3 @@
-const chalk = require('chalk');
 const chokidar = require('chokidar');
 const espree = require('espree');
 const fs = require('fs-extra');
@@ -92,7 +91,9 @@ class GenerateEntriesWebpackPlugin {
         }
         const props = infoProp.value.properties;
 
-        const appsProp = props.find(node => node.key.type === 'Identifier' && node.key.name === 'apps');
+        const appsProp = props.find(
+          node => node.key.type === 'Identifier' && node.key.name === 'apps',
+        );
         if (appsProp) {
           if (appsProp.value.type !== 'ArrayExpression') {
             this.error(vuePath, "'info.apps' option must be an array of string literals");
@@ -116,7 +117,9 @@ class GenerateEntriesWebpackPlugin {
           }
         }
 
-        const pathProp = props.find(node => node.key.type === 'Identifier' && node.key.name === 'path');
+        const pathProp = props.find(
+          node => node.key.type === 'Identifier' && node.key.name === 'path',
+        );
         if (pathProp) {
           if (pathProp.value.type !== 'Literal' || typeof pathProp.value.value !== 'string') {
             this.error(vuePath, "'info.path' option must be a string literal");
@@ -143,7 +146,9 @@ class GenerateEntriesWebpackPlugin {
         if (info.path) {
           try {
             // We use the version 1.7.0 of path-to-regexp package, which is used in vue-router
-            pagePaths.push(pathToRegexp(info.path, [], {sensitive: this.config.caseSensitive}).toString());
+            pagePaths.push(
+              pathToRegexp(info.path, [], {sensitive: this.config.caseSensitive}).toString(),
+            );
           } catch (e) {
             this.errors.push(new Error(`${vuePath} page path error: ${e.message}`));
             continue;
@@ -155,7 +160,9 @@ class GenerateEntriesWebpackPlugin {
         env: this.config.env,
         appName: this.config.appName,
         pagePaths,
-        entry: this.config.backendEntry && path.join(this.config.projectDir, 'src', this.config.backendEntry),
+        entry:
+          this.config.backendEntry &&
+          path.join(this.config.projectDir, 'src', this.config.backendEntry),
         conf: codeConfig(this.config),
       });
     }

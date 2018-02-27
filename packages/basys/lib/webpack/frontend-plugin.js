@@ -19,7 +19,7 @@ class FrontendWebpackPlugin {
           }
 
           // BUG: use this.config.assetsPublicPath here?
-          const faviconPath = 'static/' + path.basename(fullFaviconPath);
+          const faviconPath = `static/${path.basename(fullFaviconPath)}`;
           compilation.fileDependencies.push(fullFaviconPath);
           // BUG: prevent overlap with other files
           compilation.assets[faviconPath] = {
@@ -32,7 +32,7 @@ class FrontendWebpackPlugin {
             selfClosingTag: false,
             attributes: {
               rel: 'shortcut icon',
-              href: `/${faviconPath}` + (this.config.env === 'dev' ? `?${compilation.hash}` : ''),
+              href: `/${faviconPath}${this.config.env === 'dev' ? `?${compilation.hash}` : ''}`,
             },
           });
         }

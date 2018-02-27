@@ -109,7 +109,7 @@ async function start(projectDir, appName, env = 'prod') {
   if (config.type === 'web') {
     const backendPath = path.join(config.distDir, 'backend.js');
     if (!fs.pathExistsSync(backendPath)) {
-      exit(`Please run \`basys build${appName ? ' ' + appName : ''}\` command first`);
+      exit(`Please run \`basys build${appName ? ` ${appName}` : ''}\` command first`);
     }
 
     const port = await portfinder.getPortPromise({host: config.host, port: config.port});
@@ -199,7 +199,9 @@ async function lint(projectDir, fix) {
   ];
   for (const result of res.results) {
     const numWarnings = result.warnings.length;
-    result.warnings = result.warnings.filter(warning => !stylelintFormattingRules.includes(warning.rule));
+    result.warnings = result.warnings.filter(
+      warning => !stylelintFormattingRules.includes(warning.rule),
+    );
     stats.style.formatting += numWarnings - result.warnings.length;
     stats.style.linting += result.warnings.length;
   }
@@ -234,7 +236,9 @@ async function lint(projectDir, fix) {
   }
 
   const chalk = require('chalk');
-  console.log(chalk.red.bold(`\n${stats.js.linting} code and ${stats.style.linting} style linting errors.`));
+  console.log(
+    chalk.red.bold(`\n${stats.js.linting} code and ${stats.style.linting} style linting errors.`),
+  );
   if (stats.js.formatting + stats.style.formatting > 0) {
     console.log(
       chalk.yellow.bold(

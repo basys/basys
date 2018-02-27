@@ -26,7 +26,10 @@ module.exports = {
     'at-rule-semicolon-space-before': 'never',
     'color-no-invalid-hex': true,
     'comment-no-empty': true,
-    'declaration-block-no-duplicate-properties': [true, {ignore: ['consecutive-duplicates-with-different-values']}],
+    'declaration-block-no-duplicate-properties': [
+      true,
+      {ignore: ['consecutive-duplicates-with-different-values']},
+    ],
     'declaration-bang-space-after': 'never',
     'declaration-bang-space-before': 'always',
     'declaration-block-no-shorthand-property-overrides': true,

@@ -46,7 +46,9 @@ class FriendlyErrorsWebpackPlugin extends FriendlyErrorsPlugin {
           // PostCSS syntax error in a .vue file or its imports
           if (err.name === 'CssSyntaxError') {
             return Object.assign({}, error, {
-              message: `Syntax error: ${err.reason} (${err.line}:${err.column})\n\n${err.showSourceCode()}`,
+              message: `Syntax error: ${err.reason} (${err.line}:${
+                err.column
+              })\n\n${err.showSourceCode()}`,
               file: path.relative(config.projectDir, err.file),
               severity: 1000,
               origin: null,
@@ -56,11 +58,10 @@ class FriendlyErrorsWebpackPlugin extends FriendlyErrorsPlugin {
           // SCSS syntax error
           if (err.formatted && err.formatted.startsWith('Error: Invalid CSS')) {
             return Object.assign({}, error, {
-              message:
-                err.message
-                  .split('\n')
-                  .slice(1, -1)
-                  .join('\n') + ` (line ${err.line}, column ${err.column})`,
+              message: `${err.message
+                .split('\n')
+                .slice(1, -1)
+                .join('\n')} (line ${err.line}, column ${err.column})`,
               severity: 1000,
               origin: null,
             });
@@ -69,11 +70,10 @@ class FriendlyErrorsWebpackPlugin extends FriendlyErrorsPlugin {
           // LESS syntax error
           if (err.type === 'Parse') {
             return Object.assign({}, error, {
-              message:
-                err.message
-                  .split('\n')
-                  .slice(2, -1)
-                  .join('\n') + ` (line ${err.line}, column ${err.column})`,
+              message: `${err.message
+                .split('\n')
+                .slice(2, -1)
+                .join('\n')} (line ${err.line}, column ${err.column})`,
               severity: 1000,
               origin: null,
             });
@@ -98,7 +98,7 @@ class FriendlyErrorsWebpackPlugin extends FriendlyErrorsPlugin {
             let message = error.message.replace(/^Module build failed.*:\s/, 'Syntax Error: ');
 
             // Clean stack trace
-            message = (message + '\n').replace(/^\s*at\s.*:\d+:\d+[\s\)]*\n/gm, ''); // at ... ...:x:y
+            message = `${message}\n`.replace(/^\s*at\s.*:\d+:\d+[\s)]*\n/gm, ''); // at ... ...:x:y
 
             return Object.assign({}, error, {
               message,

@@ -2,7 +2,6 @@ const fs = require('fs-extra');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 const webpack = require('webpack');
-const {config} = require('../config');
 const {exit} = require('../utils');
 const FrontendWebpackPlugin = require('./frontend-plugin');
 const {assetsPath, generateLoaders} = require('./utils');
@@ -35,7 +34,9 @@ function getBabelLoader(config, entryType) {
         'syntax-trailing-function-commas',
         'transform-async-to-generator',
         'transform-exponentiation-operator',
-        ...(config.type !== 'web' || entryType === 'frontend' ? [path.join(__dirname, 'babel-vue-plugin')] : []),
+        ...(config.type !== 'web' || entryType === 'frontend'
+          ? [path.join(__dirname, 'babel-vue-plugin')]
+          : []),
       ],
       // BUG: do we need it?
       // env: {

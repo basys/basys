@@ -22,10 +22,10 @@ module.exports = function({file, options}) {
             let filePath = id;
             if (id.startsWith('@/')) {
               basedir = path.join(config.projectDir, 'assets');
-              filePath = './' + id.substr(2);
+              filePath = `./${id.substr(2)}`;
             } else if (id.startsWith('~/')) {
               basedir = path.join(config.projectDir, 'src');
-              filePath = './' + id.substr(2);
+              filePath = `./${id.substr(2)}`;
             }
             return resolve(filePath, basedir, importOptions).catch(e => {
               e.code = 'RESOLVE_POSTCSS_IMPORT';
