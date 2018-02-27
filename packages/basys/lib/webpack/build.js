@@ -9,7 +9,6 @@ const {assetsPath} = require('./utils');
 function prodWebpackConfigs(config) {
   // const CopyWebpackPlugin = require('copy-webpack-plugin');
   const ExtractTextPlugin = require('extract-text-webpack-plugin');
-  const OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin');
   const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
   const webpack = require('webpack');
   const merge = require('webpack-merge');
@@ -81,15 +80,11 @@ function prodWebpackConfigs(config) {
   ];
 
   if (config.env === 'prod') {
+    const OptimizeCSSPlugin = require('./optimize-css-assets-plugin');
     plugins.unshift(
       uglifyJsPlugin,
       new OptimizeCSSPlugin({
-        cssProcessorOptions: {
-          safe: true,
-          // BUG: existing prefixes don't seem to get removed
-          autoprefixer: {browsers: config.browsers, add: true},
-          map: config.cssSourceMap ? {inline: false} : undefined,
-        },
+        sourceMap: config.cssSourceMap,
       }),
     );
 
