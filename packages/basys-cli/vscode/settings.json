@@ -24,4 +24,8 @@
   "scss.validate": false,
   "css.validate": false,
   "less.validate": false,
+  "eslint.enable": true,
+  "eslint.options": {
+    "baseConfig": {"extends": "basys"},
+  },
 }

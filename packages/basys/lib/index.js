@@ -213,6 +213,7 @@ async function lint(projectDir, fix) {
   const CLIEngine = require('eslint/lib/cli-engine');
   const engine = new CLIEngine({
     cwd: projectDir,
+    baseConfig: {extends: 'basys'},
     extensions: ['.js', '.vue'],
     cache: true,
     cacheLocation: path.join(projectDir, '.basys', '.eslintcache'),
