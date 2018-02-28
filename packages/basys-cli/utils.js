@@ -1,6 +1,7 @@
 const chalk = require('chalk');
 const fs = require('fs-extra');
 const path = require('path');
+const {showHelp} = require('yargs');
 
 // Detect whether `dir` is inside a Basys project directory
 function detectBasysProject(dir) {
@@ -8,6 +9,55 @@ function detectBasysProject(dir) {
     if (dir === path.dirname(dir)) break;
     if (fs.existsSync(path.join(dir, 'basys.json'))) return dir;
     dir = path.dirname(dir);
+  }
+}
+
+function exit(error, help = false) {
+  console.log(chalk.red.bold(error));
+  if (help) showHelp();
+  process.exit(1);
+}
+
+async function runCommand(projectDir, argv) {
+  if (argv._.length < 1) exit('You need to provide a command', true);
+
+  const command = argv._[0];
+  const isProjectCommand = ['dev', 'build', 'start', 'test:e2e', 'lint', 'lint:fix'].includes(
+    command,
+  );
+  const isGenericCommand = ['help', 'init'].includes(command);
+  if (!isProjectCommand && !isGenericCommand) exit(`Invalid command: ${command}`, true);
+
+  if (isProjectCommand) {
+    if (projectDir !== process.cwd()) {
+      console.log(`Basys project detected at ${projectDir}`);
+    }
+
+    const {build, dev, e2eTest, lint, start} = require(require.resolve('basys/lib/index', {
+      paths: [projectDir, __dirname],
+    }));
+    const appName = argv['app-name'];
+    if (command === 'dev') {
+      return dev(projectDir, appName);
+    } else if (command === 'start') {
+      return start(projectDir, appName);
+    } else if (command === 'build') {
+      return build(projectDir, appName);
+    } else if (command === 'test:e2e') {
+      await e2eTest(projectDir, appName);
+      process.exit();
+    } else if (command === 'lint') {
+      return lint(projectDir);
+    } else if (command === 'lint:fix') {
+      return lint(projectDir, true);
+    }
+  } else {
+    if (command === 'help') {
+      // BUG: show help for command if provided
+      showHelp();
+    } else if (command === 'init') {
+      return initProject({name: argv['template-name']});
+    }
   }
 }
 
@@ -151,4 +201,4 @@ async function initProject(answers, install = true) {
   spinner.succeed(`Successfully generated the project. To start the dev server run ${commands}.`);
 }
 
-module.exports = {detectBasysProject, initProject};
+module.exports = {detectBasysProject, exit, initProject, runCommand};
