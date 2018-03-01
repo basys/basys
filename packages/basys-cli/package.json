@@ -1,6 +1,6 @@
 {
   "name": "basys-cli",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "CLI for developing Basys projects",
   "homepage": "https://basys.io",
   "bugs": {

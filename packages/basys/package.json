@@ -1,6 +1,6 @@
 {
   "name": "basys",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Toolbox for building Basys projects",
   "homepage": "https://basys.io",
   "bugs": {
@@ -22,7 +22,7 @@
     "babel-plugin-transform-exponentiation-operator": "6.24.1",
     "babel-polyfill": "6.26.0",
     "babel-preset-env": "1.6.1",
-    "basys-cli": "~0.2.1",
+    "basys-cli": "~0.2.2",
     "body-parser": "1.18.2",
     "chalk": "2.3.1",
     "chokidar": "2.0.2",
@@ -31,7 +31,7 @@
     "css-loader": "0.28.10",
     "deepmerge": "2.0.1",
     "eslint": "4.18.1",
-    "eslint-config-basys": "~0.3.0",
+    "eslint-config-basys": "~0.3.1",
     "espree": "3.5.3",
     "express": "4.16.2",
     "extract-text-webpack-plugin": "3.0.2",

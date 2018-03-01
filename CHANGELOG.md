@@ -1,3 +1,9 @@
+## 0.3.1 (1 March 2018)
+
+* Replace cssnano with csso
+* Make .eslintrc optional
+* Code linting improvements
+
 ## 0.3.0 (26 February 2018)
 
 * [Visual Studio Code extension](https://marketplace.visualstudio.com/items?itemName=basys.vscode-basys) for improved developer experience
