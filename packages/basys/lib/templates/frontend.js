@@ -10,7 +10,7 @@ Vue.use(Meta, {keyName: 'head'});
 Vue.use(Router);
 
 {% if entry %}
-  const entry = require('{{ entry }}');
+  const entry = require({{ entry|dump }});
   const conf = (entry && entry.default) || {};
 {% else %}
   const conf = {};
@@ -42,7 +42,7 @@ const router = new Router({
 
 Vue.config.productionTip = false;
 
-{# BUG: do not expose it to `window`, but make accessible in the code #}
+{# BUG: do not expose it to `window`, but make accessible in the code (via `basys`?) #}
 window.app = new Vue({
   el: '#app',
   router,
