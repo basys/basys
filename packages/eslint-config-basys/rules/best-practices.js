@@ -7,9 +7,6 @@ module.exports = {
     // treat var statements as if they were block scoped
     'block-scoped-var': 'error',
 
-    // require default case in switch statements
-    'default-case': ['error', {commentPattern: '^no default$'}],
-
     // encourages use of dot notation whenever possible
     'dot-notation': ['error', {allowKeywords: true}],
 
