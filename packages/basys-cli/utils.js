@@ -168,13 +168,19 @@ async function initProject(answers, install = true) {
     );
   }
 
+  await fs.ensureDir(path.join(destDir, 'assets'));
+
+  if (!fs.existsSync(path.join(destDir, '.gitignore'))) {
+    await fs.copy(path.join(__dirname, 'templates', 'gitignore'), path.join(destDir, '.gitignore'));
+  }
+
   if (addVSCode) {
     await fs.copy(
-      path.join(__dirname, 'vscode', 'jsconfig.json'),
+      path.join(__dirname, 'templates', 'jsconfig.json'),
       path.join(destDir, 'jsconfig.json'),
     );
     await fs.copy(
-      path.join(__dirname, 'vscode', 'settings.json'),
+      path.join(__dirname, 'templates', 'settings.json'),
       path.join(destDir, '.vscode', 'settings.json'),
     );
   }
@@ -191,12 +197,12 @@ async function initProject(answers, install = true) {
     spinner.stop();
   }
 
-  // BUG: change commands to 'npm/yarn basys dev' if this is a local basys-cli instance is used?
   let commands = '';
   if (cwd !== destDir) {
     // BUG: what about windows?
     commands += `\`${chalk.green.bold(`cd ${path.relative(cwd, destDir)}`)}\`, then `;
   }
+  // BUG: change commands to 'npm run/yarn basys dev' if a local basys-cli instance is used?
   commands += `\`${chalk.green.bold('basys dev')}\``;
   spinner.succeed(`Successfully generated the project. To start the dev server run ${commands}.`);
 }

@@ -37,12 +37,16 @@ if (localCLIPath) {
   }
 
   const {argv} = cli
-    .command('init [<template-name>]', 'Scaffold a Basys project using a starter template', yargs => {
-      yargs.positional('template-name', {
-        type: 'string',
-        describe: 'username/repo from GitHub or local directory',
-      });
-    })
+    .command(
+      'init [<template-name>]',
+      'Scaffold a Basys project using a starter template',
+      yargs => {
+        yargs.positional('template-name', {
+          type: 'string',
+          describe: 'username/repo from GitHub or local directory',
+        });
+      },
+    )
     .command('help [<command>]', 'Show help for basys-cli', yargs => {
       yargs.positional('command', {type: 'string'});
     })
