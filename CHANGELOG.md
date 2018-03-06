@@ -1,3 +1,7 @@
+## 0.3.3 (6 March 2018)
+
+* Recommend vscode-jest extension for new projects created with CLI
+
 ## 0.3.2 (6 March 2018)
 
 * Unit testing with Jest

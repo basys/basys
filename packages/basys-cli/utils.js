@@ -199,6 +199,10 @@ async function initProject(answers, install = true) {
       path.join(__dirname, 'templates', 'settings.json'),
       path.join(destDir, '.vscode', 'settings.json'),
     );
+    await fs.copy(
+      path.join(__dirname, 'templates', 'extensions.json'),
+      path.join(destDir, '.vscode', 'extensions.json'),
+    );
   }
 
   if (install) {

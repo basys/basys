@@ -1,6 +1,6 @@
 {
   "name": "basys",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Toolbox for building Basys projects",
   "homepage": "https://basys.io",
   "bugs": {
@@ -22,7 +22,7 @@
     "babel-plugin-transform-exponentiation-operator": "6.24.1",
     "babel-polyfill": "6.26.0",
     "babel-preset-env": "1.6.1",
-    "basys-cli": "0.3.0",
+    "basys-cli": "0.3.1",
     "body-parser": "1.18.2",
     "chalk": "2.3.2",
     "chokidar": "2.0.2",
