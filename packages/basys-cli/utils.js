@@ -22,9 +22,15 @@ async function runCommand(projectDir, argv) {
   if (argv._.length < 1) exit('You need to provide a command', true);
 
   const command = argv._[0];
-  const isProjectCommand = ['dev', 'build', 'start', 'test:e2e', 'lint', 'lint:fix'].includes(
-    command,
-  );
+  const isProjectCommand = [
+    'dev',
+    'build',
+    'start',
+    'test:unit',
+    'test:e2e',
+    'lint',
+    'lint:fix',
+  ].includes(command);
   const isGenericCommand = ['help', 'init'].includes(command);
   if (!isProjectCommand && !isGenericCommand) exit(`Invalid command: ${command}`, true);
 
@@ -33,9 +39,12 @@ async function runCommand(projectDir, argv) {
       console.log(`Basys project detected at ${projectDir}`);
     }
 
-    const {build, dev, e2eTest, lint, start} = require(require.resolve('basys/lib/index', {
-      paths: [projectDir, __dirname],
-    }));
+    const {build, dev, e2eTest, lint, start, unitTest} = require(require.resolve(
+      'basys/lib/index',
+      {
+        paths: [projectDir, __dirname],
+      },
+    ));
     const appName = argv['app-name'];
     if (command === 'dev') {
       return dev(projectDir, appName);
@@ -43,6 +52,8 @@ async function runCommand(projectDir, argv) {
       return start(projectDir, appName);
     } else if (command === 'build') {
       return build(projectDir, appName);
+    } else if (command === 'test:unit') {
+      await unitTest(projectDir);
     } else if (command === 'test:e2e') {
       await e2eTest(projectDir, appName);
       process.exit();
@@ -173,6 +184,11 @@ async function initProject(answers, install = true) {
   if (!fs.existsSync(path.join(destDir, '.gitignore'))) {
     await fs.copy(path.join(__dirname, 'templates', 'gitignore'), path.join(destDir, '.gitignore'));
   }
+
+  await fs.copy(
+    path.join(__dirname, 'templates', 'jest.config.js'),
+    path.join(destDir, 'jest.config.js'),
+  );
 
   if (addVSCode) {
     await fs.copy(

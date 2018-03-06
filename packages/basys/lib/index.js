@@ -250,6 +250,15 @@ async function lint(projectDir, fix) {
   }
 }
 
+function unitTest(projectDir) {
+  const configPath = path.join(projectDir, 'jest.config.js');
+  const jestConfig = fs.pathExistsSync(configPath)
+    ? require(configPath)
+    : require('./webpack/jest-config');
+  const argv = {config: JSON.stringify(jestConfig)};
+  require('jest').runCLI(argv, [projectDir]); // BUG: should be tests/unit?
+}
+
 async function e2eTest(projectDir, appName) {
   // BUG: get fixture file detection in line with testcafe (see https://github.com/DevExpress/testcafe/issues/2074)
   const testPaths = glob.sync(path.join(projectDir, 'tests', 'e2e', '**', '*.js'));
@@ -282,4 +291,4 @@ async function e2eTest(projectDir, appName) {
   return config;
 }
 
-module.exports = {build, dev, e2eTest, lint, start};
+module.exports = {build, dev, e2eTest, lint, start, unitTest};

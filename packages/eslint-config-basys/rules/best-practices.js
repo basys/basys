@@ -63,9 +63,6 @@ module.exports = {
     // disallow unnecessary nested blocks
     'no-lone-blocks': 'error',
 
-    // disallow creation of functions within loops
-    'no-loop-func': 'error',
-
     // disallow use of multiline strings
     'no-multi-str': 'error',
 

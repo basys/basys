@@ -27,7 +27,6 @@ module.exports = {
     // BUG: clean up
     // commonjs: true,
     // es6: true,
-    // jest: true,
     // node: true,
   },
   globals: {
@@ -54,10 +53,24 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['tests/e2e/*.js'],
+      files: ['tests/e2e/**/*.js'],
       globals: {
         fixture: false,
         test: false,
+      },
+    },
+    {
+      files: ['tests/unit/**/*.test.js'],
+      env: {
+        'jest/globals': true,
+      },
+      plugins: ['jest', 'prettier'],
+      rules: {
+        'jest/no-disabled-tests': 'error',
+        'jest/no-focused-tests': 'error',
+        'jest/no-identical-title': 'error',
+        'jest/prefer-to-have-length': 'error',
+        'jest/valid-expect': 'error',
       },
     },
   ],

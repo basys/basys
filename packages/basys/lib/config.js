@@ -87,7 +87,6 @@ function getConfig(projectDir, appName, env) {
       backendEntry: null, // Path to backend entry file (relative to src/ directory)
       backendPort: 3000,
       nodeVersion: env === 'dev' ? 'current' : '8.9',
-
       browsers: ['> 1%', 'last 2 versions'],
 
       // BUG: automatically detect the browsers available on developer's machine? (only relevant if web app is present)

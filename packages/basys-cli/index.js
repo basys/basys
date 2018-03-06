@@ -29,6 +29,7 @@ if (localCLIPath) {
       .command('start [<app-name>]', 'Serve a production bundle', yargs => {
         yargs.positional('app-name', {type: 'string'});
       })
+      .command('test:unit', 'Run unit tests')
       .command('test:e2e [<app-name>]', 'Run end-to-end tests', yargs => {
         yargs.positional('app-name', {type: 'string'});
       })
