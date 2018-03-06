@@ -1,3 +1,7 @@
+## 0.3.2 (6 March 2018)
+
+* Unit testing with Jest
+
 ## 0.3.1 (1 March 2018)
 
 * Replace cssnano with csso

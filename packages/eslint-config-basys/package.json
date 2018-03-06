@@ -1,6 +1,6 @@
 {
   "name": "eslint-config-basys",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "ESLint configuration used by Basys projects",
   "bugs": {
     "url": "https://github.com/basys/basys/issues"
