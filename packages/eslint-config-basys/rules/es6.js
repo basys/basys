@@ -88,10 +88,6 @@ module.exports = {
     // http://eslint.org/docs/rules/prefer-numeric-literals
     'prefer-numeric-literals': 'error',
 
-    // use rest parameters instead of arguments
-    // http://eslint.org/docs/rules/prefer-rest-params
-    'prefer-rest-params': 'error',
-
     // suggest using the spread operator instead of .apply()
     // http://eslint.org/docs/rules/prefer-spread
     'prefer-spread': 'error',

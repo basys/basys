@@ -1,5 +1,6 @@
 const fs = require('fs-extra');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const minimatch = require('minimatch');
 const path = require('path');
 const webpack = require('webpack');
 const {exit} = require('../utils');
@@ -63,6 +64,18 @@ module.exports = function(config, entryType) {
     use: [babelLoader],
   };
 
+  const moduleReplacementPlugin = new webpack.NormalModuleReplacementPlugin(/.*/, result => {
+    for (const resourcePath in config.overrides) {
+      const isMatch = path_ => path_ && minimatch(path_, resourcePath, {nocomment: true});
+      if (isMatch(result.request)) {
+        result.request = config.overrides[resourcePath];
+      }
+      if (isMatch(result.resource)) {
+        result.resource = path.resolve(config.projectDir, config.overrides[resourcePath]); // path.dirname(result.resource)
+      }
+    }
+  });
+
   if (config.type === 'web' && entryType === 'backend') {
     return {
       context: config.projectDir,
@@ -106,7 +119,9 @@ module.exports = function(config, entryType) {
         new webpack.DefinePlugin({
           'basys.env': JSON.stringify(config.env),
           'basys.appName': JSON.stringify(config.appName),
+          'basys.entryType': "'backend'",
         }),
+        moduleReplacementPlugin,
         // BUG: new webpack.BannerPlugin('require('source-map-support').install();', {raw: true, entryOnly: false}),
       ],
     };
@@ -214,11 +229,13 @@ module.exports = function(config, entryType) {
           },
           'basys.env': JSON.stringify(config.env),
           'basys.appName': JSON.stringify(config.appName),
+          'basys.entryType': "'frontend'",
         }),
         new webpack.ProvidePlugin({
           // Make `Vue` object available in code without import
           Vue: ['vue/dist/vue.runtime.esm.js', 'default'],
         }),
+        moduleReplacementPlugin,
         new HtmlWebpackPlugin({
           filename: path.join(config.distDir, 'index.html'),
           template: fs.pathExistsSync(path.join(config.projectDir, 'index.html'))

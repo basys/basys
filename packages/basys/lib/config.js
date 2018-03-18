@@ -64,6 +64,7 @@ function getConfig(projectDir, appName, env) {
     entry: null, // Path to UI entry file (relative to src/ directory)
     favicon: null,
     styles: [],
+    overrides: {},
     cssSourceMap: env === 'test',
     jsSourceMap: env === 'test',
 
