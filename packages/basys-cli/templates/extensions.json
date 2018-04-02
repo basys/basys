@@ -1,5 +1,6 @@
 {
     "recommendations": [
+        "basys.vscode-basys",
         "Orta.vscode-jest"
     ]
 }

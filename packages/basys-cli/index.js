@@ -1,8 +1,14 @@
 #!/usr/bin/env node
 
 const fs = require('fs');
+const semver = require('semver');
 const {usage} = require('yargs');
 const {detectBasysProject, exit, runCommand} = require('./utils');
+
+if (!semver.satisfies(semver.clean(process.version), '>= 8.9')) {
+  console.log('The minimum required version of Node.js is 8.9');
+  process.exit(1);
+}
 
 const projectDir = detectBasysProject(process.cwd());
 
