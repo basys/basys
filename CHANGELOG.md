@@ -1,3 +1,8 @@
+## 0.3.4 (2 April 2018)
+
+* Overriding JS modules to reduce front-end code bundle size. Allows to exclude node.js-specific code from npm packages.
+* Re-activate app builder
+
 ## 0.3.3 (6 March 2018)
 
 * Recommend vscode-jest extension for new projects created with CLI
