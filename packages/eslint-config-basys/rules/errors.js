@@ -8,19 +8,12 @@ module.exports = {
     // http://eslint.org/docs/rules/getter-return
     'getter-return': ['error', {allowImplicit: true}],
 
-    // Disallow await inside of loops
-    // http://eslint.org/docs/rules/no-await-in-loop
-    'no-await-in-loop': 'error',
-
     // Disallow comparisons to negative zero
     // http://eslint.org/docs/rules/no-compare-neg-zero
     'no-compare-neg-zero': 'error',
 
     // disallow assignment in conditional expressions
     'no-cond-assign': ['error', 'always'],
-
-    // disallow use of constant expressions in conditions
-    // 'no-constant-condition': 'warn',
 
     // disallow control characters in regular expressions
     'no-control-regex': 'error',
