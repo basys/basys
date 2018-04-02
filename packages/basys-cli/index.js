@@ -22,6 +22,7 @@ if (localCLIPath) {
     cli = cli
       .command('dev [<app-name>]', 'Start a development server', yargs => {
         yargs.positional('app-name', {type: 'string'});
+        yargs.option('b', {describe: 'Disable the app builder'});
       })
       .command('build [<app-name>]', 'Build the app for production', yargs => {
         yargs.positional('app-name', {type: 'string'});

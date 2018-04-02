@@ -47,7 +47,7 @@ async function runCommand(projectDir, argv) {
     ));
     const appName = argv['app-name'];
     if (command === 'dev') {
-      return dev(projectDir, appName);
+      return dev(projectDir, appName, !argv.noBuilder);
     } else if (command === 'start') {
       return start(projectDir, appName);
     } else if (command === 'build') {

@@ -7,7 +7,7 @@ const {codeConfig, getConfig} = require('./config');
 const {exit, monitorServerStatus} = require('./utils');
 const {build} = require('./webpack/build');
 
-async function dev(projectDir, appName) {
+async function dev(projectDir, appName, appBuilder = true) {
   const {startDevServer} = require('./webpack/dev');
   let config = getConfig(projectDir, appName, 'dev');
   const host = config.host;
@@ -69,16 +69,15 @@ async function dev(projectDir, appName) {
     }
   }
 
-  if (config.appBuilder) {
-    // BUG: what if config.appBuilder option changes?
-    config.appBuilder.port = await portfinder.getPortPromise({host, port: config.appBuilder.port});
+  if (appBuilder) {
+    const appBuilderPort = await portfinder.getPortPromise({host, port: 8090});
     const configPath = path.join(config.tempDir, 'app-builder.json');
     await fs.writeFile(
       configPath,
       JSON.stringify({
         host,
-        port: config.appBuilder.port,
-        backendPort: config.appBuilder.port,
+        port: appBuilderPort,
+        backendPort: appBuilderPort,
         appPort: config.port,
         targetProjectDir: projectDir,
       }),
@@ -88,12 +87,11 @@ async function dev(projectDir, appName) {
 
     // Open app builder when running dev server for the first time
     await new Promise(resolve => {
-      monitorServerStatus(host, config.appBuilder.port, true, connected => {
+      monitorServerStatus(host, appBuilderPort, true, connected => {
         if (connected) {
-          const appBuilderUrl = `http://${host}:${config.appBuilder.port}`;
+          const appBuilderUrl = `http://${host}:${appBuilderPort}`;
           console.log(`App builder is available at ${appBuilderUrl}`);
           if (firstRun) opn(appBuilderUrl);
-
           resolve();
         }
       });

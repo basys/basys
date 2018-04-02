@@ -65,6 +65,7 @@ function getConfig(projectDir, appName, env) {
     favicon: null,
     styles: [],
     overrides: {},
+    caseSensitive: false,
     cssSourceMap: env === 'test',
     jsSourceMap: env === 'test',
 
@@ -76,12 +77,6 @@ function getConfig(projectDir, appName, env) {
     poll: false, // dev env only, see https://webpack.js.org/configuration/dev-server/#devserver-watchoptions-
     custom: {}, // Holds custom config options (shouldn't overlap with any built-in options)
   };
-
-  if (projectConfig.appBuilder) {
-    defaultConfig.appBuilder = merge({port: 8090}, projectConfig.appBuilder);
-  }
-
-  defaultConfig.caseSensitive = projectConfig.caseSensitive || false;
 
   if (config.type === 'web') {
     Object.assign(defaultConfig, {
