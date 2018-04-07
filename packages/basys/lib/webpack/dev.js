@@ -1,3 +1,5 @@
+const fs = require('fs-extra');
+const path = require('path');
 const webpack = require('webpack');
 const Server = require('webpack-dev-server/lib/Server');
 const merge = require('webpack-merge');
@@ -86,6 +88,13 @@ function startDevServer(config) {
       process.on(sig, () => {
         server.close(() => process.exit());
       });
+    });
+
+    // Save dev server host and port info for access by external tools
+    const infoPath = path.join(config.tempDir, 'dev-server.json');
+    fs.writeFileSync(infoPath, JSON.stringify({host: config.host, port: config.port}, null, 2));
+    process.on('exit', () => {
+      fs.removeSync(infoPath);
     });
 
     server.listen(config.port, config.host, err => {
