@@ -1,3 +1,7 @@
+## 0.3.5 (8 April 2018)
+
+* Dev server integration with external tools
+
 ## 0.3.4 (2 April 2018)
 
 * Overriding JS modules to reduce front-end code bundle size. Allows to exclude node.js-specific code from npm packages.
