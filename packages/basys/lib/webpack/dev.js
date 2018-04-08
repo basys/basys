@@ -84,7 +84,7 @@ function startDevServer(config) {
       },
     });
 
-    ['SIGINT', 'SIGTERM'].forEach(sig => {
+    ['SIGHUP', 'SIGINT', 'SIGTERM'].forEach(sig => {
       process.on(sig, () => {
         server.close(() => process.exit());
       });
@@ -92,7 +92,10 @@ function startDevServer(config) {
 
     // Save dev server host and port info for access by external tools
     const infoPath = path.join(config.tempDir, 'dev-server.json');
-    fs.writeFileSync(infoPath, JSON.stringify({host: config.host, port: config.port}, null, 2));
+    fs.writeFileSync(
+      infoPath,
+      JSON.stringify({host: config.host, port: config.port, pid: process.pid}, null, 2),
+    );
     process.on('exit', () => {
       fs.removeSync(infoPath);
     });
