@@ -22,19 +22,15 @@ function getBabelLoader(config, entryType) {
       babelrc: false,
       presets: [
         [
-          'babel-preset-env',
+          '@babel/preset-env',
           {
             modules: false,
             targets,
-            useBuiltIns: true,
+            useBuiltIns: 'entry',
           },
         ],
       ],
       plugins: [
-        // Only stage 4 syntax features are supported (in line with Espree)
-        'syntax-trailing-function-commas',
-        'transform-async-to-generator',
-        'transform-exponentiation-operator',
         ...(config.type !== 'web' || entryType === 'frontend'
           ? [path.join(__dirname, 'babel-vue-plugin')]
           : []),
