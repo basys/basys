@@ -8,36 +8,18 @@ const {assetsPath} = require('./utils');
 
 function prodWebpackConfigs(config) {
   // const CopyWebpackPlugin = require('copy-webpack-plugin');
-  const ExtractTextPlugin = require('extract-text-webpack-plugin');
-  const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+  const MiniCssExtractPlugin = require('mini-css-extract-plugin');
   const webpack = require('webpack');
   const merge = require('webpack-merge');
   const baseWebpackConfig = require('./base-config');
 
-  const uglifyJsPlugin = new UglifyJsPlugin({
-    uglifyOptions: {
-      compress: {
-        warnings: false,
-      },
-    },
-    sourceMap: config.jsSourceMap,
-    cache: true,
-    parallel: true,
-  });
-
   const plugins = [
     // Extract css into its own file
-    new ExtractTextPlugin({
+    new MiniCssExtractPlugin({
       filename: assetsPath('css/[name].[contenthash].css'),
-      // Set the following option to `true` if you want to extract CSS from
-      // codesplit chunks into this main css file as well.
-      // This will result in *all* of your app's CSS being loaded upfront.
-      allChunks: false,
     }),
     // Keep module.id stable when vendor modules don't change
     new webpack.HashedModuleIdsPlugin(),
-    // Enable scope hoisting
-    new webpack.optimize.ModuleConcatenationPlugin(),
     // // Split vendor js into its own file
     // new webpack.optimize.CommonsChunkPlugin({
     //   name: 'vendor',
@@ -79,10 +61,23 @@ function prodWebpackConfigs(config) {
     // ]),
   ];
 
+  const optimization = {minimizer: []};
   if (config.env === 'prod') {
+    const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
     const OptimizeCSSPlugin = require('./optimize-css-assets-plugin');
-    plugins.unshift(
-      uglifyJsPlugin,
+    optimization.minimizer.push(
+      new UglifyJsPlugin({
+        uglifyOptions: {
+          compress: {
+            warnings: false,
+            comparisons: false,
+          },
+        },
+        sourceMap: config.jsSourceMap,
+        cache: true,
+        parallel: true,
+      }),
+
       new OptimizeCSSPlugin({
         sourceMap: config.cssSourceMap,
       }),
@@ -107,22 +102,23 @@ function prodWebpackConfigs(config) {
         filename: assetsPath('js/[name].[chunkhash].js'),
         chunkFilename: assetsPath('js/[id].[chunkhash].js'),
       },
+      optimization,
       plugins,
+      performance: {
+        hints: false,
+      },
     }),
   ];
 
   if (config.type === 'web') {
-    webpackConfigs.push(
-      merge(baseWebpackConfig(config, 'backend'), {
-        plugins: config.env === 'prod' ? [uglifyJsPlugin] : [],
-      }),
-    );
+    webpackConfigs.push(merge(baseWebpackConfig(config, 'backend'), {optimization}));
   }
 
   return webpackConfigs;
 }
 
 async function build(projectDir, appName, env = 'prod') {
+  const FriendlyErrorsWebpackPlugin = require('./friendly-errors-plugin');
   const GenerateEntriesWebpackPlugin = require('./generate-entries-plugin');
   const webpack = require('webpack');
 
@@ -135,7 +131,8 @@ async function build(projectDir, appName, env = 'prod') {
 
   await new Promise((resolve, reject) => {
     const compiler = webpack(prodWebpackConfigs(config));
-    compiler.apply(new GenerateEntriesWebpackPlugin(config));
+    new GenerateEntriesWebpackPlugin(config).apply(compiler);
+    new FriendlyErrorsWebpackPlugin(config).apply(compiler);
     compiler.run((err, multiStats) => {
       spinner.stop();
       if (err) return reject(err);
@@ -175,8 +172,6 @@ async function build(projectDir, appName, env = 'prod') {
             all: false,
             assets: true,
             colors: true,
-            errors: true,
-            errorDetails: true,
             performance: true,
             warnings: true,
           })}\n\n`,

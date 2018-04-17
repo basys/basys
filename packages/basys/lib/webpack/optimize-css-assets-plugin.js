@@ -11,7 +11,7 @@ class OptimizeCssAssetsPlugin {
     const lastCallInstance = new LastCallWebpackPlugin({
       assetProcessors: [
         {
-          phase: LastCallWebpackPlugin.PHASE.OPTIMIZE_CHUNK_ASSETS,
+          phase: LastCallWebpackPlugin.PHASES.OPTIMIZE_CHUNK_ASSETS,
           regExp: /\.css$/g,
           processor: (assetName, asset, assets) => this.processCss(assetName, asset, assets),
         },

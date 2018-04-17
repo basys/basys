@@ -16,11 +16,7 @@ function devWebpackConfigs(config) {
       output: {
         filename: '[name].js',
       },
-      plugins: [
-        new webpack.HotModuleReplacementPlugin(),
-        new webpack.NamedModulesPlugin(), // HMR shows correct file names in console on update
-        new webpack.NoEmitOnErrorsPlugin(),
-      ],
+      plugins: [new webpack.HotModuleReplacementPlugin()],
     }),
   ];
 
@@ -38,11 +34,11 @@ function devWebpackConfigs(config) {
 function startDevServer(config) {
   return new Promise((resolve, reject) => {
     const compiler = webpack(devWebpackConfigs(config));
-    compiler.apply(new GenerateEntriesWebpackPlugin(config));
-    compiler.apply(new webpack.ProgressPlugin());
-    compiler.apply(new FriendlyErrorsWebpackPlugin(config));
-    compiler.plugin('done', () => resolve(server));
-    compiler.plugin('failed', reject);
+    new GenerateEntriesWebpackPlugin(config).apply(compiler);
+    new webpack.ProgressPlugin().apply(compiler);
+    new FriendlyErrorsWebpackPlugin(config).apply(compiler);
+    compiler.hooks.done.tap('startDevServer', () => resolve(server));
+    compiler.hooks.invalid.tap('startDevServer', reject); // BUG: was named 'failed' before. is it correct?
 
     const server = new Server(compiler, {
       clientLogLevel: 'info', // BUG: think about it. use 'warning'?

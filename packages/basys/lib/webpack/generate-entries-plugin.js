@@ -27,7 +27,7 @@ class GenerateEntriesWebpackPlugin {
         });
     }
 
-    compiler.plugin('done', multiStats => {
+    compiler.hooks.done.tap('GenerateEntriesWebpackPlugin', multiStats => {
       Array.prototype.push.apply(multiStats.stats[0].compilation.errors, this.errors);
     });
   }

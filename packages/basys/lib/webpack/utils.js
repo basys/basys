@@ -37,11 +37,8 @@ function generateLoaders(config, extension, usePostCSS) {
 
   // Extract CSS when that option is specified (which is the case during production build)
   if (config.env === 'prod') {
-    const ExtractTextPlugin = require('extract-text-webpack-plugin');
-    return ExtractTextPlugin.extract({
-      use: loaders,
-      fallback: 'vue-style-loader',
-    });
+    const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+    return [MiniCssExtractPlugin.loader].concat(loaders);
   }
   return ['vue-style-loader'].concat(loaders);
 }

@@ -3,7 +3,7 @@ const path = require('path');
 
 class BackendWebpackPlugin {
   apply(compiler) {
-    compiler.plugin('done', stats => {
+    compiler.hooks.done.tap('BackendWebpackPlugin', stats => {
       if (stats.compilation.errors.length) return;
 
       for (const assetPath in stats.compilation.assets) {

@@ -12,11 +12,11 @@
     "url": "https://github.com/basys/basys/tree/master/packages/eslint-config-basys"
   },
   "dependencies": {
-    "enhanced-resolve": "3.4.1",
+    "enhanced-resolve": "4.0.0",
     "eslint-config-prettier": "2.9.0",
     "eslint-plugin-jest": "21.15.0",
-    "eslint-plugin-html": "4.0.2",
-    "eslint-plugin-import": "2.10.0",
+    "eslint-plugin-html": "4.0.3",
+    "eslint-plugin-import": "2.11.0",
     "eslint-plugin-prettier": "2.4.0",
     "eslint-plugin-vue": "4.4.0",
     "eslint-restricted-globals": "0.1.1",

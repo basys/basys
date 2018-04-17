@@ -67,13 +67,14 @@ module.exports = function(config, entryType) {
         result.request = config.overrides[resourcePath];
       }
       if (isMatch(result.resource)) {
-        result.resource = path.resolve(config.projectDir, config.overrides[resourcePath]); // path.dirname(result.resource)
+        result.resource = path.resolve(config.projectDir, config.overrides[resourcePath]);
       }
     }
   });
 
   if (config.type === 'web' && entryType === 'backend') {
     return {
+      mode: config.env === 'dev' ? 'development' : 'production',
       context: config.projectDir,
       entry: path.join(config.tempDir, 'backend-entry.js'),
       target: 'node',
@@ -161,6 +162,7 @@ module.exports = function(config, entryType) {
     });
 
     return {
+      mode: config.env === 'dev' ? 'development' : 'production',
       context: config.projectDir,
       entry: {
         app: assets,

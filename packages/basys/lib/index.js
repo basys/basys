@@ -266,6 +266,10 @@ async function e2eTest(projectDir, appName) {
   await build(projectDir, appName, env);
   const config = await start(projectDir, appName, env);
 
+  if (config.testBrowsers.length === 0) {
+    exit('Please provide "testBrowsers" option in basys.json to run end-to-end tests');
+  }
+
   // Set the global variable accessible in test files
   global.basys = {
     env,
