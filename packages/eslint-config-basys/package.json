@@ -14,11 +14,11 @@
   "dependencies": {
     "enhanced-resolve": "4.0.0",
     "eslint-config-prettier": "2.9.0",
-    "eslint-plugin-jest": "21.15.0",
+    "eslint-plugin-jest": "21.15.1",
     "eslint-plugin-html": "4.0.3",
     "eslint-plugin-import": "2.11.0",
     "eslint-plugin-prettier": "2.4.0",
-    "eslint-plugin-vue": "4.4.0",
+    "eslint-plugin-vue": "4.5.0",
     "eslint-restricted-globals": "0.1.1",
     "node-libs-browser": "2.1.0"
   }

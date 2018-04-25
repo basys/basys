@@ -30,12 +30,13 @@ Vue.use(Router);
   {% endif %}
 {% endfor %}
 
-{# BUG: allow to customize `scrollBehaviour` #}
 const router = new Router({
   mode: 'history',
   caseSensitive: {{ caseSensitive }},
   fallback: false,
   routes,
+  {# BUG: allow to customize `scrollBehavior` #}
+  scrollBehavior: () => ({x: 0, y: 0}),
 });
 
 {# BUG: add Vuex #}
