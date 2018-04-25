@@ -86,7 +86,7 @@ class FriendlyErrorsWebpackPlugin extends FriendlyErrorsPlugin {
             }
 
             // LESS syntax error
-            if (cssError.type === 'Parse') {
+            if (cssError.constructor.name === 'LessError') {
               return wrapError(
                 error,
                 `${cssError.message
