@@ -1,25 +1,30 @@
-const path = require('path');
-
-function assetsPath(_path) {
-  return path.posix.join('static', _path);
-}
-
-// Generate loader string to be used with extract text plugin
-function generateLoaders(config, extension, usePostCSS) {
+function generateLoaders(config, format, usePostcss = false) {
   const loaders = [
+    config.env !== 'dev'
+      ? require('mini-css-extract-plugin').loader
+      : {
+          loader: 'vue-style-loader',
+          options: {sourceMap: config.cssSourceMap},
+        },
     {
       loader: 'css-loader',
       options: {
-        sourceMap: config.sourceMap,
+        importLoaders: format === 'less' || format === 'sass' || usePostcss ? 1 : 0,
+        sourceMap: config.cssSourceMap,
       },
     },
   ];
 
-  if (usePostCSS) {
+  if (format === 'less' || format === 'sass') {
+    loaders.push({
+      loader: `${format}-loader`,
+      options: {sourceMap: config.cssSourceMap},
+    });
+  } else if (usePostcss) {
     loaders.push({
       loader: 'postcss-loader',
       options: {
-        sourceMap: config.sourceMap,
+        sourceMap: config.cssSourceMap,
         config: {
           path: __dirname,
           ctx: config,
@@ -28,19 +33,7 @@ function generateLoaders(config, extension, usePostCSS) {
     });
   }
 
-  if (extension !== 'css') {
-    loaders.push({
-      loader: extension !== 'scss' ? `${extension}-loader` : 'sass-loader',
-      options: {sourceMap: config.sourceMap},
-    });
-  }
-
-  // Extract CSS when that option is specified (which is the case during production build)
-  if (config.env === 'prod') {
-    const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-    return [MiniCssExtractPlugin.loader].concat(loaders);
-  }
-  return ['vue-style-loader'].concat(loaders);
+  return loaders;
 }
 
-module.exports = {assetsPath, generateLoaders};
+module.exports = {generateLoaders};

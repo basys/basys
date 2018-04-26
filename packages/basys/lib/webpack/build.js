@@ -4,7 +4,6 @@ const ora = require('ora');
 const path = require('path');
 const {getConfig} = require('../config');
 const {exit} = require('../utils');
-const {assetsPath} = require('./utils');
 
 function prodWebpackConfigs(config) {
   // const CopyWebpackPlugin = require('copy-webpack-plugin');
@@ -16,7 +15,7 @@ function prodWebpackConfigs(config) {
   const plugins = [
     // Extract css into its own file
     new MiniCssExtractPlugin({
-      filename: assetsPath('css/[name].[contenthash].css'),
+      filename: 'static/css/[name].[contenthash].css',
     }),
     // Keep module.id stable when vendor modules don't change
     new webpack.HashedModuleIdsPlugin(),
@@ -79,6 +78,7 @@ function prodWebpackConfigs(config) {
       }),
 
       new OptimizeCSSPlugin({
+        browsers: config.browsers,
         sourceMap: config.cssSourceMap,
       }),
     );
@@ -99,8 +99,8 @@ function prodWebpackConfigs(config) {
       recordsPath: path.join(config.tempDir, 'records.json'),
       output: {
         path: config.distDir,
-        filename: assetsPath('js/[name].[chunkhash].js'),
-        chunkFilename: assetsPath('js/[id].[chunkhash].js'),
+        filename: 'static/js/[name].[chunkhash].js',
+        chunkFilename: 'static/js/[id].[chunkhash].js',
       },
       optimization,
       plugins,

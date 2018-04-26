@@ -1,6 +1,8 @@
+const autoprefixer = require('autoprefixer');
 const csso = require('csso');
 const LastCallWebpackPlugin = require('last-call-webpack-plugin');
 const path = require('path');
+const postcss = require('postcss');
 
 class OptimizeCssAssetsPlugin {
   constructor(options) {
@@ -21,14 +23,19 @@ class OptimizeCssAssetsPlugin {
     return lastCallInstance.apply(compiler);
   }
 
-  processCss(assetName, asset, assets) {
-    const result = csso.minify(asset.source(), Object.assign({filename: assetName}, this.options));
-    let css = result.css;
+  async processCss(assetName, asset, assets) {
+    let css = asset.source();
+    css = await postcss([autoprefixer({browsers: this.options.browsers})]).process(css).css;
+
+    const result = csso.minify(css, Object.assign({filename: assetName}, this.options));
+    css = result.css;
+
     if (this.options.sourceMap) {
       assets.setAsset(`${assetName}.map`, result.map.toString());
       css += `/*# sourceMappingURL=${path.basename(assetName)}.map */`;
     }
-    return Promise.resolve(css);
+
+    return css;
   }
 }
 

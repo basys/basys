@@ -2,10 +2,11 @@ const fs = require('fs-extra');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const minimatch = require('minimatch');
 const path = require('path');
+const {VueLoaderPlugin} = require('vue-loader');
 const webpack = require('webpack');
 const {exit} = require('../utils');
 const FrontendWebpackPlugin = require('./frontend-plugin');
-const {assetsPath, generateLoaders} = require('./utils');
+const {generateLoaders} = require('./utils');
 
 function getBabelLoader(config, entryType) {
   let targets;
@@ -142,12 +143,6 @@ module.exports = function(config, entryType) {
       );
     }
 
-    const styleLoader = extension => ({
-      test: new RegExp(`\\.${extension}$`),
-      include: [assetsDir, /node_modules/],
-      use: generateLoaders(config, extension, true),
-    });
-
     const urlLoader = (extensions, dirName, limit) => ({
       test: new RegExp(`\\.(${extensions.join('|')})(\\?.*)?$`),
       use: [
@@ -155,7 +150,7 @@ module.exports = function(config, entryType) {
           loader: 'url-loader',
           options: {
             limit,
-            name: assetsPath(`${dirName}/[name].[hash:7].[ext]`),
+            name: `static/${dirName}/[name].[hash:7].[ext]`,
           },
         },
       ],
@@ -183,9 +178,31 @@ module.exports = function(config, entryType) {
       module: {
         rules: [
           jsRule,
-          styleLoader('css'),
-          styleLoader('less'),
-          styleLoader('scss'),
+          // CSS inside assets directory and .vue files are processed with PostCSS
+          {
+            test: /\.css$/,
+            include: [assetsDir, srcDir],
+            use: generateLoaders(config, 'css', true),
+          },
+          {
+            test: /\.css$/,
+            include: [/node_modules/],
+            use: generateLoaders(config, 'css'),
+          },
+          {
+            test: /\.less$/,
+            include: [assetsDir, /node_modules/],
+            use: generateLoaders(config, 'less'),
+          },
+          {
+            test: /\.scss$/,
+            include: [assetsDir, /node_modules/],
+            use: generateLoaders(config, 'sass'),
+          },
+          {
+            test: /\.pug$/,
+            loader: 'pug-plain-loader',
+          },
           {
             test: /\.vue$/,
             include: [srcDir],
@@ -193,18 +210,7 @@ module.exports = function(config, entryType) {
               {
                 loader: 'vue-loader',
                 options: {
-                  loaders: {
-                    js: babelLoader,
-                    css: generateLoaders(config, 'css'),
-                  },
-                  postcss: {
-                    config: {
-                      path: __dirname,
-                      ctx: config,
-                    },
-                  },
-                  cssSourceMap: config.cssSourceMap,
-                  transformToRequire: {
+                  transformAssetUrls: {
                     video: 'src',
                     source: 'src',
                     img: 'src',
@@ -233,6 +239,7 @@ module.exports = function(config, entryType) {
           // Make `Vue` object available in code without import
           Vue: ['vue/dist/vue.runtime.esm.js', 'default'],
         }),
+        new VueLoaderPlugin(),
         moduleReplacementPlugin,
         new HtmlWebpackPlugin({
           filename: path.join(config.distDir, 'index.html'),
