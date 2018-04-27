@@ -285,7 +285,8 @@ async function e2eTest(projectDir, appName) {
   await runner.src(testPaths).browsers(config.testBrowsers);
 
   try {
-    await runner.run(); // BUG: look at options https://devexpress.github.io/testcafe/documentation/using-testcafe/programming-interface/runner.html#run
+    // BUG: allow to customize the options via CLI options https://devexpress.github.io/testcafe/documentation/using-testcafe/programming-interface/runner.html#run
+    await runner.run({debugOnFail: true});
   } finally {
     await testcafe.close();
   }

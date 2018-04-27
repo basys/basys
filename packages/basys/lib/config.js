@@ -66,8 +66,8 @@ function getConfig(projectDir, appName, env) {
     styles: [],
     overrides: {},
     caseSensitive: false,
-    cssSourceMap: env === 'test',
-    jsSourceMap: env === 'test',
+    cssSourceMap: false,
+    jsSourceMap: false,
 
     host: 'localhost',
     // In dev env another free port will be determined if this one is occupied.
