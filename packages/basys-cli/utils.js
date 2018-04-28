@@ -220,7 +220,6 @@ async function initProject(answers, install = true) {
 
   let commands = '';
   if (cwd !== destDir) {
-    // BUG: what about windows?
     commands += `\`${chalk.green.bold(`cd ${path.relative(cwd, destDir)}`)}\`, then `;
   }
   // BUG: change commands to 'npm run/yarn basys dev' if a local basys-cli instance is used?
