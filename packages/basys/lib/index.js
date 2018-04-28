@@ -257,7 +257,7 @@ function unitTest(projectDir) {
   require('jest').runCLI(argv, [projectDir]); // BUG: should be tests/unit?
 }
 
-async function e2eTest(projectDir, appName) {
+async function e2eTest(projectDir, appName, options) {
   // BUG: get fixture file detection in line with testcafe (see https://github.com/DevExpress/testcafe/issues/2074)
   const testPaths = glob.sync(path.join(projectDir, 'tests', 'e2e', '**', '*.js'));
   if (testPaths.length === 0) exit(`No tests found in ${path.join(projectDir, 'tests', 'e2e')}`);
@@ -285,8 +285,8 @@ async function e2eTest(projectDir, appName) {
   await runner.src(testPaths).browsers(config.testBrowsers);
 
   try {
-    // BUG: allow to customize the options via CLI options https://devexpress.github.io/testcafe/documentation/using-testcafe/programming-interface/runner.html#run
-    await runner.run({debugOnFail: true});
+    const failed = await runner.run(options);
+    if (failed) process.exitCode = 1;
   } finally {
     await testcafe.close();
   }

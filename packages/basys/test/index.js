@@ -22,7 +22,7 @@ async function testBasysAPI() {
   await lint(projectDir, true);
   await e2eTest(projectDir);
 
-  const devConfig = await dev(projectDir);
+  const devConfig = await dev(projectDir, null, false);
   await new Promise((resolve, reject) => {
     http.get(`http://${devConfig.host}:${devConfig.port}/`, res => {
       if (res.statusCode === 200) {
@@ -38,5 +38,8 @@ async function testBasysAPI() {
 
 testBasysAPI()
   .then(() => console.log(chalk.bold.green('Tests completed successfully')))
-  .catch(err => console.log(chalk.bold.red(err.stack)))
+  .catch(err => {
+    console.log(chalk.bold.red(err.stack));
+    process.exitCode = 1;
+  })
   .then(() => process.exit());

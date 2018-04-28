@@ -55,7 +55,8 @@ async function runCommand(projectDir, argv) {
     } else if (command === 'test:unit') {
       await unitTest(projectDir);
     } else if (command === 'test:e2e') {
-      await e2eTest(projectDir, appName);
+      // BUG: allow to customize the options via CLI options https://devexpress.github.io/testcafe/documentation/using-testcafe/programming-interface/runner.html#run
+      await e2eTest(projectDir, appName, {debugOnFail: true});
       process.exit();
     } else if (command === 'lint') {
       return lint(projectDir);
