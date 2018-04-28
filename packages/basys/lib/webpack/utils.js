@@ -4,13 +4,13 @@ function generateLoaders(config, format, usePostcss = false) {
       ? require('mini-css-extract-plugin').loader
       : {
           loader: 'vue-style-loader',
-          options: {sourceMap: config.cssSourceMap},
+          options: {sourceMap: config.sourceMap},
         },
     {
       loader: 'css-loader',
       options: {
         importLoaders: format === 'less' || format === 'sass' || usePostcss ? 1 : 0,
-        sourceMap: config.cssSourceMap,
+        sourceMap: config.sourceMap,
       },
     },
   ];
@@ -18,13 +18,13 @@ function generateLoaders(config, format, usePostcss = false) {
   if (format === 'less' || format === 'sass') {
     loaders.push({
       loader: `${format}-loader`,
-      options: {sourceMap: config.cssSourceMap},
+      options: {sourceMap: config.sourceMap},
     });
   } else if (usePostcss) {
     loaders.push({
       loader: 'postcss-loader',
       options: {
-        sourceMap: config.cssSourceMap,
+        sourceMap: config.sourceMap,
         config: {
           path: __dirname,
           ctx: config,

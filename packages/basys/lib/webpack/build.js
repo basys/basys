@@ -72,14 +72,14 @@ function prodWebpackConfigs(config) {
             comparisons: false,
           },
         },
-        sourceMap: config.jsSourceMap,
+        sourceMap: config.sourceMap,
         cache: true,
         parallel: true,
       }),
 
       new OptimizeCSSPlugin({
         browsers: config.browsers,
-        sourceMap: config.cssSourceMap,
+        sourceMap: config.sourceMap,
       }),
     );
 
@@ -95,7 +95,7 @@ function prodWebpackConfigs(config) {
 
   const webpackConfigs = [
     merge(baseWebpackConfig(config, 'frontend'), {
-      devtool: config.cssSourceMap ? 'source-map' : false,
+      devtool: config.sourceMap ? 'source-map' : false,
       recordsPath: path.join(config.tempDir, 'records.json'),
       output: {
         path: config.distDir,

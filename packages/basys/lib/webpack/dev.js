@@ -12,7 +12,7 @@ const GenerateEntriesWebpackPlugin = require('./generate-entries-plugin');
 function devWebpackConfigs(config) {
   const webpackConfigs = [
     merge(baseWebpackConfig(config, 'frontend'), {
-      devtool: config.jsSourceMap ? 'eval-source-map' : false,
+      devtool: config.sourceMap ? 'eval-source-map' : false,
       output: {
         filename: '[name].js',
       },
