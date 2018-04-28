@@ -6,6 +6,7 @@ environment:
     - nodejs_version: "10"
 matrix:
   fast_finish: true
+
 build: off
 shallow_clone: true
 init:
@@ -18,4 +19,10 @@ test_script:
   - node --version
   - npm --version
   - yarn --version
-  - yarn test
+  - ps: yarn test
+
+notifications:
+  - provider: Email
+    to:
+      - sergey@basys.io
+    on_build_status_changed: true
