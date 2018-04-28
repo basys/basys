@@ -1623,7 +1623,7 @@ basys-app-builder@0.3.1:
     snabbdom "0.7.1"
     ws "5.1.1"
 
-"basys-docs@github:basys/docs":
+basys-docs@basys/docs:
   version "0.0.0"
   resolved "https://codeload.github.com/basys/docs/tar.gz/0b8d709823d3d5e472f8387fa70c64170cb0c79d"
 
@@ -9909,6 +9909,10 @@ to-regex@^3.0.1, to-regex@^3.0.2:
     extend-shallow "^3.0.2"
     regex-not "^1.0.2"
     safe-regex "^1.1.0"
+
+todomvc-app-css@^2.1.0:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/todomvc-app-css/-/todomvc-app-css-2.1.1.tgz#1f6b7a8d826836317478ee6e17bd8a5de2df4551"
 
 token-stream@0.0.1:
   version "0.0.1"

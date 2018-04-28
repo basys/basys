@@ -1,0 +1,21 @@
+# http://www.appveyor.com/docs/appveyor-yml
+environment:
+  matrix:
+    - nodejs_version: "8"
+    - nodejs_version: "9"
+    - nodejs_version: "10"
+matrix:
+  fast_finish: true
+build: off
+shallow_clone: true
+init:
+  - git config --global core.autocrlf input
+install:
+  - ps: Install-Product node $env:nodejs_version x64
+  - npm install yarn -g
+  - yarn install
+test_script:
+  - node --version
+  - npm --version
+  - yarn --version
+  - yarn test
