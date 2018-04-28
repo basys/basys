@@ -11,16 +11,17 @@ addons:
 matrix:
   include:
     - os: linux
-      node_js:
-        - "8"
-        - "9"
-        - "10"
+      node_js: "8"
       before_script:
         - "export DISPLAY=:99.0"
         - "sh -e /etc/init.d/xvfb start"
         - sleep 3
     - os: osx
       node_js: "8"
+    - os: osx
+      node_js: "9"
+    - os: osx
+      node_js: "10"
   fast_finish: true
 
 install: yarn install
