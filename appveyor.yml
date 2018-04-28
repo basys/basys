@@ -19,7 +19,7 @@ test_script:
   - node --version
   - npm --version
   - yarn --version
-  - ps: yarn test
+  - yarn test
 
 notifications:
   - provider: Email

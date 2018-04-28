@@ -6,6 +6,11 @@ const path = require('path');
 const util = require('util');
 const {dev, e2eTest, lint} = require('../lib/index');
 
+async function execCommand(command) {
+  const {stdout, stderr} = await util.promisify(exec)(command);
+  console.log(stdout, stderr);
+}
+
 async function testBasysAPI() {
   const projectDir = path.join(__dirname, '..', '..', 'basys-test');
   await fs.emptyDir(projectDir);
@@ -16,8 +21,8 @@ async function testBasysAPI() {
   // Prevent the app from being opened in the browser on first start of dev server
   await fs.ensureFile(path.join(projectDir, '.basys', 'todomvc', 'dev', 'index.html'));
 
-  const {stdout, stderr} = await util.promisify(exec)(`cd ${projectDir}; yarn install`);
-  console.log(stdout, stderr);
+  await execCommand(`cd ${projectDir}`);
+  await execCommand('yarn install');
 
   await lint(projectDir, true);
   await e2eTest(projectDir);
