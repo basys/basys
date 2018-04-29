@@ -1,4 +1,5 @@
 const chalk = require('chalk');
+const execa = require('execa');
 const fs = require('fs-extra');
 const path = require('path');
 const {showHelp} = require('yargs');
@@ -16,6 +17,23 @@ function exit(error, help = false) {
   console.log(chalk.red.bold(error));
   if (help) showHelp();
   process.exit(1);
+}
+
+function execShellCommand(command, args, cwd) {
+  return new Promise((resolve, reject) => {
+    const child = execa(command, args, {
+      cwd,
+      stdio: ['inherit', 'inherit', 'inherit'],
+    });
+
+    child.on('close', code => {
+      if (code !== 0) {
+        reject(new Error(`Command \`${command} ${args.join(' ')}\` failed with exit code ${code}`));
+        return;
+      }
+      resolve();
+    });
+  });
 }
 
 async function runCommand(projectDir, argv) {
@@ -207,15 +225,13 @@ async function initProject(answers, install = true) {
   }
 
   if (install) {
-    spinner.start('Installing packages');
-    process.chdir(destDir);
+    console.log();
     try {
-      await require('util').promisify(require('child_process').exec)('npm install');
+      await execShellCommand('npm', ['install'], destDir);
     } catch (e) {
       spinner.stop();
-      throw new Error('Installing npm packages failed');
+      exit('Installing npm packages failed');
     }
-    spinner.stop();
   }
 
   let commands = '';
@@ -227,4 +243,4 @@ async function initProject(answers, install = true) {
   spinner.succeed(`Successfully generated the project. To start the dev server run ${commands}.`);
 }
 
-module.exports = {detectBasysProject, exit, initProject, runCommand};
+module.exports = {detectBasysProject, execShellCommand, exit, initProject, runCommand};

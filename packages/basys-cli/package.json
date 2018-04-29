@@ -18,6 +18,7 @@
   "dependencies": {
     "chalk": "2.4.1",
     "download": "6.2.5",
+    "execa": "0.10.0",
     "fs-extra": "5.0.0",
     "inquirer": "5.2.0",
     "ora": "2.0.0",

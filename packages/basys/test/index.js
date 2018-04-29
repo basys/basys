@@ -1,15 +1,9 @@
 const chalk = require('chalk');
-const {exec} = require('child_process');
 const fs = require('fs-extra');
 const http = require('http');
 const path = require('path');
-const util = require('util');
 const {dev, e2eTest, lint} = require('../lib/index');
-
-async function execCommand(command) {
-  const {stdout, stderr} = await util.promisify(exec)(command);
-  console.log(stdout, stderr);
-}
+const {execShellCommand} = require('../../basys-cli/utils');
 
 async function testBasysAPI() {
   const projectDir = path.join(__dirname, '..', '..', 'basys-test');
@@ -21,8 +15,7 @@ async function testBasysAPI() {
   // Prevent the app from being opened in the browser on first start of dev server
   await fs.ensureFile(path.join(projectDir, '.basys', 'todomvc', 'dev', 'index.html'));
 
-  await execCommand(`cd ${projectDir}`);
-  await execCommand('yarn install');
+  await execShellCommand('yarn', ['install'], projectDir);
 
   await lint(projectDir, true);
   await e2eTest(projectDir);
