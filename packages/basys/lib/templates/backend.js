@@ -115,3 +115,6 @@ server.listen({host: config.host, port}, err => {
 
 // BUG: do it for other codes as well?
 process.on('SIGINT', () => server.close());
+process.on('SIGHUP', () => server.close());
+process.on('SIGKILL', () => server.close());
+process.on('SIGTERM', () => server.close());
