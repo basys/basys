@@ -6,6 +6,7 @@ environment:
 matrix:
   fast_finish: true
 
+platform: x86
 build: off
 shallow_clone: true
 init:
