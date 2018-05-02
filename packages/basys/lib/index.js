@@ -44,18 +44,18 @@ async function dev(projectDir, appName, appBuilder = true) {
     watchPaths.push(path.join(config.tempDir, 'index.html'));
     // BUG: watch other files (like basys.json)?
 
-    const nodemon = require('nodemon');
-    nodemon({
-      script: backendEntryPath,
-      watch: watchPaths,
-    });
+    // const nodemon = require('nodemon');
+    // nodemon({
+    //   script: backendEntryPath,
+    //   watch: watchPaths,
+    // });
 
-    await new Promise((resolve, reject) => {
-      nodemon
-        .on('start', resolve)
-        .on('crash', reject) // BUG: test it
-        .on('restart', () => console.log('Express app restarted'));
-    });
+    // await new Promise((resolve, reject) => {
+    //   nodemon
+    //     .on('start', resolve)
+    //     .on('crash', reject) // BUG: test it
+    //     .on('restart', () => console.log('Express app restarted'));
+    // });
 
     const appUrl = `http://${host}:${config.port}`;
     console.log(`Your application is available at ${appUrl}`);

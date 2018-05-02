@@ -82,7 +82,7 @@ function startDevServer(config) {
 
     ['SIGHUP', 'SIGINT', 'SIGKILL', 'SIGTERM'].forEach(sig => {
       process.on(sig, () => {
-        server.close();
+        server.close(() => process.exit());
       });
     });
 
