@@ -80,7 +80,7 @@ function startDevServer(config) {
       },
     });
 
-    ['SIGHUP', 'SIGINT', 'SIGKILL', 'SIGTERM'].forEach(sig => {
+    ['SIGHUP', 'SIGINT', 'SIGTERM'].forEach(sig => {
       process.on(sig, () => {
         server.close(() => process.exit());
       });
