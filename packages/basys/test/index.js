@@ -20,16 +20,16 @@ async function testBasysAPI() {
   await lint(projectDir, true);
   await e2eTest(projectDir);
 
-  // const devConfig = await dev(projectDir, null, false);
-  // await new Promise((resolve, reject) => {
-  //   http.get(`http://${devConfig.host}:${devConfig.port}/`, res => {
-  //     if (res.statusCode === 200) {
-  //       resolve();
-  //     } else {
-  //       reject(new Error('Failed to start dev server'));
-  //     }
-  //   });
-  // });
+  const devConfig = await dev(projectDir, null, false);
+  await new Promise((resolve, reject) => {
+    http.get(`http://${devConfig.host}:${devConfig.port}/`, res => {
+      if (res.statusCode === 200) {
+        resolve();
+      } else {
+        reject(new Error('Failed to start dev server'));
+      }
+    });
+  });
 
   await fs.remove(projectDir);
 }
