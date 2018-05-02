@@ -1,3 +1,12 @@
+## 0.4.0 (2 May 2018)
+
+* Upgrade to webpack 4, babel 7 and vue-loader 15
+* Changed the default value of `browsers` config option
+* Merged `cssSourceMap` and `jsSourceMap` options into `sourceMap`
+* Activate debug mode on end-to-end tests failure
+* `basys init` now streams the output of `npm install` into the terminal
+* Set up Travis CI and AppVeyor for automatic package testing
+
 ## 0.3.5 (8 April 2018)
 
 * Dev server integration with external tools

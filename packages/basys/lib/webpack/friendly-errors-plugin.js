@@ -40,6 +40,11 @@ class FriendlyErrorsWebpackPlugin extends FriendlyErrorsPlugin {
           );
         }
 
+        // BUG: so far only happened due to a bug in code loading vue files
+        if (error.name === 'ModuleParseError') {
+          return wrapError(error, error.webpackError.message);
+        }
+
         if (error.name === 'ModuleBuildError') {
           const err = error.webpackError.error;
 
