@@ -18,24 +18,24 @@ async function dev(projectDir, appName, appBuilder = true) {
     config.backendPort = await portfinder.getPortPromise({host, port: config.backendPort});
   }
 
-  let server = await startDevServer(config);
+  // let server = await startDevServer(config);
 
-  // On basys.json changes restart the webpack dev server
-  require('chokidar')
-    .watch(path.join(projectDir, 'basys.json'), {ignoreInitial: true})
-    .on('change', () => {
-      // BUG: not all changes in basys.json require to restart the dev server and recompile the project
-      // BUG: if host or app name changes dev server should be stopped
-      server.close(async () => {
-        const {backendPort, port} = config;
-        config = getConfig(projectDir, config.appName, 'dev');
-        config.port = port;
-        config.backendPort = backendPort;
-        server = await startDevServer(config);
-      });
+  // // On basys.json changes restart the webpack dev server
+  // require('chokidar')
+  //   .watch(path.join(projectDir, 'basys.json'), {ignoreInitial: true})
+  //   .on('change', () => {
+  //     // BUG: not all changes in basys.json require to restart the dev server and recompile the project
+  //     // BUG: if host or app name changes dev server should be stopped
+  //     server.close(async () => {
+  //       const {backendPort, port} = config;
+  //       config = getConfig(projectDir, config.appName, 'dev');
+  //       config.port = port;
+  //       config.backendPort = backendPort;
+  //       server = await startDevServer(config);
+  //     });
 
-      // BUG: nodemon may need to be stopped or started (if config.type === 'web')
-    });
+  //     // BUG: nodemon may need to be stopped or started (if config.type === 'web')
+  //   });
 
   if (config.type === 'web') {
     const backendEntryPath = path.join(config.tempDir, 'backend.js');
@@ -44,18 +44,18 @@ async function dev(projectDir, appName, appBuilder = true) {
     watchPaths.push(path.join(config.tempDir, 'index.html'));
     // BUG: watch other files (like basys.json)?
 
-    // const nodemon = require('nodemon');
-    // nodemon({
-    //   script: backendEntryPath,
-    //   watch: watchPaths,
-    // });
+    const nodemon = require('nodemon');
+    nodemon({
+      script: backendEntryPath,
+      watch: watchPaths,
+    });
 
-    // await new Promise((resolve, reject) => {
-    //   nodemon
-    //     .on('start', resolve)
-    //     .on('crash', reject) // BUG: test it
-    //     .on('restart', () => console.log('Express app restarted'));
-    // });
+    await new Promise((resolve, reject) => {
+      nodemon
+        .on('start', resolve)
+        .on('crash', reject) // BUG: test it
+        .on('restart', () => console.log('Express app restarted'));
+    });
 
     const appUrl = `http://${host}:${config.port}`;
     console.log(`Your application is available at ${appUrl}`);
