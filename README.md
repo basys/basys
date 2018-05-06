@@ -21,6 +21,13 @@ thanks to [Babel](http://babeljs.io), [PostCSS](http://postcss.org) and [Browser
 ## Getting started
 ```sh
 npm i -g basys-cli && basys init
+
+basys dev
+
+# OR
+
+yarn global add basys-cli && basys init
+
 basys dev
 ```
 
