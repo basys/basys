@@ -1,6 +1,7 @@
 <!--- This file should be editing in the repository root directory, maintain a copy of it in packages/basys/README.md  -->
 # Basys
 
+[![Version](https://img.shields.io/npm/v/basys.svg)](https://www.npmjs.com/package/basys)
 [![Build status](https://travis-ci.org/basys/basys.svg?branch=master)](https://travis-ci.org/basys/basys)
 [![Windows build status](https://ci.appveyor.com/api/projects/status/6chns73bnq1hgq3v/branch/master?svg=true)](https://ci.appveyor.com/project/sergkop/basys/branch/master)
 
