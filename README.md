@@ -29,3 +29,7 @@ Basys was created with the goal of making app development accessible to a wider 
 * [Create React App](https://github.com/facebookincubator/create-react-app)
 * [vue-cli-template-webpack](https://github.com/vuejs-templates/webpack)
 * [Nuxt](https://nuxtjs.org)
+
+## License
+
+[MIT](https://github.com/basys/basys/blob/master/LICENSE)
