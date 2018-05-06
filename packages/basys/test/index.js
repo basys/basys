@@ -2,14 +2,13 @@ const chalk = require('chalk');
 const fs = require('fs-extra');
 const http = require('http');
 const path = require('path');
-const {dev, e2eTest, lint} = require('../lib/index');
+const {dev, e2eTest, initProject, lint} = require('../lib/index');
 const {execShellCommand} = require('../../basys-cli/utils');
 
 async function testBasysAPI() {
   const projectDir = path.join(__dirname, '..', '..', 'basys-test');
   await fs.emptyDir(projectDir);
 
-  const {initProject} = require('../../basys-cli/utils');
   await initProject({name: 'basys/basys-todomvc', dest: projectDir, vscode: false}, false);
 
   // Prevent the app from being opened in the browser on first start of dev server

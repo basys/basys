@@ -1,3 +1,4 @@
+const {initProject} = require('basys-cli/utils');
 const fs = require('fs-extra');
 const glob = require('glob');
 const opn = require('opn');
@@ -294,4 +295,4 @@ async function e2eTest(projectDir, appName, options) {
   return config;
 }
 
-module.exports = {build, dev, e2eTest, lint, start, unitTest};
+module.exports = {build, dev, e2eTest, initProject, lint, start, unitTest};

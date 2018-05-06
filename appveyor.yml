@@ -21,9 +21,3 @@ test_script:
   - npm --version
   - yarn --version
   - yarn test
-
-notifications:
-  - provider: Email
-    to:
-      - sergey@basys.io
-    on_build_status_changed: true

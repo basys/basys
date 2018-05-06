@@ -1,5 +1,4 @@
 const chalk = require('chalk');
-const execa = require('execa');
 const fs = require('fs-extra');
 const path = require('path');
 const {showHelp} = require('yargs');
@@ -21,6 +20,7 @@ function exit(error, help = false) {
 
 function execShellCommand(command, args, cwd) {
   return new Promise((resolve, reject) => {
+    const execa = require('execa');
     const child = execa(command, args, {
       cwd,
       stdio: ['inherit', 'inherit', 'inherit'],
