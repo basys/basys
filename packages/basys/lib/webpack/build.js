@@ -48,7 +48,7 @@ function prodWebpackConfigs(config) {
     // BUG: Exclude files like css. Most static files will be bundled. Introduce a separate directory for copy-only files?
     //      Or copy files that are not processed by webpack (not entry depends on them)?
     //      Or just use `static` directory for files that are simply copied?
-    //      See http://vuejs-templates.github.io/webpack/static.html .
+    //      See https://vuejs-templates.github.io/webpack/static.html .
     // BUG: should be customizable - there can be separate dist directories/sets of assets per app?
     // Copy custom static assets
     // new CopyWebpackPlugin([

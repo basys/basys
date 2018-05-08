@@ -26,7 +26,7 @@ function getConfig(projectDir, appName, env) {
   } catch (e) {
     exit(
       `Syntax error in ${configPath}: ${e.message}\n` +
-        'You can use JSON5 (http://json5.org) which is an extension of the JSON format, that includes:\n' +
+        'You can use JSON5 (https://json5.org) which is an extension of the JSON format, that includes:\n' +
         '  - comments,\n  - unquoted and single-quoted object keys,\n  - trailing commas,\n  - single-quoted and multi-line strings.\n',
     );
   }

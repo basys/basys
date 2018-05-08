@@ -6,6 +6,7 @@
     <a href="https://www.npmjs.com/package/basys"><img src="https://img.shields.io/npm/v/basys.svg" alt="Version"></a>
     <a href="https://travis-ci.org/basys/basys"><img src="https://travis-ci.org/basys/basys.svg?branch=master" alt="Build status"></a>
     <a href="https://ci.appveyor.com/project/sergkop/basys/branch/master"><img src="https://ci.appveyor.com/api/projects/status/6chns73bnq1hgq3v/branch/master?svg=true" alt="Windows build status"></a>
+    <a href="https://gitter.im/basys/basys"><img src="https://badges.gitter.im/basys/basys.svg"></a>
 </div>
 
 <h1 align="center">Basys</h1>
@@ -13,9 +14,9 @@
 A JavaScript framework for building cross-plaform applications with a focus on developer experience.
 
 * An easy way to create full-stack [Express](https://expressjs.com)-based backend and [Vue](https://vuejs.org) single-page applications
-* A simple configuration via [JSON5](http://json5.org) with intuitive options
+* A simple configuration via [JSON5](https://json5.org) with intuitive options
 * Code can be written using modern JavaScript and CSS pre-processing and compiled for required browsers
-thanks to [Babel](http://babeljs.io), [PostCSS](http://postcss.org) and [Browserlist](https://github.com/ai/browserslist)
+thanks to [Babel](https://babeljs.io), [PostCSS](http://postcss.org) and [Browserlist](https://github.com/ai/browserslist)
 * Dev server with hot module reload and automatic restart with [nodemon](https://nodemon.io)
 * [Webpack](https://webpack.js.org)-based bundler for optimized production builds
 * Code linting using [Prettier](https://prettier.io)
