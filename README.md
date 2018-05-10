@@ -27,16 +27,19 @@ thanks to [Babel](https://babeljs.io), [PostCSS](http://postcss.org) and [Browse
 
 <h2 align="center">Getting started</h2>
 
-```sh
-npm i -g basys-cli && basys init
+If you prefer to use Basys IDE install [Basys extension for VSCode](https://marketplace.visualstudio.com/items?itemName=basys.vscode-basys), open the Command Palette (`Ctrl+Shift+P` on Windows/Linux or `⇧⌘P` on MacOS) and run `Basys: Create project` command.
 
-basys dev
+Or just use Basys CLI to start a new project:
 
-# OR
+```bash
+npm install -g basys-cli
+# or
+yarn global add basys-cli
 
-yarn global add basys-cli && basys init
+basys init # Scaffold a new project from a starter template
+cd <project-dir>
 
-basys dev
+basys dev # Launch the development server
 ```
 
 <h2 align="center">Inspiration</h2>
