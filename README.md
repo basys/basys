@@ -19,7 +19,7 @@ A JavaScript framework for building cross-plaform applications with a focus on d
 thanks to [Babel](https://babeljs.io), [PostCSS](http://postcss.org) and [Browserlist](https://github.com/ai/browserslist)
 * Dev server with hot module reload and automatic restart with [nodemon](https://nodemon.io)
 * [Webpack](https://webpack.js.org)-based bundler for optimized production builds
-* Code linting using [Prettier](https://prettier.io)
+* Code and style linting with [ESLint](https://eslint.org), [stylelint](https://stylelint.io) and [Prettier](https://prettier.io)
 * An easy way to create new pages - .vue files with custom 'info' option are automatically registered
 * Unit testing with [Jest](https://facebook.github.io/jest/)
 * End-to-end testing with [TestCafe](https://devexpress.github.io/testcafe)

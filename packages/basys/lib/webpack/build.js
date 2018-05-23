@@ -80,6 +80,7 @@ function prodWebpackConfigs(config) {
       new OptimizeCSSPlugin({
         browsers: config.browsers,
         sourceMap: config.sourceMap,
+        restructure: false,
       }),
     );
 

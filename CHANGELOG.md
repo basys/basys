@@ -33,7 +33,7 @@
 ## 0.3.0 (26 February 2018)
 
 * [Visual Studio Code extension](https://marketplace.visualstudio.com/items?itemName=basys.vscode-basys) for improved developer experience
-* Style linting using styleling and Prettier
+* Style linting using stylelint and Prettier
 * Add ~ and @ aliases for `src/` and `assets/` directories
 * Made index.html template optional
 * Bundle size report is generated along with the production build
