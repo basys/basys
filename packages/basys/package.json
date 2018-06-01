@@ -1,7 +1,11 @@
 {
   "name": "basys",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Toolbox for building Basys projects",
+  "keywords": [
+    "vue",
+    "webpack"
+  ],
   "homepage": "https://basys.io",
   "bugs": {
     "url": "https://github.com/basys/basys/issues"

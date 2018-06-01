@@ -1,3 +1,11 @@
+## 0.4.2 (1 June 2018)
+
+* Documentation improvements
+
+## 0.4.1 (24 May 2018)
+
+* Fix an issue with CSS minification
+
 ## 0.4.0 (2 May 2018)
 
 * Upgrade to webpack 4, babel 7 and vue-loader 15

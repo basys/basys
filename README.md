@@ -1,4 +1,4 @@
-<!--- This file should be editing in the repository root directory, maintain a copy of it in packages/basys/README.md  -->
+<!--- This file should be edited in the repository root directory, maintain a copy of it in packages/basys/README.md  -->
 
 <p align="center"><a href="https://basys.io"><img width="100" src="https://avatars1.githubusercontent.com/u/10965504" alt="Basys logo"></a></p>
 
@@ -11,21 +11,22 @@
 
 <h1 align="center">Basys</h1>
 
-A JavaScript framework for building cross-plaform applications with a focus on developer experience.
+[Basys](https://basys.io) is a toolbox for building Vue.js full-stack apps with a focus on great developer experience.
 
 * An easy way to create full-stack [Express](https://expressjs.com)-based backend and [Vue](https://vuejs.org) single-page applications
 * A simple configuration via [JSON5](https://json5.org) with intuitive options
 * Code can be written using modern JavaScript and CSS pre-processing and compiled for required browsers
 thanks to [Babel](https://babeljs.io), [PostCSS](http://postcss.org) and [Browserlist](https://github.com/ai/browserslist)
 * Dev server with hot module reload and automatic restart with [nodemon](https://nodemon.io)
-* [Webpack](https://webpack.js.org)-based bundler for optimized production builds
+* [Webpack 4](https://webpack.js.org)-based bundler for optimized production builds
 * Code and style linting with [ESLint](https://eslint.org), [stylelint](https://stylelint.io) and [Prettier](https://prettier.io)
 * An easy way to create new pages - .vue files with custom 'info' option are automatically registered
 * Unit testing with [Jest](https://facebook.github.io/jest/)
 * End-to-end testing with [TestCafe](https://devexpress.github.io/testcafe)
 * [Basys IDE](https://marketplace.visualstudio.com/items?itemName=basys.vscode-basys) implemented as a Visual Studio Code extension
+* Visual app builder that allows non-technical team members to participate in app development
 
-<h2 align="center">Getting started</h2>
+## Getting started
 
 If you prefer to use Basys IDE install [Basys extension for VSCode](https://marketplace.visualstudio.com/items?itemName=basys.vscode-basys), open the Command Palette (`Ctrl+Shift+P` on Windows/Linux or `⇧⌘P` on MacOS) and run `Basys: Create project` command.
 
@@ -42,13 +43,10 @@ cd <project-dir>
 basys dev # Launch the development server
 ```
 
-<h2 align="center">Inspiration</h2>
+## Documentation
 
-Basys was created with the goal of making app development accessible to a wider audience by automating the boring parts of the technology stack, building tools for visual editing and focusing on a great developer experience. It was heavily inspired and shaped by the following projects:
-* [Create React App](https://github.com/facebookincubator/create-react-app)
-* [vue-cli-template-webpack](https://github.com/vuejs-templates/webpack)
-* [Nuxt](https://nuxtjs.org)
+You can find a detailed [documentation](https://basys.io/docs/getting-started) on the website.
 
-<h2 align="center">License</h2>
+## License
 
 [MIT](https://github.com/basys/basys/blob/master/LICENSE)
