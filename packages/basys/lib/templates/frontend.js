@@ -47,6 +47,7 @@ Vue.config.productionTip = false;
 window.app = new Vue({
   el: '#app',
   router,
+  {# BUG: allow to override other attributes of this object via `conf` (like `data`) #}
   {# BUG: this is a default layout component. allow to override it on per-page basis. #}
   render: conf.render || (h => h('router-view')),
 });

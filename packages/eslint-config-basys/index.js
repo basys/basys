@@ -41,6 +41,7 @@ module.exports = {
     'prettier/prettier': [
       'error',
       {
+        parser: 'babylon',
         singleQuote: true,
         trailingComma: 'all',
         bracketSpacing: false,
