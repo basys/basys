@@ -20,7 +20,7 @@
     "download": "7.0.0",
     "execa": "0.10.0",
     "fs-extra": "6.0.1",
-    "inquirer": "5.2.0",
+    "inquirer": "6.0.0",
     "ora": "2.1.0",
     "semver": "5.5.0",
     "yargs": "11.0.0"
